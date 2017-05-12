@@ -1,14 +1,7 @@
 var socket = function(io, mongo) {
   // connection event handler
 // connection이 수립되면 event handler function의 인자로 socket인 들어온다
-/*
-var testIns = new mongo({name : "123", userid : "123"});
-testIns.save(function(err, testIns){
-  console.log("save");
-if(err) return console.error(err);
-//testIns.speak();
-});
-*/
+
 io.on('connection', function(socket) {
 
 // 접속한 클라이언트의 정보가 수신되면
@@ -48,6 +41,7 @@ socket.on('chat', function(data) {
   // 메시지를 전송한 클라이언트에게만 메시지를 전송한다
   // socket.emit('s2c chat', msg);
  socket.emit('chat', msg);
+ mongo.find({ }, (err, users) => {console.log(users);});
   // 접속된 모든 클라이언트에게 메시지를 전송한다
   // io.emit('s2c chat', msg);
 

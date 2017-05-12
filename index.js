@@ -17,36 +17,48 @@ app.use(bodyParser.json());
 app.use('/myapp', express.static(path.join(__dirname, 'public')));
 
 
-app.set('view engine', 'html');
-app.engine('html', ejs.renderFile);
+app.set('view engine', 'ejs');
+//app.set('views', './views/partials');
+app.engine('ejs', ejs.renderFile);
 
 app.route('/')
   .get( (req, res) => { res.redirect('/myapp'); }
 );
 
-var data = {count : 0};
+//var data = {list : 0};
 
+var file = 'index';
+var data = [];
 app.route('/myapp')
     .get( (req, res) => {
         p(docker).then(val => {
-            //console.log(val);
-            //data.count = JSON.stringify(val);
-            res.render('test', data);
+
+            ptmp = val[0];
+
+            ptmp.forEach(function (val, index) {
+            //  console.log(JSON.stringify(val) + '|' + index);
+                data.push(val);
+            })
+            console.log("data");
+            console.log(data);
+
+            res.render(file, {data});
+            data=new Array();
         });
 
     })
     .post( (req, res, next) => {
     //  console.log(req.body);
     //  console.log(JSON.stringify(req.body));
-      data.count = req.body.message;
+      data.list = req.body.message;
       //res.send(req.body);
-      res.render('test', data);
+      res.render(file, data);
     });
 
 app.route('/myapp/:num')
     .get( (req, res) => {
-      data.count = req.params.num;
-      res.render('test', data);
+      data.data = req.params.num;
+      res.render(file, data);
     });
 
 const port = 3000;
