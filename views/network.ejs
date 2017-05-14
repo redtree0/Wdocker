@@ -27,37 +27,35 @@
           <thead>
             <tr>
               <td>#</td>
+              <td>Name</td>
               <td>Id</td>
-              <td>Names</td>
-              <td>Image</td>
-              <td>ImageID</td>
-              <td>Command</td>
               <td>Created</td>
-              <td>Ports</td>
+              <td>Scope</td>
+              <td>Driver</td>
+              <td>EnableIPv6</td>
+              <td>IPAM</td>
+              <td>Internal</td>
+              <td>Attachable</td>
+              <td>Containers</td>
+              <td>Options</td>
               <td>Labels</td>
-              <td>State</td>
-              <td>Status</td>
-              <td>HostConfig</td>
-              <td>NetworkSettings</td>
-              <td>Mounts</td>
             </tr>
           </thead>
           <% for(var i=0; i < data.length; i++) { %>
            <tr>
              <td><%- i %></td>
+             <td><%- data[i].Name %></td>
              <td><%- data[i].Id %></td>
-             <td><%- data[i].Names %></td>
-             <td><%- data[i].Image %></td>
-             <td><%- data[i].ImageID %></td>
-             <td><%- data[i].Command %></td>
              <td><%- data[i].Created %></td>
-             <td><%- data[i].Ports %></td>
+             <td><%- data[i].Scope %></td>
+             <td><%- data[i].Driver %></td>
+             <td><%- data[i].EnableIPv6 %></td>
+             <td><%- data[i].IPAM %></td>
+             <td><%- data[i].Internal %></td>
+             <td><%- data[i].Attachable %></td>
+             <td><%- data[i].Containers %></td>
+             <td><%- data[i].Options %></td>
              <td><%- data[i].Labels %></td>
-             <td><%- data[i].State %></td>
-             <td><%- data[i].Status %></td>
-             <td><%- data[i].HostConfig %></td>
-             <td><%- data[i].NetworkSettings %></td>
-             <td><%- JSON.stringify(data[i].Mounts) %></td>
            </tr>
            <% } %>
         </table>
@@ -65,8 +63,7 @@
 
         </div>
         </div>
-      </div>
-    </div>
+</div>
 
 </body>
 </html>

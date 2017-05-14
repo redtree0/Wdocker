@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <% include ./partials/head %>
+  <!-- 스크립트 -->
+  <script src='/myapp/js/ajaxTest.js'></script>
+  <script src='/myapp/js/socketio.js'></script>
+
+</head>
+
+<body>
+  <% include ./partials/topnav %>
+
+<div class="container-fluid">
+      <div class="row">
+        <% include ./partials/nav %>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+          <div class="row placeholders">
+            <script>
+                var data =<%-JSON.stringify(data)%>
+                console.log(data);
+                console.log(data.length);
+            </script>
+
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <td>#</td>
+              <td>Volume</td>
+              <td>Warnings</td>
+            </tr>
+          </thead>
+          <% for(var i=0; i < data.length; i++) { %>
+           <tr>
+             <td><%- i %></td>
+             <td><%- data[i].Volume %></td>
+             <td><%- data[i].Warnings %></td>
+           </tr>
+           <% } %>
+        </table>
+          </div>
+
+        </div>
+        </div>
+</div>
+
+</body>
+</html>

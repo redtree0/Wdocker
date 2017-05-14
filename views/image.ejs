@@ -27,37 +27,31 @@
           <thead>
             <tr>
               <td>#</td>
-              <td>Id</td>
-              <td>Names</td>
-              <td>Image</td>
-              <td>ImageID</td>
-              <td>Command</td>
+              <td>Containers</td>
               <td>Created</td>
-              <td>Ports</td>
+              <td>Id</td>
               <td>Labels</td>
-              <td>State</td>
-              <td>Status</td>
-              <td>HostConfig</td>
-              <td>NetworkSettings</td>
-              <td>Mounts</td>
+              <td>ParentId</td>
+              <td>RepoDigests</td>
+              <td>RepoTags</td>
+              <td>SharedSize</td>
+              <td>Size</td>
+              <td>VirtualSize</td>
             </tr>
           </thead>
           <% for(var i=0; i < data.length; i++) { %>
            <tr>
              <td><%- i %></td>
-             <td><%- data[i].Id %></td>
-             <td><%- data[i].Names %></td>
-             <td><%- data[i].Image %></td>
-             <td><%- data[i].ImageID %></td>
-             <td><%- data[i].Command %></td>
+             <td><%- data[i].Containers %></td>
              <td><%- data[i].Created %></td>
-             <td><%- data[i].Ports %></td>
+             <td><%- data[i].Id %></td>
              <td><%- data[i].Labels %></td>
-             <td><%- data[i].State %></td>
-             <td><%- data[i].Status %></td>
-             <td><%- data[i].HostConfig %></td>
-             <td><%- data[i].NetworkSettings %></td>
-             <td><%- JSON.stringify(data[i].Mounts) %></td>
+             <td><%- data[i].ParentId %></td>
+             <td><%- data[i].RepoDigests %></td>
+             <td><%- data[i].RepoTags %></td>
+             <td><%- data[i].SharedSize %></td>
+             <td><%- data[i].Size %></td>
+             <td><%- data[i].VirtualSize %></td>
            </tr>
            <% } %>
         </table>
@@ -65,8 +59,7 @@
 
         </div>
         </div>
-      </div>
-    </div>
+</div>
 
 </body>
 </html>
