@@ -1,4 +1,7 @@
-var socket = function(io, mongo) {
+var docker = require('./docker');
+var p = require('./promise');
+
+var socket = function(io) {
   // connection event handler
 // connection이 수립되면 event handler function의 인자로 socket인 들어온다
 
@@ -19,34 +22,31 @@ socket.on('login', function(data) {
 
 // 클라이언트로부터의 메시지가 수신되면
 socket.on('chat', function(data) {
-  console.log('Message from %s: %s', socket.name, data.msg);
-
-  var msg = {
-    from: {
-      name: socket.name,
-      userid: socket.userid
-    },
-    msg: data.msg
-  };
-
+  console.log('Message from %s: %s', socket.name, JSON.stringify(data));
+/*
   var testIns = new mongo({name : socket.name, userid : socket.userid, msg: data.msg});
   testIns.save(function(err, testIns){
     console.log("save");
   if(err) return console.error(err);
   //testIns.speak();
   });
+  */
   // 메시지를 전송한 클라이언트를 제외한 모든 클라이언트에게 메시지를 전송한다
   //socket.broadcast.emit('chat', msg);
 
   // 메시지를 전송한 클라이언트에게만 메시지를 전송한다
   // socket.emit('s2c chat', msg);
- socket.emit('chat', msg);
- mongo.find({ }, (err, users) => {console.log(users);});
+
   // 접속된 모든 클라이언트에게 메시지를 전송한다
   // io.emit('s2c chat', msg);
 
   // 특정 클라이언트에게만 메시지를 전송한다
   // io.to(id).emit('s2c chat', data);
+
+
+socket.emit('chat', data);
+ //mongo.find({ }, (err, users) => {console.log(users);});
+    p(docker, 'CreateContainer', data);
 });
 
 // force client disconnect from server

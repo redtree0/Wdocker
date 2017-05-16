@@ -53,6 +53,32 @@ _promise(docker)
 */
 //var MongoClient = require('mongodb').MongoClient
 //var Server = require('mongodb').Server;
+
+
+/**
+ * null 이나 빈값을 기본값으로 변경
+ * @param str       입력값
+ * @param defaultVal    기본값(옵션)
+ * @returns {String}    체크 결과값
+ */
+/*
+function nvl(str, defaultVal) {
+    var defaultValue = "";
+
+    if (typeof defaultVal != 'undefined') {
+        defaultValue = defaultVal;
+    }
+
+    if (typeof str == "undefined" || str == null || str == '' || str == "undefined") {
+        return defaultValue;
+    }
+
+    return str;
+}
+
+*/
+
+/*
 var p = require('./promise');
 var docker = require('./docker');
 
@@ -73,6 +99,7 @@ p(docker).then(val => {
     var val1 = '{';
     var length = tmp.length -1;
     var b = Object.getOwnPropertyNames(tmp);
+    */
 
 /*
     for(key in tmp) {
@@ -85,6 +112,7 @@ p(docker).then(val => {
         val1 += ',';
     }
 */
+/*
     console.log(typeof tmp);
     //console.log(typeof tmp);
     var b = Object.getOwnPropertyNames(tmp);
@@ -121,4 +149,55 @@ p(docker).then(val => {
         console.log("Saved successfully");
     });
 
+});
+*/
+
+var docker = require ('./docker');
+var p = require('./promise');
+
+var container = docker.getContainer('71501a8ab0f8');
+
+// query API for container info
+container.inspect(function (err, data) {
+  console.log(data);
+});
+/*
+'{
+  "Image": "izone/arm:jessie-slim",
+  "name" : "test",
+  "AttachStdin": "false",
+  "AttachStdout": "true",
+  "AttachStderr": "true",
+  "Tty": "true",
+  "Cmd": "["/bin/bash"]",
+  "OpenStdin": "true",
+  "StdinOnce": "false"
+}
+'
+*/
+var tmp = {
+  Image: 'izone/arm:jessie-slim',
+  name : 'test',
+  AttachStdin: false,
+  AttachStdout: true,
+  AttachStderr: true,
+  Tty: true,
+  Cmd: ['/bin/bash' ],
+  OpenStdin: true,
+  StdinOnce: false
+}
+console.log(tmp);
+console.log(typeof tmp);
+docker.createContainer(tmp).then(function(container) {
+  //console.log(container);
+  return container.start();
+  /*
+  return container.start(function (err, data) {
+    container.top({ps_args: 'aux'}, function(err, data) {
+      console.log(data);
+    });
+  });
+  */
+}).catch(function(err) {
+  console.log(err);
 });

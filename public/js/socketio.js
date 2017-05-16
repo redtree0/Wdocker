@@ -16,16 +16,28 @@ $(function(){
 
   // 서버로부터의 메시지가 수신되면
   socket.on("chat", function(data) {
+  //  console.log(data);
     $("#chatLogs").append("<div>" + data.msg + " : from <strong>" + data.from.name + "</strong></div>");
+  //  $("#chatLogs").append("<div>" + data + " : from <strong>" + "</strong></div>");
   });
 
   // Send 버튼이 클릭되면
   $("form").submit(function(e) {
     e.preventDefault();
     var $msgForm = $("#msgForm");
-
+    var tmp = {
+      Image: 'izone/arm:jessie-slim',
+      name : $msgForm.val(),
+      AttachStdin: false,
+      AttachStdout: true,
+      AttachStderr: true,
+      Tty: true,
+      Cmd: ['/bin/bash' ],
+      OpenStdin: true,
+      StdinOnce: false
+    }
     // 서버로 메시지를 전송한다.
-    socket.emit("chat", { msg: $msgForm.val() });
+    socket.emit("chat", tmp);
     $msgForm.val("");
   });
 

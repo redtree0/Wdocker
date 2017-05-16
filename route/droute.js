@@ -52,35 +52,33 @@ module.exports = function(app){//함수로 만들어 객체 app을 전달받음
             });
           });
 
-
-          app.route('/myapp/image')
-                  .get( (req, res) => {
-                    p(docker, 'image').then(val => {
-                        ptmp = val[0];
-
-                        ptmp.forEach(function (val, index) {
+  app.route('/myapp/image')
+    .get( (req, res) => {
+      p(docker, 'image').then(val => {
+          ptmp = val[0];
+          ptmp.forEach(function (val, index) {
                         //  console.log(JSON.stringify(val) + '|' + index);
-                            data.push(val);
-                        })
+                  data.push(val);
+        });
+
+        res.render("image", {data});
+        data=new Array();
+      });
+    });
+
+ app.route('/myapp/volume')
+    .get( (req, res) => {
+        p(docker, 'volume').then(val => {
+            ptmp = val[0];
+          //  console.log(ptmp);
+
+          //  console.log(data);
+           res.render("volume", {data});
+          data=new Array();
+       });
+    });
 
 
-                        res.render("image", {data});
-                        data=new Array();
-                    });
-                  });
 
-
-                  app.route('/myapp/volume')
-                          .get( (req, res) => {
-                            p(docker, 'volume').then(val => {
-                                ptmp = val[0];
-                                console.log(ptmp);
-
-                                console.log(data);
-
-                                res.render("volume", {data});
-                                data=new Array();
-                            });
-                          });
-	return app;	//라우터를 리턴
+	   return app;	//라우터를 리턴
 };
