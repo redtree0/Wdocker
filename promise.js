@@ -28,12 +28,23 @@ switch (opt) {
         break;
   case 'CreateContainer':
       doIt(docker, opt, docker.createContainer(data));
+      break;
+  case 'CtlContainer':
+      if(data.state == "running")
+        docker.getContainer(data.id).stop();
+      if(data.state == "exited")
+        docker.getContainer(data.id).start();
+
+        docker.getContainer(data.id).inspect(function (err, data) {
+          console.log(data);
+        });
+      console.log("done");
+      break;
   }
 
 //    console.log(p);
   	return Promise.all(p);
 };
-
 
 
 module.exports = _promise;

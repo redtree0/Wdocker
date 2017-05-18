@@ -49,6 +49,12 @@ socket.emit('chat', data);
     p(docker, 'CreateContainer', data);
 });
 
+socket.on('dctl', function(data){
+  console.log('dctl id : %s', socket.name, data.id);
+  p(docker, 'CtlContainer', data);
+});
+
+
 // force client disconnect from server
   socket.on('forceDisconnect', function() {
     socket.disconnect();

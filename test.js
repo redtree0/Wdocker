@@ -155,29 +155,10 @@ p(docker).then(val => {
 var docker = require ('./docker');
 var p = require('./promise');
 
-var container = docker.getContainer('71501a8ab0f8');
 
-// query API for container info
-container.inspect(function (err, data) {
-  console.log(data);
-});
-/*
-'{
-  "Image": "izone/arm:jessie-slim",
-  "name" : "test",
-  "AttachStdin": "false",
-  "AttachStdout": "true",
-  "AttachStderr": "true",
-  "Tty": "true",
-  "Cmd": "["/bin/bash"]",
-  "OpenStdin": "true",
-  "StdinOnce": "false"
-}
-'
-*/
 var tmp = {
   Image: 'izone/arm:jessie-slim',
-  name : 'test',
+  name : 'kk',
   AttachStdin: false,
   AttachStdout: true,
   AttachStderr: true,
@@ -185,11 +166,12 @@ var tmp = {
   Cmd: ['/bin/bash' ],
   OpenStdin: true,
   StdinOnce: false
-}
+};
+
 console.log(tmp);
 console.log(typeof tmp);
 docker.createContainer(tmp).then(function(container) {
-  //console.log(container);
+  console.log(container);
   return container.start();
   /*
   return container.start(function (err, data) {

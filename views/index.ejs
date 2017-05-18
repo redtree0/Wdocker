@@ -6,6 +6,7 @@
   <!-- 스크립트 -->
   <script src='/myapp/js/ajaxTest.js'></script>
   <script src='/myapp/js/socketio.js'></script>
+  <script src='/myapp/js/index.js'></script>
 
 </head>
 
@@ -19,7 +20,7 @@
           <div class="row placeholders">
             <div class="container">
               <h3>Make Containers?</h3>
-              <form class="form-inline">
+              <form class="form-inline" id="CreateContainer">
                 <div class="form-group">
                   <label for="msgForm">Message: </label>
                   <input type="text" class="form-control" id="msgForm">
@@ -28,19 +29,6 @@
               </form>
               <div id="chatLogs"></div>
             </div>
-
-            <script>
-                var data =<%-JSON.stringify(data)%>
-                console.log(data);
-                console.log(data.length);
-                $(function(){
-                    $("table tr").click(function(){
-                        var txt = $(this).text();
-                        alert(txt);
-                    });
-                });
-
-            </script>
 
         <table class="table table-striped">
           <thead>
@@ -61,9 +49,16 @@
               <td>Mounts</td>
             </tr>
           </thead>
+
+          <tbody>
+          <script>
+              var data =<%-JSON.stringify(data)%>
+            //  console.log(data);
+            //  console.log(data.length);
+          </script>
           <% for(var i=0; i < data.length; i++) { %>
            <tr>
-             <td><%- i %></td>
+             <td><button id="ctl" class="btn btn-default" ><%- i %></button></td>
              <td><%- data[i].Id %></td>
              <td><%- data[i].Names %></td>
              <td><%- data[i].Image %></td>
@@ -79,6 +74,10 @@
              <td><%- JSON.stringify(data[i].Mounts) %></td>
            </tr>
            <% } %>
+
+           </tbody>
+           <tfoot>
+           </tfoot>
         </table>
           </div>
 

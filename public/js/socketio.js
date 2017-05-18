@@ -22,7 +22,7 @@ $(function(){
   });
 
   // Send 버튼이 클릭되면
-  $("form").submit(function(e) {
+  $("#CreateContainer").submit(function(e) {
     e.preventDefault();
     var $msgForm = $("#msgForm");
     var tmp = {
@@ -40,6 +40,7 @@ $(function(){
     socket.emit("chat", tmp);
     $msgForm.val("");
   });
+
 
   function makeRandomName(){
     var name = "";
