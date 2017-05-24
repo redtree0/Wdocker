@@ -22,24 +22,6 @@ $(function(){
   });
 
   // Send 버튼이 클릭되면
-  $("#CreateContainer").submit(function(e) {
-    e.preventDefault();
-    var $msgForm = $("#msgForm");
-    var tmp = {
-      Image: 'izone/arm:jessie-slim',
-      name : $msgForm.val(),
-      AttachStdin: false,
-      AttachStdout: true,
-      AttachStderr: true,
-      Tty: true,
-      Cmd: ['/bin/bash' ],
-      OpenStdin: true,
-      StdinOnce: false
-    }
-    // 서버로 메시지를 전송한다.
-    socket.emit("chat", tmp);
-    $msgForm.val("");
-  });
 
 
   function makeRandomName(){

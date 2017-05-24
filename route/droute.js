@@ -9,23 +9,7 @@ module.exports = function(app){//함수로 만들어 객체 app을 전달받음
 
   app.route('/myapp')
       .get( (req, res) => {
-          p(docker, 'Container').then(val => {
-              // promise 중 몇번째 promise
-              ptmp = val[0];
-
-              // promise 몇번째 promise 내에 몇번째 data 추출
-              ptmp.forEach(function (val, index) {
-              //  console.log(JSON.stringify(val) + '|' + index);
-                  data.push(val);
-              })
-
-
-              // 렌더링
-              res.render(file, {data});
-
-              data=new Array();
-          });
-
+              res.render(file);
       })
       .post( (req, res, next) => {
       //  console.log(req.body);
@@ -35,6 +19,24 @@ module.exports = function(app){//함수로 만들어 객체 app을 전달받음
         res.render(file, data);
       });
 
+app.route('/myapp/container/data.json').get( (req, res) => {
+  p(docker, 'Container').then(val => {
+      // promise 중 몇번째 promise
+      ptmp = val[0];
+
+      // promise 몇번째 promise 내에 몇번째 data 추출
+      ptmp.forEach(function (val, index) {
+      //  console.log(JSON.stringify(val) + '|' + index);
+          data.push(val);
+      })
+
+      console.log(data);
+      // 렌더링
+      res.json({data});
+
+      data=new Array();
+  });
+})
 
   app.route('/myapp/network')
           .get( (req, res) => {

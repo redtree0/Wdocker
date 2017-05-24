@@ -10,6 +10,7 @@
 
 </head>
 
+
 <body>
   <% include ./partials/topnav %>
 
@@ -29,56 +30,18 @@
               </form>
               <div id="chatLogs"></div>
             </div>
+            <div>
+              <h3 id="title">Container List</h3>
+              <div id="bgrp" class="btn-group" role="group">
+                      <button type="button" class="btn btn-primary btn-lg test">Start</button>
+                      <button type="button" class="btn btn-default btn-lg test">Stop</button>
+                      <button type="button" class="btn btn-danger btn-lg test">Remove</button>
+              </div>
+            </div>
 
-        <table class="table table-striped">
-          <thead>
-            <tr>
-              <td>#</td>
-              <td>Id</td>
-              <td>Names</td>
-              <td>Image</td>
-              <td>ImageID</td>
-              <td>Command</td>
-              <td>Created</td>
-              <td>Ports</td>
-              <td>Labels</td>
-              <td>State</td>
-              <td>Status</td>
-              <td>HostConfig</td>
-              <td>NetworkSettings</td>
-              <td>Mounts</td>
-            </tr>
-          </thead>
+            <table id="ctable" data-pagination="true" class="table table-striped">
+            </table>
 
-          <tbody>
-          <script>
-              var data =<%-JSON.stringify(data)%>
-            //  console.log(data);
-            //  console.log(data.length);
-          </script>
-          <% for(var i=0; i < data.length; i++) { %>
-           <tr>
-             <td><button id="ctl" class="btn btn-default" ><%- i %></button></td>
-             <td><%- data[i].Id %></td>
-             <td><%- data[i].Names %></td>
-             <td><%- data[i].Image %></td>
-             <td><%- data[i].ImageID %></td>
-             <td><%- data[i].Command %></td>
-             <td><%- data[i].Created %></td>
-             <td><%- data[i].Ports %></td>
-             <td><%- data[i].Labels %></td>
-             <td><%- data[i].State %></td>
-             <td><%- data[i].Status %></td>
-             <td><%- data[i].HostConfig %></td>
-             <td><%- data[i].NetworkSettings %></td>
-             <td><%- JSON.stringify(data[i].Mounts) %></td>
-           </tr>
-           <% } %>
-
-           </tbody>
-           <tfoot>
-           </tfoot>
-        </table>
           </div>
 
         </div>
