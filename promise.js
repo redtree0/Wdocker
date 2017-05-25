@@ -29,18 +29,41 @@ switch (opt) {
   case 'CreateContainer':
       doIt(docker, opt, docker.createContainer(data));
       break;
-  case 'CtlContainer':
-      if(data.state == "running")
-        docker.getContainer(data.id).stop();
-      if(data.state == "exited")
-        docker.getContainer(data.id).start();
-
-        docker.getContainer(data.id).inspect(function (err, data) {
-          console.log(data);
-        });
-      console.log("done");
+  case 'StartContainer':
+      data.forEach((data, index) => {
+        if( data.state != "running" ) {
+          console.log("start");
+          docker.getContainer(data.id).start();
+        }
+      });
       break;
-  }
+ case 'StopContainer':
+          data.forEach((data, index) => {
+            if( data.state == "running" ) {
+              console.log("stop");
+              docker.getContainer(data.id).stop();
+            }
+          });
+          break;
+  case 'RemoveContainer':
+              data.forEach((data, index) => {
+                if( data.state == "running" ) {
+                  console.log("stop");
+                  docker.getContainer(data.id).stop();
+                }
+              });
+
+                data.forEach((data, index) => {
+                  var testTime = setTimeout(()=>{docker.getContainer(data.id).remove()}, 2000);
+
+                  console.log("remove");
+
+                  //clearTimeout(testTime);
+
+                });
+
+              break;
+}
 
 //    console.log(p);
   	return Promise.all(p);

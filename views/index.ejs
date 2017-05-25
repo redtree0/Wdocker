@@ -4,7 +4,6 @@
 <head>
   <% include ./partials/head %>
   <!-- 스크립트 -->
-  <script src='/myapp/js/ajaxTest.js'></script>
   <script src='/myapp/js/socketio.js'></script>
   <script src='/myapp/js/index.js'></script>
 
@@ -23,19 +22,19 @@
               <h3>Make Containers?</h3>
               <form class="form-inline" id="CreateContainer">
                 <div class="form-group">
-                  <label for="msgForm">Message: </label>
+                  <label for="msgForm">Container Name: </label>
                   <input type="text" class="form-control" id="msgForm">
                 </div>
-                <button type="submit" class="btn btn-primary">Send</button>
+                <button type="submit" class="btn btn-primary">Create</button>
               </form>
               <div id="chatLogs"></div>
             </div>
             <div>
               <h3 id="title">Container List</h3>
               <div id="bgrp" class="btn-group" role="group">
-                      <button type="button" class="btn btn-primary btn-lg test">Start</button>
-                      <button type="button" class="btn btn-default btn-lg test">Stop</button>
-                      <button type="button" class="btn btn-danger btn-lg test">Remove</button>
+                      <button id="dstart" type="button" class="btn btn-primary btn-lg ctlbtn">Start</button>
+                      <button id="dstop" type="button" class="btn btn-default btn-lg ctlbtn">Stop</button>
+                      <button id="dremove" type="button" class="btn btn-danger btn-lg ctlbtn">Remove</button>
               </div>
             </div>
 

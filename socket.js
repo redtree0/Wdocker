@@ -50,8 +50,15 @@ socket.emit('chat', data);
 });
 
 socket.on('dctl', function(data){
-  console.log('dctl id : %s', socket.name, data.id);
-  p(docker, 'CtlContainer', data);
+  var tmp = data.splice(0, 1);
+  var doIt = tmp[0].doIt;
+  if (doIt == "dstart"){
+      p(docker, 'StartContainer', data);
+  } else if (doIt == "dstop"){
+      p(docker, 'StopContainer', data);
+  } else if (doIt == "dremove"){
+      p(docker, 'RemoveContainer', data);
+  } 
 });
 
 
