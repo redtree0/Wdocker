@@ -53,12 +53,40 @@ socket.on('dctl', function(data){
   var tmp = data.splice(0, 1);
   var doIt = tmp[0].doIt;
   if (doIt == "dstart"){
-      p(docker, 'StartContainer', data);
+      p(docker, 'StartContainer', data).then ( (container) => {
+        container.forEach ( (container) => {
+          console.log(container.id);
+          container.start();
+        }
+      );
+      });
   } else if (doIt == "dstop"){
-      p(docker, 'StopContainer', data);
+      p(docker, 'StopContainer', data).then ( (container) => {
+        container.forEach ( (container) => {
+          console.log(container.id);
+          container.stop();
+        }
+      );
+      });
   } else if (doIt == "dremove"){
-      p(docker, 'RemoveContainer', data);
-  } 
+    p(docker, 'RemoveContainer', data).then ( (container) => {
+      var tmp = [];
+      container.forEach ( (container) => {
+        console.log(container.id);
+        container.stop();
+        tmp.push(container);
+      } );
+      return container;
+    }).then ( (container) => {
+        container.forEach ( (container) => {
+          console.log(container.id);
+          setTimeout( () => {container.remove(); console.log("remove");}, "500");
+
+      //    container.remove();
+        }
+      );
+      });
+  }
 });
 
 
