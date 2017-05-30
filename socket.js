@@ -50,6 +50,8 @@ socket.emit('chat', data);
 });
 
 socket.on('dctl', function(data){
+  console.log("socket");
+  // console.log(data);
   var tmp = data.splice(0, 1);
   var doIt = tmp[0].doIt;
   if (doIt == "dstart"){

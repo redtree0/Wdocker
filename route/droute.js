@@ -30,7 +30,7 @@ app.route('/myapp/container/data.json').get( (req, res) => {
           data.push(val);
       })
 
-      console.log(data);
+    //  console.log(data);
       // 렌더링
       res.json({data});
 

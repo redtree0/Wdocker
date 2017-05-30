@@ -5,7 +5,8 @@ function doIt(docker, opt, fn) {
       if (!docker && !opt) {
         reject(Error("실패!!"));
       }
-      fn.then( val => {  console.log(val); resolve(val); /*return val*/}  );
+      fn.then( val => {  //console.log(val);
+        resolve(val); /*return val*/}  );
   });
 }
 
@@ -30,26 +31,28 @@ switch (opt) {
       doIt(docker, opt, docker.createContainer(data));
       break;
   case 'StartContainer':
-      console.log(data);
+      console.log("promise");
+      // console.log(data);
       data.forEach((data, index) => {
         if( data.state != "running" ) {
-                p.push(docker.getContainer(data.id));
+                console.log(data);
+                p.push(docker.getContainer(data.Id));
         }
       });
       break;
  case 'StopContainer':
           data.forEach((data, index) => {
             if( data.state != "exited" ) {
-              p.push(docker.getContainer(data.id));
+              p.push(docker.getContainer(data.Id));
             }
           });
           break;
   case 'RemoveContainer':
               data.forEach((data, index) => {
                 if( data.state != "exited" ) {
-                      docker.getContainer(data.id).stop();
+                      docker.getContainer(data.Id).stop();
                   }
-                    p.push(docker.getContainer(data.id));
+                    p.push(docker.getContainer(data.Id));
                 });
 
             break;
