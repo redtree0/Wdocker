@@ -1,5 +1,17 @@
 var docker = require('./docker');
 var p = require('./promise');
+// 메시지를 전송한 클라이언트를 제외한 모든 클라이언트에게 메시지를 전송한다
+//socket.broadcast.emit('chat', msg);
+
+// 메시지를 전송한 클라이언트에게만 메시지를 전송한다
+// socket.emit('s2c chat', msg);
+
+// 접속된 모든 클라이언트에게 메시지를 전송한다
+// io.emit('s2c chat', msg);
+
+// 특정 클라이언트에게만 메시지를 전송한다
+// io.to(id).emit('s2c chat', data);
+
 
 var socket = function(io) {
   // connection event handler
@@ -23,72 +35,34 @@ socket.on('login', function(data) {
 // 클라이언트로부터의 메시지가 수신되면
 socket.on('chat', function(data) {
   console.log('Message from %s: %s', socket.name, JSON.stringify(data));
-/*
-  var testIns = new mongo({name : socket.name, userid : socket.userid, msg: data.msg});
-  testIns.save(function(err, testIns){
-    console.log("save");
-  if(err) return console.error(err);
-  //testIns.speak();
-  });
-  */
-  // 메시지를 전송한 클라이언트를 제외한 모든 클라이언트에게 메시지를 전송한다
-  //socket.broadcast.emit('chat', msg);
 
-  // 메시지를 전송한 클라이언트에게만 메시지를 전송한다
-  // socket.emit('s2c chat', msg);
+    socket.emit('chat', data);
 
-  // 접속된 모든 클라이언트에게 메시지를 전송한다
-  // io.emit('s2c chat', msg);
-
-  // 특정 클라이언트에게만 메시지를 전송한다
-  // io.to(id).emit('s2c chat', data);
-
-
-socket.emit('chat', data);
- //mongo.find({ }, (err, users) => {console.log(users);});
     p(docker, 'CreateContainer', data);
 });
 
 socket.on('dctl', function(data){
-  console.log("socket");
   // console.log(data);
   var tmp = data.splice(0, 1);
   var doIt = tmp[0].doIt;
-  if (doIt == "dstart"){
-      p(docker, 'StartContainer', data).then ( (container) => {
-        container.forEach ( (container) => {
-          console.log(container.id);
-          container.start();
-        }
-      );
-      });
-  } else if (doIt == "dstop"){
-      p(docker, 'StopContainer', data).then ( (container) => {
-        container.forEach ( (container) => {
-          console.log(container.id);
-          container.stop();
-        }
-      );
-      });
-  } else if (doIt == "dremove"){
-    p(docker, 'RemoveContainer', data).then ( (container) => {
-      var tmp = [];
-      container.forEach ( (container) => {
-        console.log(container.id);
-        container.stop();
-        tmp.push(container);
-      } );
-      return container;
-    }).then ( (container) => {
-        container.forEach ( (container) => {
-          console.log(container.id);
-          setTimeout( () => {container.remove(); console.log("remove");}, "500");
 
-      //    container.remove();
-        }
-      );
+  p(docker, doIt, data).then ( (container) => {
+    if (doIt == "dstart") {
+      container.forEach ( (container) => {
+          container.start();
       });
-  }
+    }  else if (doIt == "dstop"){
+      container.forEach ( (container) => {
+          container.stop();
+      });
+    } else if (doIt == "dremove") {
+      container.forEach ((container) => {
+        setTimeout( () => {container.remove(); console.log("remove");}, "500");
+      });
+    } else {
+      reject(Error("doIt parms 에러"));
+    }
+  });
 });
 
 

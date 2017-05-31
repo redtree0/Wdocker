@@ -10,55 +10,57 @@ function doIt(docker, opt, fn) {
   });
 }
 
-
+function pMakelist(plist, fn) {
+  console.log("===================");
+  console.log("promise");
+  console.log("===================");
+//  console.log(fn);
+  return plist.push(fn);
+}
+function ctlContainer (plist, docker, data, state) {
+  data.forEach((container) => {
+    if( container.State != state ) {
+              pMakelist(plist , docker.getContainer(container.Id));
+    }
+  });
+}
 var _promise = function (docker, opt, data) {
 
-var p = [];
+var plist = [];
 switch (opt) {
   case 'Container':
-    p.push(doIt(docker, opt, docker.listContainers({all: true})));
+    pMakelist(plist ,doIt(docker, opt, docker.listContainers({all: true})));
   break;
   case 'network':
-    p.push(doIt(docker, opt, docker.listNetworks({})));
+    pMakelist(plist ,doIt(docker, opt, docker.listNetworks({})));
     break;
   case 'image':
-      p.push(doIt(docker, opt, docker.listImages()));
+      pMakelist(plist ,doIt(docker, opt, docker.listImages()));
       break;
   case 'volume':
-        p.push(doIt(docker, opt, docker.listVolumes({})));
+        pMakelist(plist ,doIt(docker, opt, docker.listVolumes({})));
         break;
   case 'CreateContainer':
       doIt(docker, opt, docker.createContainer(data));
       break;
-  case 'StartContainer':
-      console.log("promise");
-      // console.log(data);
-      data.forEach((data, index) => {
-        if( data.state != "running" ) {
-                console.log(data);
-                p.push(docker.getContainer(data.Id));
-        }
-      });
-      break;
- case 'StopContainer':
-          data.forEach((data, index) => {
-            if( data.state != "exited" ) {
-              p.push(docker.getContainer(data.Id));
-            }
-          });
+  case 'dstart':
+          ctlContainer(plist, docker, data, "running");
           break;
-  case 'RemoveContainer':
-              data.forEach((data, index) => {
-                if( data.state != "exited" ) {
+ case 'dstop':
+          ctlContainer(plist, docker, data, "exited");
+          break;
+  case 'dremove':
+              data.forEach((data) => {
+                  if( data.State == "running" ) {
                       docker.getContainer(data.Id).stop();
                   }
-                    p.push(docker.getContainer(data.Id));
+                    pMakelist(plist ,docker.getContainer(data.Id));
                 });
 
             break;
   }
 //    console.log(p);
-  	return Promise.all(p);
+  	return Promise.all(plist);
 };
 
 
