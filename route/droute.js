@@ -37,6 +37,18 @@ app.route('/myapp/container/data.json').get( (req, res) => {
       data=new Array();
   });
 })
+app.route('/myapp/images/data.json')
+  .get( (req, res) => {
+    p(docker, 'image').then(val => {
+        ptmp = val[0];
+        ptmp.forEach(function (val, index) {
+                data.push(val);
+      });
+
+      res.json({data});
+      data=new Array();
+    });
+  });
 
   app.route('/myapp/network')
           .get( (req, res) => {

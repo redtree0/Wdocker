@@ -20,11 +20,33 @@
           <div class="row placeholders">
             <div class="container">
               <h3>Make Containers?</h3>
-              <form class="form-inline" id="CreateContainer">
+              <form class="form-horizontal" id="CreateContainer">
                 <div class="form-group">
-                  <label for="msgForm">Container Name: </label>
-                  <input type="text" class="form-control" id="msgForm">
+                  <label for="msgForm" class="col-sm-2 control-label">Container Name: </label>
+                  <div class="col-sm-10">
+                    <input type="text" class="form-control" id="msgForm" placeholder="Name">
+                  </div>
                 </div>
+                <div class="form-group">
+                  <label for="images" class="col-sm-2 control-label">Images : </label>
+                  <div class="col-sm-10">
+
+                  <div class="btn-group">
+                    <button id="images" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                       Images <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                      <li><a href="#" class="list">Action</a></li>
+                      <li><a href="#" class="list">Another action</a></li>
+                      <li><a href="#" class="list">Something else here</a></li>
+                      <li role="separator" class="divider"></li>
+                      <li><a href="#" class="list">Separated link</a></li>
+                    </ul>
+                  </div>
+
+                  </div>
+                </div>
+
                 <button type="submit" class="btn btn-primary">Create</button>
               </form>
               <div id="chatLogs"></div>
