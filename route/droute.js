@@ -1,4 +1,7 @@
-//./routes/p1.js
+//./routes/droute.js
+
+
+
 module.exports = function(app){//함수로 만들어 객체 app을 전달받음
   var express = require('express');
   var app = express();
@@ -92,7 +95,9 @@ app.route('/myapp/images/data.json')
        });
     });
 
-
+app.route('/myapp/test').get ( (req, res) => {
+  res.render("test.ejs");
+});
 
 	   return app;	//라우터를 리턴
 };

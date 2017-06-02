@@ -63,39 +63,43 @@ function reloadTable()
     console.log("reload");}, 1000);
 }
 
-function jsontest() {
+function initDropdown() {
   $.getJSON('/myapp/images/data.json', function(json, textStatus) {
-      console.log(json.data);
 
       json.data.forEach ( (data) => {
-        console.log(data.RepoTags);
+        console.log(data.RepoTags[0]);
+        $("<li><a>" +  data.RepoTags[0] + "</a><li/>").appendTo('ul.dropdown-menu');
       });
-    //  console.log(json.RepoTags);
       console.log(textStatus);
-      /*optional stuff to do after success */
   });
 }
 
 $(function(){
-      jsontest();
+      initDropdown();
       $(".dropdown-menu").on("click", "li a", function(event){
         //    console.log("You clicked the drop downs", event);
-        //    console.log($(this).text());
-            //console.log($("li").find("a").text());
         //    console.log($('#images').text());
-            $('#images').text($(this).text());
+            $('#cimage').text($(this).text());
         });
 
     initDataTable();
 
     $("#CreateContainer").submit(function(e) {
       e.preventDefault();
-      var $msgForm = $("#msgForm");
-      var msg = $msgForm.val();
+      var $name=$("#cname");
+      var $image =$('#cimage');
 
-      var tmp = {
-        Image: 'izone/arm:jessie-slim',
-        name : msg,
+      var _name = $name.val();
+      var _image = $image.text().trim();
+      //console.log(images.trim());
+      if(_image === "Images") {
+        alert ("images 선택 하시오.");
+        return;
+      }
+
+      var container = {
+        Image: _image,
+        name : _name,
         AttachStdin: false,
         AttachStdout: true,
         AttachStderr: true,
@@ -105,13 +109,14 @@ $(function(){
         StdinOnce: false
       }
       // 서버로 메시지를 전송한다.
-      socket.emit("chat", tmp);
-      $msgForm.val("");
+      socket.emit("CreateContainer", container);
+      $name.val("");
+      $image.text("Images");
       reloadTable();
 
       BootstrapDialog.show({
           title: 'Container',
-          message: msg,
+          message: _name + "|" + _image,
           buttons: [ {
                 label: 'Close',
                 action: function(dialogItself){
