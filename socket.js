@@ -1,5 +1,7 @@
 var docker = require('./docker');
 var p = require('./promise');
+var spawn = require('child_process').spawn;
+
 // 메시지를 전송한 클라이언트를 제외한 모든 클라이언트에게 메시지를 전송한다
 //socket.broadcast.emit('chat', msg);
 
@@ -74,7 +76,39 @@ socket.on('dctl', function(data){
   socket.on('disconnect', function() {
     console.log('user disconnected: ' + socket.name);
   });
-});
+/////////////////////////////////////
+var shell = spawn('/bin/bash')
+   , stdin = shell.stdin;
 
+ shell.on('exit', function() {
+   socket.disconnect();
+ })
+
+ shell['stdout'].setEncoding('ascii');
+ shell['stdout'].on('data', function(data) {
+   socket.emit('stdout', data);
+ });
+
+ shell['stderr'].setEncoding('ascii');
+ shell['stderr'].on('data', function(data) {
+   socket.emit('stderr', data);
+ });
+
+ socket.on('stdin', function(command) {
+   stdin.write(command+"\n") || socket.emit('disable');
+ });
+
+ stdin.on('drain', function() {
+   socket.emit('enable');
+ });
+
+ stdin.on('error', function(exception) {
+   socket.emit('error', String(exception));
+ });
+
+
+/////////////////////////////////////
+
+  });
 };
 module.exports = socket;
