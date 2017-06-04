@@ -53,7 +53,8 @@ function initDataTable() {
   $('#ctable').bootstrapTable({
       url: '/myapp/container/data.json',
       columns: _columns,
-      silent: true
+      silent: true,
+      search : true
   });
 }
 

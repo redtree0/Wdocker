@@ -86,15 +86,18 @@ var shell = spawn('/bin/bash')
 
  shell['stdout'].setEncoding('ascii');
  shell['stdout'].on('data', function(data) {
+   console.log(data);
    socket.emit('stdout', data);
  });
 
  shell['stderr'].setEncoding('ascii');
  shell['stderr'].on('data', function(data) {
+   console.log(data);
    socket.emit('stderr', data);
  });
 
  socket.on('stdin', function(command) {
+   console.log(command);
    stdin.write(command+"\n") || socket.emit('disable');
  });
 

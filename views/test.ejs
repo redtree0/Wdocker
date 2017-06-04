@@ -1,10 +1,24 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Web shell</title>
+    <% include ./partials/head %>
     <link type="text/css" href="/myapp/css/jquery.terminal.css" rel="stylesheet" />
   </head>
-  <body id="terminal">
+  <body>
+    <% include ./partials/topnav %>
+    <div class="container-fluid">
+          <div class="row">
+            <% include ./partials/nav %>
+            <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+              <div class="row placeholders">
+                <div class="container">
+                  <div  id="terminal"  style="height: 300px;text-align: left;">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+    </div>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
     <script src="/myapp/js/jquery.terminal.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
@@ -35,6 +49,16 @@
         terminal.disable();
       });
     });
+
+    $(document).keydown(function(e){
+      history.pushState(null, null, location.href);
+        window.onpopstate = function(event) {
+        	history.go(1);
+        };
+
+});
+
+
     </script>
   </body>
 </html>
