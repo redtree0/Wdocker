@@ -99,5 +99,9 @@ app.route('/myapp/test').get ( (req, res) => {
   res.render("test.ejs");
 });
 
+app.route('/myapp/graph').get ( (req, res) => {
+  res.render("graph.ejs");
+});
+
 	   return app;	//라우터를 리턴
 };
