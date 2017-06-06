@@ -152,34 +152,68 @@ p(docker).then(val => {
 });
 */
 
-var docker = require ('./docker');
-var p = require('./promise');
+const spawn = require('child_process').spawn;
+
+//stdin = spawn.stdin;
+//const ls = spawn('docker', ['start', '1234']);
+const ls = spawn('docker', ['attach', '222222']);
 
 
-var tmp = {
-  Image: 'izone/arm:jessie-slim',
-  name : 'kk',
-  AttachStdin: false,
-  AttachStdout: true,
-  AttachStderr: true,
-  Tty: true,
-  Cmd: ['/bin/bash' ],
-  OpenStdin: true,
-  StdinOnce: false
-};
+ls.stdout.on('data', (data) => {
+//ls.stdin.write("\n");
 
-console.log(tmp);
-console.log(typeof tmp);
-docker.createContainer(tmp).then(function(container) {
-  console.log(container);
-  return container.start();
-  /*
-  return container.start(function (err, data) {
-    container.top({ps_args: 'aux'}, function(err, data) {
-      console.log(data);
-    });
-  });
-  */
-}).catch(function(err) {
-  console.log(err);
+  console.log(`stdout: ${data}`);
 });
+
+ls.stderr.on('data', (data) => {
+  console.log(`stderr: ${data}`);
+});
+
+ls.on('close', (code) => {
+  console.log(`child process exited with code ${code}`);
+});
+
+/*
+const exec = require('child_process').exec;
+exec('docker attach 1234', (error, stdout, stderr) => {
+  if (error) {
+    console.error(`exec error: ${error}`);
+    return;
+  }
+  console.log(`stdout: ${stdout}`);
+  console.log(`stderr: ${stderr}`);
+});
+*//*
+const spawn = require('child_process').spawn;
+const ps = spawn('ps', ['ax']);
+const grep = spawn('grep', ['ssh']);
+
+ps.stdout.on('data', (data) => {
+  grep.stdin.write(data);
+});
+
+ps.stderr.on('data', (data) => {
+  console.log(`ps stderr: ${data}`);
+});
+
+ps.on('close', (code) => {
+  if (code !== 0) {
+    console.log(`ps process exited with code ${code}`);
+  }
+  grep.stdin.end();
+});
+
+grep.stdout.on('data', (data) => {
+  console.log(data.toString());
+});
+
+grep.stderr.on('data', (data) => {
+  console.log(`grep stderr: ${data}`);
+});
+
+grep.on('close', (code) => {
+  if (code !== 0) {
+    console.log(`grep process exited with code ${code}`);
+  }
+});
+*/

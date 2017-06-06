@@ -25,6 +25,7 @@ var yAxis = d3.svg.axis()
 
 
 // add the SVG element
+$(function(){
 var svg = d3.select("#graph").append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
@@ -89,4 +90,5 @@ d3.json("/myapp/container/data.json", function(error, data) {
 
   console.log(svg);
 
+});
 });

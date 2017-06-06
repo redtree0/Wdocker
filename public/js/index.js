@@ -49,6 +49,8 @@ var _columns = [{
 
 var dstack = [{"doIt" : ""}];
 
+
+
 function initDataTable() {
   $('#ctable').bootstrapTable({
       url: '/myapp/container/data.json',
@@ -104,7 +106,7 @@ $(function(){
         AttachStdin: false,
         AttachStdout: true,
         AttachStderr: true,
-        Tty: true,
+        Tty: false, // tty : false 로 해야 web terminal에서 docker attach가 됨
         Cmd: ['/bin/bash' ],
         OpenStdin: true,
         StdinOnce: false
@@ -126,7 +128,18 @@ $(function(){
             }]
       });
     });
-
+    $("#ctable").on('click-row.bs.table', function (r, e, f){
+      var container = e;
+      var list=[];
+    //  console.log(container);
+      $('#cinspect li').remove();
+      $.each(container, (key, value)=>{
+        list.push("<li>"+ key + " : " + value+"</li>");
+      });
+    //  $('#cinspect').append($("<li>").append(container.Id));
+    //console.log(list);
+      $('#cinspect').append(list);
+    });
 
 
     // r - row , e - element
