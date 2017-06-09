@@ -3,10 +3,12 @@
   <head>
     <% include ./partials/head %>
     <link type="text/css" href="/myapp/css/jquery.terminal.css" rel="stylesheet" />
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
-    <script src="/myapp/js/jquery.terminal.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
-    <script src="/myapp/js/terminal.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js" ></script>
+ <script src="/myapp/js/terminal.js"></script>
+   <script src="/myapp/js/jquery.terminal.min.js"></script>
+
+
   </head>
   <body>
     <% include ./partials/topnav %>
@@ -18,6 +20,7 @@
                 <div class="container">
                   <div  id="terminal"  style="height: 300px;text-align: left;">
                   </div>
+                  <button id="eventTest" class="btn-default btn-primary">eventTest</button>
                 </div>
               </div>
             </div>

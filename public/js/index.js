@@ -82,18 +82,20 @@ $(function(){
       $(".dropdown-menu").on("click", "li a", function(event){
         //    console.log("You clicked the drop downs", event);
         //    console.log($('#images').text());
-            $('#cimage').text($(this).text());
+            $('#image').text($(this).text());
         });
 
     initDataTable();
 
     $("#CreateContainer").submit(function(e) {
       e.preventDefault();
-      var $name=$("#cname");
-      var $image =$('#cimage');
+      var $name=$("#name");
+      var $image =$('#image');
+      var $command = $("#command")
 
       var _name = $name.val();
       var _image = $image.text().trim();
+      var _command = $command.val();
       //console.log(images.trim());
       if(_image === "Images") {
         alert ("images 선택 하시오.");
@@ -107,7 +109,7 @@ $(function(){
         AttachStdout: true,
         AttachStderr: true,
         Tty: false, // tty : false 로 해야 web terminal에서 docker attach가 됨
-        Cmd: ['/bin/bash' ],
+        Cmd: [ _command ],
         OpenStdin: true,
         StdinOnce: false
       }
@@ -131,14 +133,18 @@ $(function(){
     $("#ctable").on('click-row.bs.table', function (r, e, f){
       var container = e;
       var list=[];
-    //  console.log(container);
-      $('#cinspect li').remove();
+      console.log(container);
+    //  console.log(container.0);
+      $('#detail li').remove();
       $.each(container, (key, value)=>{
+        if(key == "0") {
+          return true;
+        }
         list.push("<li>"+ key + " : " + value+"</li>");
       });
     //  $('#cinspect').append($("<li>").append(container.Id));
     //console.log(list);
-      $('#cinspect').append(list);
+      $('#detail').append(list);
     });
 
 

@@ -152,68 +152,92 @@ p(docker).then(val => {
 });
 */
 
-const spawn = require('child_process').spawn;
 
-//stdin = spawn.stdin;
-//const ls = spawn('docker', ['start', '1234']);
-const ls = spawn('docker', ['attach', '222222']);
+var Docker = require('dockerode');
+var fs     = require('fs');
 
+var socket = process.env.DOCKER_SOCKET || '/var/run/docker.sock';
+var stats  = fs.statSync(socket);
 
-ls.stdout.on('data', (data) => {
-//ls.stdin.write("\n");
+if (!stats.isSocket()) {
+  throw new Error('Are you sure the docker is running?');
+}
 
-  console.log(`stdout: ${data}`);
-});
+var docker = new Docker({ socketPath: socket });
+var optsc = {
+  'Hostname': '',
+  'User': '',
+  'AttachStdin': true,
+  'AttachStdout': true,
+  'AttachStderr': true,
+  'Tty': true,
+  'OpenStdin': true,
+  'StdinOnce': false,
+  'Env': null,
+  'Cmd': ['bash'],
+  'Dns': ['8.8.8.8', '8.8.4.4'],
+  'Image': 'ubuntu',
+  'Volumes': {},
+  'VolumesFrom': []
+};
 
-ls.stderr.on('data', (data) => {
-  console.log(`stderr: ${data}`);
-});
+var previousKey,
+    CTRL_P = '\u0010',
+    CTRL_Q = '\u0011';
 
-ls.on('close', (code) => {
-  console.log(`child process exited with code ${code}`);
-});
+function handler(err, container) {
+  var attach_opts = {stream: true, stdin: true, stdout: true, stderr: true};
+  console.log(container);
+  container.attach(attach_opts, function handler(err, stream) {
+    // Show outputs
+    stream.pipe(process.stdout);
 
-/*
-const exec = require('child_process').exec;
-exec('docker attach 1234', (error, stdout, stderr) => {
-  if (error) {
-    console.error(`exec error: ${error}`);
-    return;
+    // Connect stdin
+    var isRaw = process.isRaw;
+    process.stdin.resume();
+    process.stdin.setEncoding('utf8');
+    process.stdin.setRawMode(true);
+    process.stdin.pipe(stream);
+
+    process.stdin.on('data', function(key) {
+      // Detects it is detaching a running container
+      if (previousKey === CTRL_P && key === CTRL_Q) exit(stream, isRaw);
+      previousKey = key;
+    });
+
+    container.start(function(err, data) {
+      resize(container);
+      process.stdout.on('resize', function() {
+        resize(container);
+      });
+
+      container.wait(function(err, data) {
+        exit(stream, isRaw);
+      });
+    });
+  });
+}
+
+// Resize tty
+function resize (container) {
+  var dimensions = {
+    h: process.stdout.rows,
+    w: process.stderr.columns
+  };
+
+  if (dimensions.h != 0 && dimensions.w != 0) {
+    container.resize(dimensions, function() {});
   }
-  console.log(`stdout: ${stdout}`);
-  console.log(`stderr: ${stderr}`);
-});
-*//*
-const spawn = require('child_process').spawn;
-const ps = spawn('ps', ['ax']);
-const grep = spawn('grep', ['ssh']);
+}
 
-ps.stdout.on('data', (data) => {
-  grep.stdin.write(data);
-});
+// Exit container
+function exit (stream, isRaw) {
+  process.stdout.removeListener('resize', resize);
+  process.stdin.removeAllListeners();
+  process.stdin.setRawMode(isRaw);
+  process.stdin.resume();
+  stream.end();
+  process.exit();
+}
 
-ps.stderr.on('data', (data) => {
-  console.log(`ps stderr: ${data}`);
-});
-
-ps.on('close', (code) => {
-  if (code !== 0) {
-    console.log(`ps process exited with code ${code}`);
-  }
-  grep.stdin.end();
-});
-
-grep.stdout.on('data', (data) => {
-  console.log(data.toString());
-});
-
-grep.stderr.on('data', (data) => {
-  console.log(`grep stderr: ${data}`);
-});
-
-grep.on('close', (code) => {
-  if (code !== 0) {
-    console.log(`grep process exited with code ${code}`);
-  }
-});
-*/
+docker.createContainer(optsc, handler);

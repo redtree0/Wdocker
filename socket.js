@@ -77,15 +77,39 @@ socket.on('dctl', function(data){
     console.log('user disconnected: ' + socket.name);
   });
 /////////////////////////////////////
-var shell = spawn('/bin/bash')
-   , stdin = shell.stdin;
 
- shell.on('exit', function() {
-   socket.disconnect();
- })
+var shell = spawn('/bin/bash');
+var stdin = shell.stdin;
+console.log(shell.killed);
+ socket.on('exit', function() {
+// //   console.log(  this.pid);
+//   console.log(shell);
+//   shell.kill('SIGHUP');
+//   console.log("kill");
+//   console.log(shell.killed);
+//   shell = spawn('/bin/bash');
+  // socket.disconnect();
+  shell.stdin.pause();
+  shell.stdout.pause();
+  //shell.exit(0);
+  shell.stdin.resume();
+  shell.stdout.resume();
 
+});
+
+ shell.on('exit', function (c, s){
+   console.log(c);
+   console.log(s);
+ });
+
+  shell.on('close', function (c, s){
+    console.log("close");
+    console.log(c);
+    console.log(s);
+  });
  shell['stdout'].setEncoding('ascii');
  shell['stdout'].on('data', function(data) {
+   console.log("stdout");
    console.log(data);
    socket.emit('stdout', data);
  });
@@ -96,8 +120,11 @@ var shell = spawn('/bin/bash')
    socket.emit('stderr', data);
  });
 
+
  socket.on('stdin', function(command) {
+   console.log("stdin");
    console.log(command);
+
    stdin.write(command+"\n") || socket.emit('disable');
  });
 
