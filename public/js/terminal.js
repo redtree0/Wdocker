@@ -27,18 +27,7 @@ function changePrompt(terminal , command, defaultprompt, socket) {
     return
   } else if (cmd.name == "docker" && cmd.args[0] == "attach") {
         searchContainerName(cmd.args[1], attachContainer, terminal, socket);
-        // terminal.push(function(cmd, term) {
-        //   socket.emit('stdin', cmd);
-        // }, {
-        //   prompt: 'Container :'+ cmd.args[1] + '> ',
-        //   name: 'container',
-        //   onExit: (function () {
-        //     // jquery terminal 에서 먼저 exit를 인식해 명령어가 아닌 terminal pop 호출
-        //     // 되기 때문에 명령문으로써 호출 될기 위해 넣음
-        //     socket.emit('stdin', "exit");
-        //   })
-        //   , exit: true
-        // });
+
     }
 }
 
@@ -157,12 +146,6 @@ $(function() {
     terminal.echo(String(data));
   });
   socket.on('stderr', function(data) {
-    // if(data) {
-    //   errExcept = true;
-    //     console.log("stderr errExcept");
-    //     console.log(errExcept);
-    //     changePrompt(terminal , "", defaultprompt, socket, errExcept) ;
-    // }
     terminal.error(String(data));
   });
   socket.on('disconnect', function() {

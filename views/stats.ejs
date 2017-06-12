@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <% include ./partials/head %>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js" ></script>
+
+  </head>
+  <body>
+    <% include ./partials/topnav %>
+    <div class="container-fluid">
+          <div class="row">
+            <% include ./partials/nav %>
+            <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+              <div class="row placeholders">
+                <div class="container">
+                  <ul id="stats">
+                  </ul>
+                  <script>
+                        $(function () {
+                          $.getJSON('/myapp/stats/data.json', function(json, textStatus) {
+                              var list = [];
+                              console.log(json);
+                              $.each(json.data, (key, value)=>{
+                                console.log("Key : %s, value : %s , value type : %s",key, JSON.stringify(value), typeof value);
+                                list.push("<li>"+ key + " : " + JSON.stringify(value)+"</li>");
+                                }
+                              );
+                              $("#stats").append(list);
+                              console.log(textStatus);
+                          });
+                        })
+                  </script>
+                </div>
+              </div>
+            </div>
+          </div>
+    </div>
+
+  </body>
+</html>
