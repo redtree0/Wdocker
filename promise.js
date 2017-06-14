@@ -82,6 +82,15 @@ switch (opt) {
                 });
 
             break;
+  case 'searchImages' :
+    //
+    // console.log(data);
+    // docker.searchImages(data).then ( (data)=> {
+    //   console.log(data);
+    //
+    // });
+    //pMakelist(plist ,doIt(docker, opt, docker.searchImages(data)));
+  
   }
 //    console.log(p);
   	return Promise.all(plist);

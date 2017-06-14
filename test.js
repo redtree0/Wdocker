@@ -151,7 +151,7 @@ p(docker).then(val => {
 
 });
 */
-
+/*
 
 var docker = require('./docker');
 //var network = require('./node_modules/dockerode/lib/network');
@@ -194,3 +194,25 @@ var options = {
 
 //network.disconnect({id: "bridge", Container: "xx"}, (data, err) => {console.log(data); console.log(err);});
 //network.connect(options, (data) => {console.log(data);});
+*/
+var docker = require('./docker');
+var opts = {
+  term : "arm",
+  limit : "5",
+  filters : {}
+}
+opts["filters"] = {
+  "is-automated" : ["true"],
+  "is-official": ["true"]
+}
+console.log(typeof opts);
+console.log(opts);
+docker.searchImages(opts).then(
+  (val) =>{
+    console.log(val);
+  }
+).catch(
+  (err) =>{
+    console.log(err);
+  }
+);

@@ -42,6 +42,16 @@ socket.on('CreateContainer', function(data) {
 
     p(docker, 'CreateContainer', data);
 });
+socket.on("searchImages", function(data){
+  console.log(data);
+  docker.searchImages(data).then ( (data)=> {
+    console.log(data);
+    if(data) {
+      socket.emit('searchResult', data);
+    }
+  });
+//  p(docker, 'searchImages', data);
+});
 
 socket.on('dctl', function(data){
   // console.log(data);
@@ -80,22 +90,6 @@ socket.on('dctl', function(data){
 
 var shell = spawn('/bin/bash');
 var stdin = shell.stdin;
-console.log(shell.killed);
- socket.on('exit', function() {
-// //   console.log(  this.pid);
-//   console.log(shell);
-//   shell.kill('SIGHUP');
-//   console.log("kill");
-//   console.log(shell.killed);
-//   shell = spawn('/bin/bash');
-  // socket.disconnect();
-  shell.stdin.pause();
-  shell.stdout.pause();
-  //shell.exit(0);
-  shell.stdin.resume();
-  shell.stdout.resume();
-
-});
 
  shell.on('exit', function (c, s){
    console.log(c);
@@ -105,8 +99,8 @@ console.log(shell.killed);
   shell.on('close', function (c, s){
     console.log("close");
     console.log(c);
-    console.log(s);
   });
+
  shell['stdout'].setEncoding('ascii');
  shell['stdout'].on('data', function(data) {
    console.log("stdout");
