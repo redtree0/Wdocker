@@ -53,6 +53,21 @@ socket.on("searchImages", function(data){
 //  p(docker, 'searchImages', data);
 });
 
+socket.on("pullImages", function(data) {
+  console.log(data);
+
+  docker.pull(data);
+});
+socket.on("removeImages", function(data) {
+  var image = docker.getImage(data + ":0.1.0-rc3");
+  var opts= {
+    name: data
+  }
+  console.log(image);
+//  image.remove();
+  image.remove();
+});
+
 socket.on('dctl', function(data){
   // console.log(data);
   var tmp = data.splice(0, 1);

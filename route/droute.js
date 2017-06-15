@@ -33,7 +33,7 @@ app.route('/myapp/container/data.json').get( (req, res) => {
 
     //  console.log(data);
       // 렌더링
-      res.json({data});
+      res.json(data);
 
       data=new Array();
   });
@@ -45,8 +45,7 @@ app.route('/myapp/images/data.json')
         ptmp.forEach(function (val, index) {
                 data.push(val);
       });
-
-      res.json({data});
+      res.json(data);
       data=new Array();
     });
   });
@@ -67,7 +66,7 @@ app.route('/myapp/images/data.json')
             });
           });
 
-  app.route('/myapp/image')
+  app.route('/myapp/images')
     .get( (req, res) => {
       p(docker, 'image').then(val => {
           ptmp = val[0];

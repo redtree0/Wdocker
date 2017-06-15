@@ -3,7 +3,7 @@
 
 var socket = io();
 
-var _columns = [{
+var columns = [{
       checkbox: true,
       title: 'Check'
   },{
@@ -50,26 +50,10 @@ var _columns = [{
 var dstack = [{"doIt" : ""}];
 
 
-
-function initDataTable() {
-  $('#ctable').bootstrapTable({
-      url: '/myapp/container/data.json',
-      columns: _columns,
-      silent: true,
-      search : true
-  });
-}
-
-function reloadTable()
-{
-      setTimeout(()=> {$('#ctable').bootstrapTable('refresh');
-    console.log("reload");}, 1000);
-}
-
 function initDropdown() {
   $.getJSON('/myapp/images/data.json', function(json, textStatus) {
 
-      json.data.forEach ( (data) => {
+      json.forEach ( (data) => {
         console.log(data.RepoTags[0]);
         $("<li><a>" +  data.RepoTags[0] + "</a><li/>").appendTo('ul.dropdown-menu');
       });
@@ -85,7 +69,7 @@ $(function(){
             $('#image').text($(this).text());
         });
 
-    initDataTable();
+    initUrlTable('ctable', columns,'/myapp/container/data.json');
 
     $("#CreateContainer").submit(function(e) {
       e.preventDefault();
@@ -117,7 +101,7 @@ $(function(){
       socket.emit("CreateContainer", container);
       $name.val("");
       $image.text("Images");
-      reloadTable();
+      reloadTable('ctable');
 
       BootstrapDialog.show({
           title: 'Container',
@@ -163,7 +147,7 @@ $(function(){
               object.splice(index, 1);
         }
       });
-  });
+    });
 
 // r - event , e - data
     $("#ctable").on('check-all.bs.table', function (r,e) {
@@ -190,6 +174,6 @@ $(function(){
           console.log(dstack);
           socket.emit("dctl", dstack);
       }
-      reloadTable();
+      reloadTable("ctable");
     });
 });
