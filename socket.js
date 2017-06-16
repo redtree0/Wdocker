@@ -50,24 +50,36 @@ socket.on("searchImages", function(data){
       socket.emit('searchResult', data);
     }
   });
-//  p(docker, 'searchImages', data);
 });
 
 socket.on("pullImages", function(data) {
   console.log(data);
+  data.forEach( (images) => {
 
-  docker.pull(data);
+    docker.pull(images.name, {"tag" : "latest"},function(err, stream) {
+
+      if (err) return done(err);
+
+      docker.modem.followProgress(stream, onFinished, onProgress);
+
+       function onFinished(err, output) {
+         console.log("onFinished");
+       }
+       function onProgress(event) {
+            console.log("onProgress");
+            //console.log(event);
+            socket.emit("progress", event);
+        }
+      });
+  });
 });
 socket.on("removeImages", function(data) {
-  var image = docker.getImage(data + ":0.1.0-rc3");
-  var opts= {
-    name: data
-  }
-  console.log(image);
-//  image.remove();
-  image.remove();
+  data.forEach( (images) => {
+  //  console.log("remove");
+    var searchimage = docker.getImage(images.RepoTags);
+    searchimage.remove();
+  });
 });
-
 socket.on('dctl', function(data){
   // console.log(data);
   var tmp = data.splice(0, 1);

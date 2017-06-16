@@ -39,9 +39,41 @@
 
 
       $(function(){
-
+        var imageslist =[];
+        var searchlist =[];
         initUrlTable('imagelist', columns,'/myapp/images/data.json');
       //  TestTable('imagelist', '/myapp/images/data.json');
+        checkAlltable('imagelist', imageslist);
+        uncheckAlltable('imagelist', imageslist);
+        checkOneTable('imagelist', imageslist);
+        uncheckOneTable('imagelist', imageslist);
+        var $textAndPic = $('<div></div>');
+        $("#download").click((e)=> {
+          socket.emit("pullImages", searchlist);
+          socket.on("progress", (event)=> {
+             $textAndPic.text("");
+             $textAndPic.append(event.status +  event.progress + event.id);
+            //  console.log(event.progress);
+            //  console.log(event.status);
+            //  console.log(event.id);
+          });
+
+          BootstrapDialog.show({
+              title: 'Progress',
+              message: $textAndPic,
+              buttons: [ {
+                    label: 'Close',
+                    action: function(dialogItself){
+                        dialogItself.close();
+                    }
+                }]
+          });
+
+        });
+
+        $("#remove").click((e)=> {
+          socket.emit("removeImages", imageslist);
+        });
 
         $("#SearchImages").submit(function(e) {
           e.preventDefault();
@@ -73,7 +105,7 @@
 
           socket.emit("searchImages", opts);
           });
-          
+
             socket.on("searchResult", function(data){
               var results = JSON.stringify(data);
 
@@ -81,38 +113,29 @@
                       checkbox: true,
                       title: 'Check'
                 },{
-                field: 'star_count',
-                title: 'star_count'
-              }, {
-                field: 'is_official',
-                title: 'is_official'
-              }, {
-                field: 'name',
-                title: 'name'
-              }, {
-                field: 'is_automated',
-                title: 'is_automated'
-              }, {
-                field: 'description',
-                title: 'description'
-              }];
-              var stack = [];
+                  field: 'star_count',
+                  title: 'star_count'
+                }, {
+                  field: 'is_official',
+                  title: 'is_official'
+                }, {
+                  field: 'name',
+                  title: 'name'
+                }, {
+                  field: 'is_automated',
+                  title: 'is_automated'
+                }, {
+                  field: 'description',
+                  title: 'description'
+                }];
+
               initDataTable('results', columns, data);
               $('#results').bootstrapTable('load', data);
-              checkAlltable('results', stack);
-              uncheckAlltable('results', stack);
-              checkOneTable('results', stack);
-              uncheckOneTable('results', stack);
-              console.log(stack);
+              checkAlltable('results', searchlist);
+              uncheckAlltable('results', searchlist);
+              checkOneTable('results', searchlist);
+              uncheckOneTable('results', searchlist);
+
             });
 
-
-
-        $("#download").click((e)=> {
-          socket.emit("pullImages", "swarm");
-        });
-
-        $("#remove").click((e)=> {
-          socket.emit("removeImages", "swarm");
-        });
 });
