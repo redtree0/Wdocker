@@ -43,24 +43,39 @@
         var searchlist =[];
         initUrlTable('imagelist', columns,'/myapp/images/data.json');
       //  TestTable('imagelist', '/myapp/images/data.json');
-        checkAlltable('imagelist', imageslist);
-        uncheckAlltable('imagelist', imageslist);
-        checkOneTable('imagelist', imageslist);
-        uncheckOneTable('imagelist', imageslist);
-        var $textAndPic = $('<div></div>');
+        checkTableEvent('imagelist', imageslist);
+
+        var $status = $('<div></div>');
+        var $msgdiag = $("<div></div>");
+        $msgdiag.addClass('progress');
+        var $progress = $("<div class='progress-bar progress-bar-striped' role='progressbar' style='width: 0%' aria-valuenow='0' aria-valuemin='0' aria-valuemax='100'></div>");
+        $progress.css("width", '0%');
+        $msgdiag.append($progress);
+
         $("#download").click((e)=> {
           socket.emit("pullImages", searchlist);
           socket.on("progress", (event)=> {
-             $textAndPic.text("");
-             $textAndPic.append(event.status +  event.progress + event.id);
-            //  console.log(event.progress);
-            //  console.log(event.status);
-            //  console.log(event.id);
+             $status.text("");
+             $status.append(event.status);
+
+             var progress =  event.progress;
+             $msgdiag.after($status);
+             if(progress != null){
+               var count = (progress.match(/=/g) || []).length;
+               $progress.css("width", count * 2 + '%');
+             } else {
+               $progress.css("width", '0%');
+             }
           });
 
           BootstrapDialog.show({
               title: 'Progress',
-              message: $textAndPic,
+              message: function(){
+                var $message = $msgdiag;
+
+                return $message ;
+              } ,
+
               buttons: [ {
                     label: 'Close',
                     action: function(dialogItself){
@@ -76,36 +91,40 @@
         });
 
         $("#SearchImages").submit(function(e) {
-          e.preventDefault();
-          var $term=$("#term");
-          var $limit =$('#limit');
-          var $is_automated = $('#is_automated');
-          var $is_official = $('#is_official');
-          var $stars = $("#stars");
+            e.preventDefault();
+            var $term=$("#term");
+            var $limit =$('#limit');
+            var $is_automated = $('#is_automated');
+            var $is_official = $('#is_official');
+            var $stars = $("#stars");
 
-          var _term = $term.val();
-          var _limit = $limit.val();
-          var _is_automated = $is_automated.prop('checked').toString();
-          var _is_official = $is_official.prop('checked').toString();
-          var _stars = $stars.val();
-          if( !_stars ){
-            _stars = "0";
-          }
-          var opts = {
-            term : _term,
-            limit : _limit,
-            filters : {}
-          };
-          opts["filters"] = {
-            "is-automated" : [_is_automated],
-            "is-official": [_is_official],
-            "stars" : [_stars]
-          };
+            var _term = $term.val();
+            var _limit = $limit.val();
+            var _is_automated = $is_automated.prop('checked').toString();
+            var _is_official = $is_official.prop('checked').toString();
+            var _stars = $stars.val();
+            if( !_stars ){
+              _stars = "0";
+            }
+            var opts = {
+              term : _term,
+              limit : _limit,
+              filters : {}
+            };
+            opts["filters"] = {
+              "is-automated" : [_is_automated],
+              "is-official": [_is_official],
+              "stars" : [_stars]
+            };
 
 
-          socket.emit("searchImages", opts);
+            socket.emit("searchImages", opts);
           });
-
+            socket.on("errCatch", (err)=> {  
+                if(err.statusCode == "409") {
+                  alert(err.json.message);
+                }
+            })
             socket.on("searchResult", function(data){
               var results = JSON.stringify(data);
 
@@ -130,11 +149,8 @@
                 }];
 
               initDataTable('results', columns, data);
-              $('#results').bootstrapTable('load', data);
-              checkAlltable('results', searchlist);
-              uncheckAlltable('results', searchlist);
-              checkOneTable('results', searchlist);
-              uncheckOneTable('results', searchlist);
+              loadTable('results', data);
+              checkTableEvent('results', searchlist);
 
             });
 

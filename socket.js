@@ -75,9 +75,15 @@ socket.on("pullImages", function(data) {
 });
 socket.on("removeImages", function(data) {
   data.forEach( (images) => {
-  //  console.log("remove");
-    var searchimage = docker.getImage(images.RepoTags);
-    searchimage.remove();
+    var multiTag = images.RepoTags;
+    multiTag.forEach( (singleTag)=> {
+      var searchimage = docker.getImage(singleTag);
+      searchimage.remove().catch( (err) => {
+          socket.emit("errCatch", err);
+      }).then(()=>{
+        //console.log("remove");
+      });
+    });
   });
 });
 socket.on('dctl', function(data){

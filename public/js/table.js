@@ -32,8 +32,19 @@ function resetTable(tableid){
 
 function reloadTable(tableid) {
   var $table = $("#" + tableid);
-      setTimeout(()=> {$table.bootstrapTable('refresh');
-    console.log("reload");}, 1000);
+      setTimeout(()=> {
+        $table.bootstrapTable('refresh');
+    }, 1000);
+}
+function loadTable(tableid, data) {
+  var $table = $("#" + tableid);
+  $table.bootstrapTable('load', data);
+}
+function checkTableEvent(tableid, checklist){
+  checkAlltable(tableid, checklist);
+  uncheckAlltable(tableid, checklist);
+  checkOneTable(tableid, checklist);
+  uncheckOneTable(tableid, checklist);
 }
 
 function checkAlltable(tableid, checklist){
