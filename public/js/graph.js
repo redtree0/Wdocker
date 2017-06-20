@@ -40,12 +40,7 @@ d3.json("/myapp/container/data.json", function(error, data) {
   console.log(data);
   console.log(data.data);
   var data = data.data;
-    /*
-    Array.prototype.forEach.call(data, function(d) {
-        d.Letter = d.Id;
-        d.Freq +=1;
-    });
-*/
+
 	var i = 0;
   data.forEach(function(d) {
       d.Letter = d.Id;

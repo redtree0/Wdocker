@@ -47,21 +47,29 @@ var columns = [{
       title: 'Mounts'
   }];
 
-var dstack = [{"doIt" : ""}];
+var dstack = [];
 
 
 function initDropdown() {
   $.getJSON('/myapp/images/data.json', function(json, textStatus) {
 
       json.forEach ( (data) => {
-        console.log(data.RepoTags[0]);
+    //    console.log(data.RepoTags[0]);
         $("<li><a>" +  data.RepoTags[0] + "</a><li/>").appendTo('ul.dropdown-menu');
       });
-      console.log(textStatus);
+  //    console.log(textStatus);
   });
 }
 
 $(function(){
+
+  socket.on("errCatch", (err)=> {
+    alert(JSON.stringify(err));
+      if(err.statusCode == "409") {
+        alert(err.json.message);
+      }
+  });
+
       initDropdown();
       $(".dropdown-menu").on("click", "li a", function(event){
         //    console.log("You clicked the drop downs", event);
@@ -70,6 +78,7 @@ $(function(){
         });
 
     initUrlTable('ctable', columns,'/myapp/container/data.json');
+
 
     $("#CreateContainer").submit(function(e) {
       e.preventDefault();
@@ -117,8 +126,7 @@ $(function(){
     $("#ctable").on('click-row.bs.table', function (r, e, f){
       var container = e;
       var list=[];
-      console.log(container);
-    //  console.log(container.0);
+      //console.log(container);
       $('#detail li').remove();
       $.each(container, (key, value)=>{
         if(key == "0") {
@@ -126,54 +134,25 @@ $(function(){
         }
         list.push("<li>"+ key + " : " + value+"</li>");
       });
-    //  $('#cinspect').append($("<li>").append(container.Id));
-    //console.log(list);
+
       $('#detail').append(list);
     });
 
 
-    // r - row , e - element
-    $("#ctable").on('check.bs.table	', function (r,e) {
-      var dctl = {};
-      dctl.Id = e.Id;
-      dctl.State = e.State;
-      console.log(e.Id);
-      dstack.push(dctl);
-      });
 
-    $("#ctable").on('uncheck.bs.table', function (r,e) {
-      dstack.forEach((d, index, object) => {
-        if( (e.Id == d.Id) &&  (e.State == d.State) ) {
-              object.splice(index, 1);
-        }
-      });
-    });
+    checkOneTable('ctable', dstack);
+    uncheckOneTable('ctable', dstack);
+    checkAlltable('ctable', dstack);
+    uncheckAlltable('ctable', dstack);
 
-// r - event , e - data
-    $("#ctable").on('check-all.bs.table', function (r,e) {
-        console.log(e);
-        e.forEach((data) => {
-          dstack.push(data);
-        });
-        console.log(dstack);
-    });
-
-    $("#ctable").on('uncheck-all.bs.table', function (r,e) {
-        console.log(e);
-        e.forEach((data) => {
-          dstack.pop(data);
-        });
-      });
 
     $(".ctlbtn").click(function() {
-    //  if(!dctl.id && !dctl.state){
-      if(!dstack[0]){
-        console.log("empty");
-      } else{
-          dstack[0].doIt =$(this).attr('id');
-          console.log(dstack);
-          socket.emit("dctl", dstack);
-      }
-      reloadTable("ctable");
+          var doIt =$(this).attr('id');
+        //  console.log(dstack);
+          socket.emit(doIt, dstack,()=>{
+            dstack=[];
+          });
+
+          reloadTable("ctable");
     });
 });

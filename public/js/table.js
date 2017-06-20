@@ -16,7 +16,7 @@ function initUrlTable(tableid, columns, urljson) {
 function initDataTable(tableid, columns, datajson) {
   var $table = $("#" + tableid);
   var col = columns;
-  console.log("do");
+  //console.log("do");
   $table.bootstrapTable({
       data : datajson,
       columns: col,
@@ -34,7 +34,7 @@ function reloadTable(tableid) {
   var $table = $("#" + tableid);
       setTimeout(()=> {
         $table.bootstrapTable('refresh');
-    }, 1000);
+    }, 1500);
 }
 function loadTable(tableid, data) {
   var $table = $("#" + tableid);
@@ -63,7 +63,7 @@ function uncheckAlltable(tableid, checklist){
           e.forEach((data) => {
             checklist.pop(data);
           });
-          console.log(checklist);
+      //    console.log(checklist);
   });
 }
 
@@ -72,8 +72,8 @@ function checkOneTable(tableid, checklist){
   $table.on('check.bs.table	', function (element, row) {
     checklist.push(row);
     });
-    console.log("check");
-    console.log(checklist);
+    //console.log("check");
+    //console.log(checklist);
 }
 function uncheckOneTable(tableid, checklist){
   var $table = $("#" + tableid);
@@ -83,8 +83,8 @@ function uncheckOneTable(tableid, checklist){
             object.splice(index, 1);
       }
     });
-    console.log("uncheck");
-    console.log(checklist);
+    //console.log("uncheck");
+    //console.log(checklist);
   });
 }
 
@@ -94,8 +94,8 @@ function TestTable(tableid, json) {
   getcolumns(json,  (json, list)=>{
     //console.log(data);
     console.log($table.attr('id'));
-    console.log(json);
-    console.log(JSON.stringify(list));
+    //console.log(json);
+    //console.log(JSON.stringify(list));
     $table.bootstrapTable({
         url: json,
         columns: list,
@@ -106,14 +106,14 @@ function TestTable(tableid, json) {
 }
 
 function getcolumns(json, callback){
-  console.log(json);
+  //console.log(json);
   $.getJSON( json ,(data) => {
   var list = [];
     var col = Object.keys(data[0]);
     $.each(col, (key, val) => {
       list[key] = {field : val,  title : val };
     });
-    console.log(typeof list);
+    //console.log(typeof list);
     callback(json, list);
   });
 }

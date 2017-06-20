@@ -16,10 +16,21 @@ var spawn = require('child_process').spawn;
 
 
 var socket = function(io) {
+
   // connection event handler
 // connection이 수립되면 event handler function의 인자로 socket인 들어온다
 
 io.on('connection', function(socket) {
+
+
+    function errCatch(callback){
+      callback.catch( (err) => {
+        //console.log(err);
+        console.log("error");
+        socket.emit("errCatch", err);
+      });
+      return callback;
+    }
 
 // 접속한 클라이언트의 정보가 수신되면
 socket.on('login', function(data) {
@@ -66,7 +77,7 @@ socket.on("pullImages", function(data) {
          console.log("onFinished");
        }
        function onProgress(event) {
-            console.log("onProgress");
+            //console.log("onProgress");
             //console.log(event);
             socket.emit("progress", event);
         }
@@ -86,30 +97,31 @@ socket.on("removeImages", function(data) {
     });
   });
 });
-socket.on('dctl', function(data){
+
+ socket.on("dstart", function(data){
   // console.log(data);
-  var tmp = data.splice(0, 1);
-  var doIt = tmp[0].doIt;
-
-  p(docker, doIt, data).then ( (container) => {
-    if (doIt == "dstart") {
-      container.forEach ( (container) => {
-          container.start();
-      });
-    }  else if (doIt == "dstop"){
-      container.forEach ( (container) => {
-          container.stop();
-      });
-    } else if (doIt == "dremove") {
-      container.forEach ((container) => {
-        setTimeout( () => {container.remove(); console.log("remove");}, "500");
-      });
-    } else {
-      reject(Error("doIt parms 에러"));
-    }
-  });
-});
-
+   p(docker, "dstart", data).then ( (container) => {
+     container.forEach ( (container) => {
+         errCatch(container.start());
+     });
+   });
+ });
+ socket.on("dstop", function(data){
+  // console.log(data);
+   p(docker, "dstop", data).then ( (container) => {
+     container.forEach ( (container) => {
+         errCatch(container.stop());
+     });
+   });
+ });
+ socket.on("dremove", function(data){
+  // console.log(data);
+   p(docker, "dremove", data).then ( (container) => {
+     container.forEach ((container) => {
+       setTimeout( () => {errCatch(container.remove()); }, "500");
+     });
+   });
+ });
 
 // force client disconnect from server
   socket.on('forceDisconnect', function() {
