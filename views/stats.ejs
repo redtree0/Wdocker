@@ -3,8 +3,10 @@
   <head>
     <% include ./partials/head %>
     <script src="/socket.io/socket.io.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js" ></script>
-    <script src="https://d3js.org/d3.v4.min.js"></script>
+     <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
+   <script type="text/javascript" src="/myapp/js/liquidFillGauge.js"></script>
+       <script type="text/javascript" src="/myapp/js/stats.js"></script>
+
 
   </head>
   <body>
@@ -18,89 +20,9 @@
                   <ul id="stats">
                   </ul>
 
-                  <div id="pie_chart">
-                  </div>
-
-                  <div id="chart">
-  <svg width="360" height="360">
-    <g transform="translate(180,180)">
-      <path d="M0,-180A..." fill="#393b79"></path>
-      <path d="M105.801..." fill="#5254a3"></path>
-      <path d="M171.190..." fill="#6b6ecf"></path>
-      <path d="M-105.80..." fill="#9c9ede"></path>
-    </g>
-  </svg>
-</div>
-                  <script>
-                        $(function () {
-                          $.getJSON('/myapp/stats/data.json', function(json, textStatus) {
-                              var list = [];
-                              console.log(json);
-                              $.each(json.data, (key, value)=>{
-                                console.log("Key : %s, value : %s , value type : %s",key, JSON.stringify(value), typeof value);
-                                list.push("<li>"+ key + " : " + JSON.stringify(value)+"</li>");
-                                }
-                              );
-                              $("#stats").append(list);
-                              console.log(textStatus);
-                          });
-                        })
-
-
-
-
-                        var width = 960;
-                        var height = 500;
-                        var radius = 400;
-
-                        var outerRadius = radius;
-                        var innerRadius = 0;
-
-                        var pie = d3.layout.pie().sort(null).y(function(d) {
-                            return d.y;
-                        });
-
-                        var g, arc, labelArc;
-
-                        var color = d3.scale.category10();
-
-                        var svg = d3.select("#pie_chart").append("svg").attr("width", width).attr(
-                                "height", height).append("g").attr("transform",
-                                "translate(" + width / 2 + "," + height / 2 + ")");
-
-
-
-                        d3.json("/myapp/stats/data.json", function(error, data ) {
-
-                            x.domain(data.map(function(d) { return d.x; }));
-
-                            y.domain([ 0, d3.max(data, function(d) { return d.y; }) ]);
-
-                            g = svg.selectAll(".arc")
-                                       .data(pie(data))
-                                       .enter()
-                                       .append("g")
-                                       .attr("class", "arc");
-
-                            arc = d3.svg.arc()
-                                        .outerRadius(outerRadius)
-                                        .innerRadius(innerRadius);
-
-                            labelArc = d3.svg.arc()
-                                             .outerRadius(radius - 40)
-                                             .innerRadius(radius - 40);
-
-                            g.append("path")
-                             .attr("fill", function(d, i) { return color(i); })
-                             .attr("d", arc);
-
-                            g.append("text")
-                             .attr("transform", function(d) { return "translate(" + labelArc.centroid(d) + ")";})
-                             .attr("text-anchor", "middle").text(function(d) { return d.data.x; });
-
-                        });
-
-                  </script>
+                  <svg id="fillgauge1" width="50%" height="250" ></svg>
+                  <svg id="fillgauge2" width="97%" height="250" ></svg>
+                  <svg id="fillgauge3" width="97%" height="250" ></svg>
                 </div>
               </div>
             </div>
