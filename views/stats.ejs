@@ -6,9 +6,13 @@
      <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
    <script type="text/javascript" src="/myapp/js/liquidFillGauge.js"></script>
        <script type="text/javascript" src="/myapp/js/stats.js"></script>
-
+       <!-- Plotly.js -->
+         <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+         <!-- Numeric JS -->
+         <script src="https://cdnjs.cloudflare.com/ajax/libs/numeric/1.2.6/numeric.min.js"></script>
 
   </head>
+
   <body>
     <% include ./partials/topnav %>
     <div class="container-fluid">
@@ -19,7 +23,8 @@
                 <div class="container">
                   <ul id="stats">
                   </ul>
-
+                  <div id="pie_chart">
+                  </div>
                   <svg id="fillgauge1" width="50%" height="250" ></svg>
                   <svg id="fillgauge2" width="97%" height="250" ></svg>
                   <svg id="fillgauge3" width="97%" height="250" ></svg>

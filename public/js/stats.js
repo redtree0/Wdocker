@@ -5,10 +5,10 @@ $(function () {
          setInterval(()=> {
            $.getJSON('/myapp/stats/data.json', function(json, textStatus) {
                var val =  json.data.usedmem / json.data.totalmem * 100;
-               console.log(json);
-               console.log(json.data.usedmem);
-               console.log(json.data.totalmem);
-               console.log(val);
+              //  console.log(json);
+              //  console.log(json.data.usedmem);
+              //  console.log(json.data.totalmem);
+              //  console.log(val);
                  gauge1.update(val);
            });
 
@@ -17,11 +17,11 @@ $(function () {
               for(var i = 0, len = json.length; i < len; i++) {
 //                  console.log(json[i]);
                       for(var type in json[i].per) {
-                        console.log((json[i].per[0]));
-                        gauge3.update((json[i].per[0].used));
-                        console.log((json[i].per[1]));
-                        console.log((json[i].per[2]));
-                        console.log((json[i].per[3]));
+                        // console.log((json[i].per[0]));
+                         gauge3.update((json[i].per[0].used));
+                        // console.log((json[i].per[1]));
+                        // console.log((json[i].per[2]));
+                        // console.log((json[i].per[3]));
                        }
               }
             //     gauge1.update(val);
@@ -57,34 +57,108 @@ $(function () {
               }
             );
             $("#stats").append(list);
-            data = json;
+          //  data = json;
             console.log(textStatus);
         });
 
+function defaultSetting(location) {
+  return {
+    values: [],
+    labels: [],
+    domain: location,
+    marker: {         // marker is an object, valid marker keys: #scatter-marker
+      colors: ["#ffff33", "#FFDDDD", "#ff9933", "#70db70", "#66b3ff"] // more about "marker.color": #scatter-marker-color
+  },
+    name: 'CPU Info',
+    hoverinfo: 'label+percent+name',
+    hole: .7,
+    type: 'pie'
+  }
+}
 
-        var width = 500,
-  height = 500,
-  radius = Math.min(width, height) / 2;
-var color = d3.scale.ordinal()
-  .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
-var arc = d3.svg.arc()
-  .outerRadius(radius - 10)
-  .innerRadius(0);
+  $.getJSON('/myapp/stats/cpus.json', function(json, textStatus) {
+          console.log(json[0].per[0].type);
+          // var label =[];
+          // var values =[];
 
-// defines wedge size
-// var pie = d3.layout.pie()
-//     .sort(null)
-//     .value(function (d) { return d.ratio; });
-var pie = d3.layout.pie()
-  .sort(null)
-  .value(function (d) {
-  return d.totalmem;
-});
+  //       var data = [defaultSetting({
+  //   x: [0, .48],
+  //   y: [0, .49]
+  // }), defaultSetting({
+  //   x: [0.52, 1],
+  //   y: [0, .49]
+  // })
+  //       , defaultSetting({
+  //   x: [0, .48],
+  //   y: [.51, 1]
+  // }), defaultSetting( {
+  //   x: [0.52, 1],
+  //   y: [0.52, 1]
+  // })];
+  var data = [defaultSetting({
+x: [0, .48],
+y: [0, .49]
+}), defaultSetting({
+x: [0.52, 1],
+y: [0, .49]
+})
+  , defaultSetting({
+x: [0, .48],
+y: [.51, 1]
+}), defaultSetting( {
+x: [0.52, 1],
+y: [0.52, 1]
+})];
+        var layout = {
+          title: 'CPU info',
+          annotations: [
+            {
+              font: {
+                size: 14
+              },
+              showarrow: false,
+              text: 'CPU1',
+              x: 0.17,
+              y: 0.5
+            },{
+                font: {
+                  size: 20
+                },
+                showarrow: false,
+                text: 'CPU2',
+                x: 0.82,
+                y: 0.5
+              },{
+                  font: {
+                    size: 20
+                  },
+                  showarrow: false,
+                  text: 'CPU3',
+                  x: 0.82,
+                  y: 0.5
+                },{
+                    font: {
+                      size: 20
+                    },
+                    showarrow: false,
+                    text: 'CPU4',
+                    x: 0.82,
+                    y: 0.5,
 
-d3.json("/myapp/stats/data.json", function(error, data) {
-console.log("d3");
-console.log(data);
+                    bgcolor : "#66b3ff"
+                  }
+          ],
+          height: 400,
+          width: 400,
+        };
+        for(var i in json) {
+          $.each(json[i].per, (key, val)=>{
+              data[i].values.push(val.used);
+              data[i].labels.push(val.type);
+          });
+        }
 
-});
 
+        Plotly.newPlot('pie_chart', data, layout);
+        });
 });
