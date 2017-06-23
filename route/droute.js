@@ -68,7 +68,7 @@ app.route('/myapp/stats').get ( (req, res) => {
 });
 app.route('/myapp/stats/data.json').get ( (req, res) => {
   const os = require('os');
-  console.log(os);
+  //console.log(os);
   var data = {};
   data.hostname = os.hostname();
   data.cpus = os.cpus();
@@ -90,14 +90,14 @@ app.route('/myapp/stats/data.json').get ( (req, res) => {
   // console.log(os.totalmem() - os.freemem());
   // console.log(os.userInfo());
 
-  res.json({data});
+  res.json(data);
 });
 
 app.route('/myapp/stats/cpus.json').get ( (req, res) => {
   var os = require('os');
   var cpus = os.cpus();
   var cpulist = [];
-  console.log(cpus);
+//  console.log(cpus);
   for(var i = 0, len = cpus.length; i < len; i++) {
     //  console.log("CPU %s:", i);
       var cpu = cpus[i], total = 0;
@@ -113,7 +113,7 @@ app.route('/myapp/stats/cpus.json').get ( (req, res) => {
 
 
   }
-  console.log(JSON.stringify(cpulist));
+//  console.log(JSON.stringify(cpulist));
   res.json(cpulist);
 });
 	   return app;	//라우터를 리턴
