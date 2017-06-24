@@ -40,7 +40,14 @@ var columns = [{
   }];
 
 $(function(){
+  var checklist =[];
   initUrlTable("networklist", columns, "/myapp/network/data.json");
 
+  clickTableRow('networklist', 'detail');
+
+  checkOneTable('networklist', checklist);
+  uncheckOneTable('networklist', checklist);
+  checkAlltable('networklist', checklist);
+  uncheckAlltable('networklist', checklist);
 
 });

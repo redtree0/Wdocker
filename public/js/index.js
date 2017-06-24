@@ -1,158 +1,133 @@
-// client index.js
-'use strict';
+"use strict";
 
-var socket = io();
-
-var columns = [{
-      checkbox: true,
-      title: 'Check'
-  },{
-      field: 'Id',
-      title: 'Id'
-  }, {
-      field: 'Names',
-      title: 'Item Names'
-  }, {
-      field: 'Image',
-      title: 'Image'
-  }, {
-      field: 'ImageID',
-      title: 'ImageID'
-  }, {
-      field: 'Command',
-      title: 'Command'
-  }, {
-      field: 'Created',
-      title: 'Created'
-  }, {
-      field: 'Ports',
-      title: 'Ports'
-  }, {
-      field: 'Labels',
-      title: 'Labels'
-  }, {
-      field: 'State',
-      title: 'State'
-  }, {
-      field: 'Status',
-      title: 'Status'
-  }, {
-      field: 'HostConfig',
-      title: 'HostConfig'
-  }, {
-      field: 'NetworkingSettings',
-      title: 'NetworkingSettings'
-  }, {
-      field: 'Mounts',
-      title: 'Mounts'
-  }];
-
-var dstack = [];
+$(function () {
+  
+         setInterval(()=> {
+           $.getJSON('/myapp/stats/data.json', function(json, textStatus) {
+              var memory = json.memory;
+               var val =  memory.usedmem / memory.totalmem * 100;
+                 gauge.update(val);
+           });
 
 
-function initDropdown() {
-  $.getJSON('/myapp/images/data.json', function(json, textStatus) {
+           $.getJSON('/myapp/stats/cpus.json', function(json, textStatus) {
 
-      json.forEach ( (data) => {
-    //    console.log(data.RepoTags[0]);
-        $("<li><a>" +  data.RepoTags[0] + "</a><li/>").appendTo('ul.dropdown-menu');
-      });
-  //    console.log(textStatus);
-  });
-}
+                   var data = [
+                     defaultPieSetting({ x: [0, .48], y: [.51, 1]}, "cpu1")
+                   , defaultPieSetting({ x: [0.52, 1], y: [0.52, 1]}, "cpu2")
+                   , defaultPieSetting({ x: [0, .48], y: [0, .49]}, "cpu3")
+                   , defaultPieSetting({ x: [0.52, 1], y: [0, .49]}, "cpu4")];
 
-$(function(){
+                  var layout = {
+                           title: 'CPU info',
+                           annotations: [
+                             defaultAnnotationsSetting({x: 0.15, y: 0.78}, "CPU1")
+                           , defaultAnnotationsSetting({x: 0.8, y: 0.78}, "CPU2")
+                           , defaultAnnotationsSetting({x: 0.15, y: 0.23}, "CPU3")
+                           , defaultAnnotationsSetting({x: 0.82, y: 0.23}, "CPU4")
+                           ],
+                           height: 550,
+                           width: 450,
+                         };
 
-  socket.on("errCatch", (err)=> {
-    alert(JSON.stringify(err));
-      if(err.statusCode == "409") {
-        alert(err.json.message);
-      }
-  });
+                 for(var i in json) {
+                   $.each(json[i].per, (key, val)=>{
+                       data[i].values.push(val.used);
+                       data[i].labels.push(val.type);
+                   });
+                 }
+                   Plotly.newPlot('cpuStatus', data, layout);
 
-      initDropdown();
-      $(".dropdown-menu").on("click", "li a", function(event){
-        //    console.log("You clicked the drop downs", event);
-        //    console.log($('#images').text());
-            $('#image').text($(this).text());
+                 });
+       }, 3000);
+
+        var config = liquidFillGaugeDefaultSettings();
+            config.circleColor = "#FF7777";
+            config.textColor = "#FF4444";
+            config.waveTextColor = "#FFAAAA";
+            config.waveColor = "#FFDDDD";
+            config.circleThickness = 0.2;
+            config.textVertPosition = 0.2;
+            config.waveAnimateTime = 1000;
+        var gauge = loadLiquidFillGauge("memoryStatus", 1, config);
+
+        $.getJSON('/myapp/stats/data.json', function(json, textStatus) {
+              var colClass = "col-md-6";
+              var cpus = json.cpus;
+
+              $("#cpu_core").append(addRowText(colClass, "CPU Core Number"));
+              $("#cpu_core").append(addRowText(colClass, cpus.length));
+              $("#cpu_model").append(addRowText(colClass, "CPU Model"));
+              $("#cpu_model").append(addRowText(colClass, cpus[0].model));
+
+              var network = (json.networkInterfaces);
+              var $networkInfo = $("#networkInfo");
+              for( var type in network) {
+
+                $networkInfo.append(addRowText(colClass, "type"));
+                $networkInfo.append(addRowText(colClass, type));
+                $networkInfo.append(addRowText(colClass, "IP Address"));
+                $networkInfo.append(addRowText(colClass, (network[type])[0].address ));
+                $networkInfo.append(addRowText(colClass, "IP Family"));
+                $networkInfo.append(addRowText(colClass, (network[type])[0].family ));
+                $networkInfo.append(addRowText(colClass, "Mac Adrress"));
+                $networkInfo.append(addRowText(colClass, (network[type])[0].mac ));
+                $networkInfo.append(addRowText(colClass, "Netmask"));
+                $networkInfo.append(addRowText(colClass, (network[type])[0].netmask ));
+              }
+
+              var memory = json.memory;
+              var $memoryInfo = $("#memoryInfo");
+              $memoryInfo.append(addRowText(colClass, "total"));
+              $memoryInfo.append(addRowText(colClass, memory.totalmem));
+              $memoryInfo.append(addRowText(colClass, "free"));
+              $memoryInfo.append(addRowText(colClass, memory.freemem));
+              $memoryInfo.append(addRowText(colClass, "used"));
+              $memoryInfo.append(addRowText(colClass, memory.usedmem));
+
+              $("#others").append(addRowText(colClass, "Release"));
+              $("#others").append(addRowText(colClass, json.release));
+
+              $("#others").append(addRowText(colClass, "OS"));
+              $("#others").append(addRowText(colClass, json.platform));
+              $("#others").append(addRowText(colClass, "Username"));
+              $("#others").append(addRowText(colClass, json.userInfo.username));
+              $("#others").append(addRowText(colClass, "Shell"));
+              $("#others").append(addRowText(colClass, json.userInfo.shell));
+              $("#others").append(addRowText(colClass, "Uptime"));
+              $("#others").append(addRowText(colClass, json.uptime + " s"));
+
+            function addNewRow( _id ){
+                return $('<div/>', { class: "row", id : _id });
+            }
+            function addRowText( _class,  _text){
+              return $('<div/>', { class: _class, text: _text });
+            }
+            console.log(textStatus);
         });
 
-    initUrlTable('ctable', columns,'/myapp/container/data.json');
+function defaultPieSetting(location, name) {
+  return {
+    values: [],
+    labels: [],
+    domain: location,
+    marker: {         // marker is an object, valid marker keys: #scatter-marker
+      colors: ["#ffff33", "#FFDDDD", "#ff9933", "#70db70", "#66b3ff"] // more about "marker.color": #scatter-marker-color
+  },
+    name: name,
+    hoverinfo: 'label+percent+name',
+    hole: .7,
+    type: 'pie'
+  }
+}
 
-
-    $("#CreateContainer").submit(function(e) {
-      e.preventDefault();
-      var $name=$("#name");
-      var $image =$('#image');
-      var $command = $("#command")
-
-      var _name = $name.val();
-      var _image = $image.text().trim();
-      var _command = $command.val();
-      //console.log(images.trim());
-      if(_image === "Images") {
-        alert ("images 선택 하시오.");
-        return;
-      }
-
-      var container = {
-        Image: _image,
-        name : _name,
-        AttachStdin: false,
-        AttachStdout: true,
-        AttachStderr: true,
-        Tty: false, // tty : false 로 해야 web terminal에서 docker attach가 됨
-        Cmd: [ _command ],
-        OpenStdin: true,
-        StdinOnce: false
-      }
-      // 서버로 메시지를 전송한다.
-      socket.emit("CreateContainer", container);
-      $name.val("");
-      $image.text("Images");
-      reloadTable('ctable');
-
-      BootstrapDialog.show({
-          title: 'Container',
-          message: _name + "|" + _image,
-          buttons: [ {
-                label: 'Close',
-                action: function(dialogItself){
-                    dialogItself.close();
-                }
-            }]
-      });
-    });
-    $("#ctable").on('click-row.bs.table', function (r, e, f){
-      var container = e;
-      var list=[];
-      //console.log(container);
-      $('#detail li').remove();
-      $.each(container, (key, value)=>{
-        if(key == "0") {
-          return true;
-        }
-        list.push("<li>"+ key + " : " + value+"</li>");
-      });
-
-      $('#detail').append(list);
-    });
-
-
-
-    checkOneTable('ctable', dstack);
-    uncheckOneTable('ctable', dstack);
-    checkAlltable('ctable', dstack);
-    uncheckAlltable('ctable', dstack);
-
-
-    $(".ctlbtn").click(function() {
-          var doIt =$(this).attr('id');
-        //  console.log(dstack);
-          socket.emit(doIt, dstack,()=>{
-            dstack=[];
-          });
-
-          reloadTable("ctable");
-    });
+function defaultAnnotationsSetting(location, name) {
+  return  {
+     font: { size: 14 },
+     showarrow: false,
+     text: name,
+     x: location.x,
+      y: location.y
+   }
+}
 });

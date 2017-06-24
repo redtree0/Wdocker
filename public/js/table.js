@@ -47,6 +47,32 @@ function checkTableEvent(tableid, checklist){
   uncheckOneTable(tableid, checklist);
 }
 
+function clickTableRow(tableid, viewid){
+  function addNewRow( _id ){
+      return $('<div/>', { class: "row", id : _id });
+  }
+  function addRowText( _class,  _text){
+    return $('<div/>', { class: _class, text: _text });
+  }
+
+    var $table = $("#" + tableid);
+    var $view = $("#" + viewid);
+
+  $table.on('click-row.bs.table', function (r, e, f){
+    var data = e;
+
+    $("#" + viewid +" div").remove();
+    $.each(data, (key, value)=>{
+      if(key == "0") { // key 0 인 값 제외
+        return true;
+      }
+      $view.append(addRowText("col-md-6", key));
+      $view.append(addRowText("col-md-6", value));
+    });
+
+  });
+}
+
 function checkAlltable(tableid, checklist){
   var $table = $("#" + tableid);
   $table.on('check-all.bs.table', function (r,e) {

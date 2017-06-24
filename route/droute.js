@@ -8,7 +8,7 @@ module.exports = function(app){//함수로 만들어 객체 app을 전달받음
   var p = require('../promise');
   var docker = require('../docker');
 
-  app.route('/myapp')
+  app.route('/myapp/index')
       .get( (req, res) => {
               res.render(file);
       })
@@ -39,7 +39,10 @@ app.route('/myapp/network/data.json').get( (req, res) => {
     promiseTojson(p(docker, 'network'), res);
 });
 
-
+app.route('/myapp/container')
+        .get( (req, res) => {
+          res.render("container");
+        });
   app.route('/myapp/network')
           .get( (req, res) => {
             res.render("network");
@@ -63,9 +66,7 @@ app.route('/myapp/graph').get ( (req, res) => {
   res.render("graph.ejs");
 });
 
-app.route('/myapp/stats').get ( (req, res) => {
-  res.render("stats.ejs");
-});
+
 app.route('/myapp/stats/data.json').get ( (req, res) => {
   const os = require('os');
   //console.log(os);
@@ -75,21 +76,16 @@ app.route('/myapp/stats/data.json').get ( (req, res) => {
   data.networkInterfaces = os.networkInterfaces();
   data.platform = os.platform();
   data.release = os.release();
-  data.totalmem = os.totalmem();
-  data.freemem = os.freemem();
-  data.usedmem = data.totalmem - data.freemem;
+  // data.totalmem = os.totalmem();
+  // data.freemem = os.freemem();
+  // data.usedmem = data.totalmem - data.freemem;
+  data.memory = {
+    totalmem : os.totalmem(),
+    freemem : os.freemem(),
+    usedmem : os.totalmem() - os.freemem()
+  }
   data.userInfo = os.userInfo();
-  // console.log(os.hostname());
-  // console.log(os.cpus());
-  // console.log(os.networkInterfaces());
-  // console.log(os.platform());
-  // console.log(os.loadavg());
-  // console.log(os.freemem());
-  // console.log(os.release());
-  // console.log(os.totalmem());
-  // console.log(os.totalmem() - os.freemem());
-  // console.log(os.userInfo());
-
+  data.uptime = os.uptime();
   res.json(data);
 });
 
