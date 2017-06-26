@@ -101,6 +101,12 @@ $(function(){
         AttachStdin: false,
         AttachStdout: true,
         AttachStderr: true,
+        'ExposedPorts': {
+          '80/tcp': {},
+          '80/udp': {},
+          '22/tcp': {},
+          '22/udp': {}
+        },
         Tty: false, // tty : false 로 해야 web terminal에서 docker attach가 됨
         Cmd: [ _command ],
         OpenStdin: true,

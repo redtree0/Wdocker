@@ -47,12 +47,52 @@ socket.on('login', function(data) {
 
 // 클라이언트로부터의 메시지가 수신되면
 socket.on('CreateContainer', function(data) {
-  console.log('Message from %s: %s', socket.name, JSON.stringify(data));
-
     socket.emit('chat', data);
-
     p(docker, 'CreateContainer', data);
 });
+
+socket.on('RemoveNetwork', function(data) {
+    data.forEach((data)=>{
+      var network = docker.getNetwork(data.Id);
+      network.remove();
+    });
+
+    // var options = {
+    //     id: "multi-host",
+    //     Container: "xx",
+    //     "EndpointConfig": {
+    //         "IPAMConfig": {
+    //         "IPv4Address": "172.10.10.50"
+    //         }
+    //       }
+    //   };
+    console.log(data[0].Id);
+
+
+    //network.disconnect({id: "bridge", Container: "xx"}, (data, err) => {console.log(data); console.log(err);});
+    //network.connect(options, (data) => {console.log(data);});
+});
+
+socket.on('ConnectNetwork', function(data, t) {
+  data.forEach((data)=>{
+    var network = docker.getNetwork(data.Id);
+
+    network.connect({Container: t, EndpointConfig : {NetworkID : data.Id}}, (data, err) => {console.log(data); console.log(err);});
+  })
+});
+
+socket.on('DisconnectNetwork', function(data, t) {
+  data.forEach((data)=>{
+    var network = docker.getNetwork(data.Id);
+    network.disconnect({Container: t}, (data, err) => {console.log(data); console.log(err);});
+  })
+});
+
+socket.on('CreateNetwork', function(data) {
+    console.log("socket");
+    p(docker, 'CreateNetwork', data);
+});
+
 socket.on("searchImages", function(data){
   console.log(data);
   docker.searchImages(data).then ( (data)=> {

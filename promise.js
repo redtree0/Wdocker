@@ -45,8 +45,12 @@ switch (opt) {
         promisePush(plist ,doIt(docker, docker.listVolumes({})));
         break;
   case 'CreateContainer':
-      doIt(docker, docker.createContainer(data));
-      break;
+        doIt(docker, docker.createContainer(data));
+        break;
+  case 'CreateNetwork':
+        console.log(data);
+        doIt(docker, docker.createNetwork(data));
+        break;
   case 'dstart':
           ctlContainer(plist, docker, data, "running");
           break;

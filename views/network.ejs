@@ -17,10 +17,50 @@
         <% include ./partials/nav %>
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
           <div class="row placeholders">
+            <div class="col-md-6" >
+              <h3>Create a Network</h3>
+                <form class="form-horizontal" id="CreateNetwork">
+                    <div class="form-group">
+                      <label for="name" class="col-sm-2 control-label">Network Name: </label>
+                      <div class="col-sm-10">
+                        <input type="text" class="form-control" id="name" placeholder="Name">
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label for="driver" class="col-sm-2 control-label">Network Driver: </label>
+                      <div class="col-sm-10">
+                        <input type="text" class="form-control" id="driver" placeholder="driver" >
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label for="internal" class="col-sm-2 control-label">Internal : </label>
+                      <label class="checkbox-inline">
+                         <input type="checkbox" id="internal" checked data-toggle="toggle" data-on="true"
+                         data-off="false" data-onstyle="success" data-offstyle="danger"></input>
+                      </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Create</button>
+
+                </form>
+            </div>
+            <button id="remove" class="btn btn-danger">Remove</button>
               <div id="detail" class="row">
               </div>
               <table id="networklist" class="table table-striped">
               </table>
+              <div class="btn-group">
+                <button id="container" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                   Containers <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                </ul>
+              </div>
+              <div id="network" class="btn-group" role="group">
+                      <button id="connect" type="button" class="btn btn-success btn-lg ctlbtn">Connect</button>
+                      <button id="disconnect" type="button" class="btn btn-default btn-lg ctlbtn">Disconnect</button>
+              </div>
+
           </div>
 
         </div>
