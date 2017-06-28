@@ -65,7 +65,35 @@ app.route('/myapp/test').get ( (req, res) => {
 app.route('/myapp/graph').get ( (req, res) => {
   res.render("graph.ejs");
 });
+app.route('/myapp/dockerfile').get ( (req, res) => {
+  res.render("dockerfile.ejs");
+});
+app.route('/myapp/dockerfile/data.json').get ( (req, res) => {
+  var fs = require('fs');
+  var path = require('path');
+  var test = [];
+  var jsonPath = path.join(__dirname);
+  var dirPath = path.dirname(jsonPath)
+  var dockerfilePath = path.join(dirPath, "dockerfile");
+  console.log(jsonPath);;
+  console.log(dirPath);
+  fs.readdir(dockerfilePath, "utf8", function(err, file) {
+    console.log(file);
+    for (var i in file) {
+        var readFilePath = path.join(dockerfilePath, file[i]);
+        test.push(path.parse(readFilePath));
+    }
+      // var readFilePath = path.join(dockerfilePath, file[0]);
+    //  fs.readFile(readFilePath, 'utf8', (err, data) => {
+    //     if (err) throw err;
+    //     console.log(data);
+    //   });
 
+
+     res.json(test);
+  })
+
+});
 
 app.route('/myapp/stats/data.json').get ( (req, res) => {
   const os = require('os');
@@ -106,10 +134,7 @@ app.route('/myapp/stats/cpus.json').get ( (req, res) => {
       //    console.log("\t", type, (100 * cpu.times[type] / total).toFixed(2));
           cpulist[i].per.push({type: type, used: (100 * cpu.times[type] / total).toFixed(2)});
       }
-
-
   }
-//  console.log(JSON.stringify(cpulist));
   res.json(cpulist);
 });
 	   return app;	//라우터를 리턴

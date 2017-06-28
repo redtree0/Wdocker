@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<% include ./partials/head %>
+  <script src='/myapp/js/socketio.js'></script>
+	<script src= "/myapp/js/dockerfile.js">	</script>
+</head>
+
+<style>
+#editor {
+    width: 100%;
+    height: 500px;
+    padding: 10px;
+    background-color: #444;
+    color: white;
+    font-size: 14px;
+    font-family: monospace;
+		overflow : scroll;
+		text-align: left;
+}
+
+.statement {
+    color: orange;
+}
+</style>
+
+<body>
+	<% include ./partials/topnav %>
+	<div class="container-fluid">
+		<% include ./partials/nav %>
+		      <div class="row">
+						<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+		          <div class="row placeholders">
+		            <div class="container">
+									<div id="filelist">
+									</div>
+                  <form class="form-horizontal" id="CreateFile">
+                      <div class="form-group">
+                  <input type="text" class="form-control" id="filename" placeholder="filename">
+                </div>
+                <div class="form-group">
+									<div id="editor" contenteditable="true" ></div>
+
+                </div>
+                    <button type="submit" class="btn btn-primary">Create</button>
+                  </form>
+								</div>
+							</div>
+						</div>
+					</div>
+	</div>
+
+</body>
+</html>

@@ -28,8 +28,13 @@
                     </div>
                     <div class="form-group">
                       <label for="driver" class="col-sm-2 control-label">Network Driver: </label>
-                      <div class="col-sm-10">
-                        <input type="text" class="form-control" id="driver" placeholder="driver" >
+
+                      <div class="btn-group" >
+                        <button id="driver" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                           driver <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" id="driver_list">
+                        </ul>
                       </div>
                     </div>
                     <div class="form-group">
@@ -39,7 +44,12 @@
                          data-off="false" data-onstyle="success" data-offstyle="danger"></input>
                       </label>
                     </div>
-
+                    <div class="form-group">
+                      <label for="options" class="col-sm-2 control-label">Options : </label>
+                      <div class="col-sm-10">
+                        <input type="text" class="form-control" id="options" placeholder="options">
+                      </div>
+                    </div>
                     <button type="submit" class="btn btn-primary">Create</button>
 
                 </form>
@@ -53,7 +63,7 @@
                 <button id="container" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                    Containers <span class="caret"></span>
                 </button>
-                <ul class="dropdown-menu">
+                <ul class="dropdown-menu" id="container_list">
                 </ul>
               </div>
               <div id="network" class="btn-group" role="group">

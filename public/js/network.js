@@ -48,17 +48,27 @@ var columns = [{
     $.getJSON(url, function(json, textStatus) {
 
       json.forEach ( (data) => {
-          $("<li><a>" +  data.Names + "</a><li/>").appendTo('ul.dropdown-menu');
+        // $("<li><a>" +  data.Names + "</a><li/>").appendTo('ul.dropdown-menu');
+          $("<li><a>" +  data.Names + "</a><li/>").appendTo('#container_list');
       });
     //    console.log(textStatus);
     });
+
+    $("<li><a>" + "bridge" + "</a><li/>").appendTo('#driver_list');
+    $("<li><a>" + "overlay" + "</a><li/>").appendTo('#driver_list');
+    $("<li><a>" + "macvlan" + "</a><li/>").appendTo('#driver_list');
   }
 
   function clickDropdown(id) {
-    $(".dropdown-menu").on("click", "li a", function(event){
+    $("#container_list").on("click", "li a", function(event){
           $('#container').text($(this).text());
           checkAddColor('networklist', $(this).text(), "success");
       });
+
+      $("#driver_list").on("click", "li a", function(event){
+            $('#driver').text($(this).text());
+
+        });
   }
 
 $(function(){
@@ -99,11 +109,11 @@ $(function(){
 
     var _name = $name.val();
     //  var _driver = $image.text().trim();
-    var _driver = $driver.val();
+    var _driver = $driver.text().trim();
     // var _internal = $internal.prop('checked').toString();
     var _internal = $internal.prop('checked');
     //console.log(images.trim());
-
+    console.log(_driver);
     var opts = {
       Name : _name,
       Driver: _driver,
@@ -112,20 +122,24 @@ $(function(){
       Ingress : false,
       Attachable : false,
       IPAM : {
-        // "Driver": _driver,
+      //  "Driver": _driver,
         "Config": [
-        {
-            "Subnet": "192.168.0.0/24",
-            "IPRange": "192.168.0.0/24"
-             ,"Gateway": "192.168.0.100"
-        }]
-
-      },
+              {
+                  "Subnet": "192.168.0.0/24",
+                  "IPRange": "192.168.0.0/24"
+                  // , "Gateway": "192.168.0.1"
+              }
+            ]
+            ,
+            "Options" : {
+              "parent" : "wlan0"
+            }
+          },
       "Options": {
-                "com.docker.network.bridge.default_bridge": "true",
+                "com.docker.network.bridge.default_bridge": "false",
                 "com.docker.network.bridge.enable_icc": "true",
                 "com.docker.network.bridge.enable_ip_masquerade": "true",
-                "com.docker.network.bridge.host_binding_ipv4": "0.0.0.0",
+                // "com.docker.network.bridge.host_binding_ipv4": "192.168.0.8",
                 // "com.docker.network.bridge.name": "k",
                 "com.docker.network.driver.mtu": "1500"
               }
