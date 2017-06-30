@@ -24,7 +24,9 @@ var socket = function(io) {
 // connection이 수립되면 event handler function의 인자로 socket인 들어온다
 
 io.on('connection', function(socket) {
-
+    function done(socket){
+      socket.emit("doneCatch", true);
+    }
 
     function errCatch(callback){
       callback.catch( (err) => {
@@ -48,134 +50,147 @@ socket.on('login', function(data) {
   io.emit('login', data.name );
 });
 
-// 클라이언트로부터의 메시지가 수신되면
-socket.on('CreateContainer', function(data) {
-    socket.emit('chat', data);
-    p(docker, 'CreateContainer', data);
-});
 
-socket.on('RemoveNetwork', function(data) {
+
+network(socket);
+function network(socket) {
+  socket.on('ConnectNetwork', function(data, t) {
     data.forEach((data)=>{
       var network = docker.getNetwork(data.Id);
-      network.remove();
-    });
-    //network.disconnect({id: "bridge", Container: "xx"}, (data, err) => {console.log(data); console.log(err);});
-    //network.connect(options, (data) => {console.log(data);});
-});
 
-socket.on('ConnectNetwork', function(data, t) {
-  data.forEach((data)=>{
-    var network = docker.getNetwork(data.Id);
+      network.connect({Container: t, EndpointConfig : {NetworkID : data.Id}}, (data, err) => {console.log(data); console.log(err);});
+    })
+  });
 
-    network.connect({Container: t, EndpointConfig : {NetworkID : data.Id}}, (data, err) => {console.log(data); console.log(err);});
-  })
-});
+  socket.on('DisconnectNetwork', function(data, t) {
+    data.forEach((data)=>{
+      var network = docker.getNetwork(data.Id);
+      network.disconnect({Container: t}, (data, err) => {console.log(data); console.log(err);});
+    })
+  });
 
-socket.on('DisconnectNetwork', function(data, t) {
-  data.forEach((data)=>{
-    var network = docker.getNetwork(data.Id);
-    network.disconnect({Container: t}, (data, err) => {console.log(data); console.log(err);});
-  })
-});
+  socket.on('CreateNetwork', function(data) {
+      console.log("socket");
+      p(docker, 'CreateNetwork', data);
+  });
 
-socket.on('CreateNetwork', function(data) {
-    console.log("socket");
-    p(docker, 'CreateNetwork', data);
-});
+  socket.on('RemoveNetwork', function(data) {
+      data.forEach((data)=>{
+        var network = docker.getNetwork(data.Id);
+        network.remove();
+      });
+      //network.disconnect({id: "bridge", Container: "xx"}, (data, err) => {console.log(data); console.log(err);});
+      //network.connect(options, (data) => {console.log(data);});
+  });
+}
 
-socket.on("searchImages", function(data){
-  console.log(data);
-  docker.searchImages(data).then ( (data)=> {
+images(socket);
+function images(socket){
+  socket.on("searchImages", function(data){
     console.log(data);
-    if(data) {
-      socket.emit('searchResult', data);
-    }
+    docker.searchImages(data).then ( (data)=> {
+      console.log(data);
+      if(data) {
+        socket.emit('searchResult', data);
+      }
+    });
   });
-});
 
-socket.on("pullImages", function(data) {
-  console.log(data);
-  data.forEach( (images) => {
+  socket.on("pullImages", function(data) {
+    console.log(data);
+    data.forEach( (images) => {
 
-    docker.pull(images.name, {"tag" : "latest"},function(err, stream) {
+      docker.pull(images.name, {"tag" : "latest"},function(err, stream) {
 
-      if (err) return done(err);
+        if (err) return done(err);
 
-      docker.modem.followProgress(stream, onFinished, onProgress);
+        docker.modem.followProgress(stream, onFinished, onProgress);
 
-       function onFinished(err, output) {
-         console.log("onFinished");
-       }
-       function onProgress(event) {
-            socket.emit("progress", event);
-        }
-      });
+         function onFinished(err, output) {
+           console.log("onFinished");
+         }
+         function onProgress(event) {
+              socket.emit("progress", event);
+          }
+        });
+    });
   });
-});
-socket.on("removeImages", function(data) {
-  data.forEach( (images) => {
-    var multiTag = images.RepoTags;
-    multiTag.forEach( (singleTag)=> {
-      var searchimage = docker.getImage(singleTag);
-      searchimage.remove().catch( (err) => {
-          socket.emit("errCatch", err);
-      }).then(()=>{
-        //console.log("remove");
+  socket.on("removeImages", function(data) {
+    data.forEach( (images) => {
+      var multiTag = images.RepoTags;
+      multiTag.forEach( (singleTag)=> {
+        var searchimage = docker.getImage(singleTag);
+        searchimage.remove().catch( (err) => {
+            socket.emit("errCatch", err);
+        }).then(()=>{
+          //console.log("remove");
+        });
       });
     });
   });
-});
+}
 
- socket.on("dstart", function(data){
-  // console.log(data);
-   p(docker, "dstart", data).then ( (container) => {
-     container.forEach ( (container) => {
-         errCatch(container.start());
+function container(socket){
+  socket.on('CreateContainer', function(data) {
+      socket.emit('chat', data);
+      p(docker, 'CreateContainer', data);
+  });
+
+
+   socket.on("dstart", function(data){
+    // console.log(data);
+     p(docker, "dstart", data).then ( (container) => {
+       container.forEach ( (container) => {
+           errCatch(container.start());
+       });
      });
    });
- });
- socket.on("dstop", function(data){
-  // console.log(data);
-   p(docker, "dstop", data).then ( (container) => {
-     container.forEach ( (container) => {
-         errCatch(container.stop());
+   socket.on("dstop", function(data){
+    // console.log(data);
+     p(docker, "dstop", data).then ( (container) => {
+       container.forEach ( (container) => {
+           errCatch(container.stop());
+       });
      });
    });
- });
- socket.on("dremove", function(data){
-  // console.log(data);
-   p(docker, "dremove", data).then ( (container) => {
-     container.forEach ((container) => {
-       setTimeout( () => {errCatch(container.remove()); }, "500");
+   socket.on("dremove", function(data){
+    // console.log(data);
+     p(docker, "dremove", data).then ( (container) => {
+       container.forEach ((container) => {
+         setTimeout( () => {errCatch(container.remove()); }, "500");
+       });
      });
    });
- });
- socket.on("fileRead", function(data){
-   var readFilePath = path.join(__dirname, "dockerfile", data);
-   fs.readFile(readFilePath, 'utf8', (err, data) => {
-      if (err) throw err;
-      socket.emit("fileLoad",data);
+}
+
+file(socket);
+function file(socket){
+  socket.on("fileRead", function(data){
+    var readFilePath = path.join(__dirname, "dockerfile", data);
+    fs.readFile(readFilePath, 'utf8', (err, data) => {
+       if (err) throw err;
+       socket.emit("fileLoad",data);
+     });
+  });
+
+  socket.on("CreateFile", function(data){
+
+   var jsonPath = path.join(__dirname, "dockerfile", data.name);
+
+    fs.writeFile(jsonPath, data.context, 'utf8', function(err) {
+        console.log('비동기적 파일 쓰기 완료');
+        done(socket);
     });
- });
 
- socket.on("CreateFile", function(data){
-   console.log(data);
-
-  var jsonPath = path.join(__dirname, "dockerfile", data.name);
-  var dirPath = path.dirname(jsonPath);
-  console.log(dirPath);
-  fs.readdir(dirPath, "utf8", function(err, file) {
-    console.log(file);
-
+  });
+  socket.on("RemoveFile", function(filename){
+    var jsonPath = path.join(__dirname, "dockerfile", filename);
+      fs.unlink(jsonPath);
+      done(socket);
   })
-  // console.log(jsonPath);
 
+}
 
-   fs.writeFile(jsonPath, data.context, 'utf8', function(err) {
-       console.log('비동기적 파일 쓰기 완료');
-   });
-
- });
 
 // force client disconnect from server
   socket.on('forceDisconnect', function() {
