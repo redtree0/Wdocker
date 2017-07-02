@@ -21,109 +21,26 @@ $(function(){
       });
     });
   }
+  var editor = CodeMirror.fromTextArea(document.getElementById("editor"), {
+    lineNumbers: true,
+    mode: "dockerfile"
+  });
 
+  console.log("do");
 
-  function textnewLine(_class){
-    console.log("do");
-    $("." + _class).html("&NewLine;");
-    $("#editor").find("br").html("&nbsp;&SmallCircle;&nbsp;");
-  }
-  function textConvert(id){
-    var $editor = $("#"+ id);
-
-    var text = $editor.text().replace(/[\s]+/g, " ").trim();
-    var word = text.split(" ");
-
-    return word;
-  }
-
-  function textAddColor(id, index){
-    var $editor = $("#"+ id);
-    var newHTML = "";
-    var word = textConvert(id);
-    // console.log(word);
-    $.each(word, function(index, value){
-          // console.log("value : %s",value);
-
-        switch(value.toUpperCase()){
-            case "FROM":
-            case "RUN":
-            case "ENV":
-            case "EXPOSE":
-            case "CMD":
-                newHTML += "<span class='statement'>" + value + "&nbsp;</span>";
-                break;
-            case "∘":
-                 newHTML += "<br class='line'/>"
-                break;
-
-            default:
-                newHTML += "<span class='other'>" + value + "&nbsp;</span>";
-        }
-    });
-    // console.log(newHTML);
-
-    $editor.html(newHTML);
-    textnewLine("line");
-
-    // console.log(index);
-    var child = $editor.children();
-    if(index == -1){
-      var index = 0;
-    }
-    var range = document.createRange();
-    var sel = window.getSelection();
-    console.log(index);
-    range.setStart(child[index], 1);
-    range.collapse(true);
-    sel.removeAllRanges();
-    sel.addRange(range);
-    $editor[0].focus();
-  }
   ////////// function  end//////////////////////
 
 
     showFileList();
-  $("#editor").on("keydown", function(e){
-    var enterKey = 13;
-    var spaceKey = 32;
-    var tapKey = 9;
-
-
-    if(e.keyCode == tapKey) {
-      var $tab = $("<span/>", {class: "tab"});
-      window.getSelection().getRangeAt(0).insertNode($tab[0]);
-      $tab.html("&nbsp;&shy;&nbsp;&shy;&nbsp;&shy;&nbsp;&shy;");
-      e.preventDefault();
-    } else if (e.keyCode == enterKey) {
-      var $newline = $("<br/>", {class: "line"});
-      window.getSelection().getRangeAt(0).insertNode($newline[0]);
-      textnewLine("line");
-      e.preventDefault();
-    } else if (e.keyCode == spaceKey) {
-
-              var child = $(this).children();
-              var sel = window.getSelection();
-              var anchorOffset = sel.anchorOffset;
-
-              var node = window.getSelection().getRangeAt(0).commonAncestorContainer.parentNode;
-              console.log(node);
-              var index = child.index(node);
-
-              var tmptext = $(child[index]).text();
-              var x = tmptext.substring(0, anchorOffset) + " "  + tmptext.substring(anchorOffset);
-              $(child[index]).text(x);
-                // console.log(anchorOffset);
-        textAddColor("editor", index);
-    }
-
-  });
 
       $("#CreateFile").submit(function(e) {
           e.preventDefault();
 					var file ={};
 					file.name = $("#filename").val();
-					file.context = $("#editor").text();
+					file.context = $("#editor").val();
+          console.log($("#editor").val());
+          console.log($("#editor").html());
+          console.log($("#editor").text());
 					if(file.name == null){
 						return ;
 					}
@@ -147,6 +64,16 @@ $(function(){
           })
       });
 
+      $("#build").click(()=>{
+
+
+          var file ={};
+
+          file.name = $("#filename").val();
+          file.context = $("#editor").text();
+          socket.emit("build", file);
+          console.log("done");
+      });
 			  $("#filelist").on("click", "button", (e)=> {
 					var filename = e.target.id;
 					$("#filename").val(filename);
@@ -154,12 +81,11 @@ $(function(){
 				});
 
 				socket.on("fileLoad", (data)=>{
-          var tmp = data.replace(/\n/g,"<br class='line'/>");
+          // var tmp = data.replace(/\n/g,"<br class='line'/>");
           // console.log(tmp);
-					$("#editor").find("br").html("&nbsp;&SmallCircle;&nbsp;");
-          $("#editor").html(tmp);
+          console.log(data);
+          // $("#editor").append(data);
+          editor.setValue(data);
 
-          textnewLine("line");
-          textAddColor("editor", 0);
 				});
 });

@@ -4,25 +4,13 @@
 	<% include ./partials/head %>
   <script src='/myapp/js/socketio.js'></script>
 	<script src= "/myapp/js/dockerfile.js">	</script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.27.4/codemirror.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.27.4/addon/mode/simple.js"></script>
+
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.27.4/codemirror.css" />
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.27.4/mode/dockerfile/dockerfile.js"></script>
+
 </head>
-
-<style>
-#editor {
-    width: 100%;
-    height: 500px;
-    padding: 10px;
-    background-color: #444;
-    color: white;
-    font-size: 14px;
-    font-family: monospace;
-		overflow : scroll;
-		text-align: left;
-}
-
-.statement {
-    color: orange;
-}
-</style>
 
 <body>
 	<% include ./partials/topnav %>
@@ -39,7 +27,10 @@
                   <input type="text" class="form-control" id="filename" placeholder="filename">
                 </div>
                 <div class="form-group">
-									<div id="editor" contenteditable="true" class="tabs"></div>
+									<textarea id="editor" name="code">
+</textarea>
+
+
                 </div>
                     <button type="submit" class="btn btn-primary">Create</button>
                   </form>

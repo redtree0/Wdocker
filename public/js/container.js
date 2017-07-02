@@ -84,15 +84,34 @@ $(function(){
       e.preventDefault();
       var $name=$("#name");
       var $image =$('#image');
-      var $command = $("#command")
+      var $command = $("#command");
+      var $containerPort = $("#containerPort");
+      var $hostPort = $("#hostPort");
+      var $protocol = $("#protocol");
 
       var _name = $name.val();
       var _image = $image.text().trim();
       var _command = $command.val();
+      var _containerPort = $containerPort.val();
+      var _hostPort = $hostPort.val();
+      // var _protocol = $protocol.text();
+      var _protocol = $protocol.prop('checked').toString() ? "tcp" : "udp";
+      var _portBinding = _containerPort +"/"+ _protocol;
       //console.log(images.trim());
+      console.log(_portBinding);
       if(_image === "Images") {
         alert ("images 선택 하시오.");
         return;
+      }
+      if(!(_hostPort) || !(_containerPort)) {
+          var _hostconfig = {};
+      } else {
+        var _hostconfig = {
+          "PortBindings": {
+
+         }
+       };
+     (_hostconfig.PortBindings)[_portBinding] = [{ HostPort : _hostPort }]; 
       }
 
       var container = {
@@ -110,8 +129,10 @@ $(function(){
         Tty: false, // tty : false 로 해야 web terminal에서 docker attach가 됨
         Cmd: [ _command ],
         OpenStdin: true,
-        StdinOnce: false
+        StdinOnce: false,
+         HostConfig : _hostconfig
       }
+      console.log(container);
       // 서버로 메시지를 전송한다.
       socket.emit("CreateContainer", container);
       $name.val("");
@@ -141,11 +162,11 @@ $(function(){
 
     $(".ctlbtn").click(function() {
           var doIt =$(this).attr('id');
-        //  console.log(dstack);
-          socket.emit(doIt, dstack,()=>{
-            dstack=[];
+          // console.log(dstack);
+          socket.emit(doIt, dstack);
+          doneCatch(socket, ()=>{
+            dstack= new Array();
           });
-
           reloadTable("ctable");
     });
 });

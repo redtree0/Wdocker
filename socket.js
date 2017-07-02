@@ -129,10 +129,10 @@ function images(socket){
     });
   });
 }
-
+container(socket);
 function container(socket){
   socket.on('CreateContainer', function(data) {
-      socket.emit('chat', data);
+
       p(docker, 'CreateContainer', data);
   });
 
@@ -154,17 +154,19 @@ function container(socket){
      });
    });
    socket.on("dremove", function(data){
-    // console.log(data);
+     console.log("remove");
+     console.log(data);
      p(docker, "dremove", data).then ( (container) => {
        container.forEach ((container) => {
          setTimeout( () => {errCatch(container.remove()); }, "500");
        });
+       done(socket);
      });
    });
 }
 
-file(socket);
-function file(socket){
+dockerfile(socket);
+function dockerfile(socket){
   socket.on("fileRead", function(data){
     var readFilePath = path.join(__dirname, "dockerfile", data);
     fs.readFile(readFilePath, 'utf8', (err, data) => {
@@ -188,7 +190,24 @@ function file(socket){
       fs.unlink(jsonPath);
       done(socket);
   })
-
+  socket.on("build", (file)=>{
+    console.log("build");
+    console.log(file);
+    var dirname = path.join(__dirname, "dockerfile");
+    console.log(dirname);
+        docker.buildImage({
+        context: dirname,
+        src: [file.name]
+      }, {
+        t: 'imgcwd'
+      }, function(error, output) {
+        if (error) {
+          return console.error(error);
+        }
+        output.pipe(process.stdout);
+      });
+      done(socket);
+  });
 }
 
 
