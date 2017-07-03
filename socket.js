@@ -210,7 +210,31 @@ function dockerfile(socket){
   });
 }
 
+socket.on("swarmInit", function(data){
+  console.log(data);
+  var opts = {
+    "ListenAddr" : "0.0.0.0:4567",
+    "AdvertiseAddr" : "192.168.0.8:4567"
+  };
+  docker.swarmInit(opts);
+});
 
+socket.on("Access", function(data){
+  console.log(data);
+  var opts = {
+    host: 'http://192.168.0.11',
+    port: process.env.DOCKER_PORT || 2375,
+  };
+  // var opts = {
+  //   "ListenAddr" : "0.0.0.0:4567",
+  //   "AdvertiseAddr" : "192.168.0.8:4567",
+  //   "JoinToken" : "1234"
+  // };
+  var docker = require('./docker')(opts);
+  docker.listContainers({all: true}).then((data)=>{
+    console.log(data);
+  });
+});
 // force client disconnect from server
   socket.on('forceDisconnect', function() {
     socket.disconnect();

@@ -57,7 +57,10 @@ app.route('/myapp/container')
     .get( (req, res) => {
            res.render("volume");
     });
-
+    app.route('/myapp/swarm')
+       .get( (req, res) => {
+              res.render("swarm");
+       });
 app.route('/myapp/test').get ( (req, res) => {
   res.render("test.ejs");
 });

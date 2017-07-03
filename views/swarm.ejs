@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <% include ./partials/head %>
+    <link type="text/css" href="/myapp/css/jquery.terminal.css" rel="stylesheet" />
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/myapp/js/swarm.js"></script>
+  </head>
+  <body>
+    <% include ./partials/topnav %>
+    <div class="container-fluid">
+          <div class="row">
+            <% include ./partials/nav %>
+            <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+              <div class="row placeholders">
+                <div class="container">
+                  <form class="form-horizontal" id="swarmInit">
+                      <div class="form-group">
+                        <label for="ip" class="col-sm-2 control-label">Swarm Init IP : </label>
+                        <div class="col-sm-10">
+                          <input type="text" class="form-control" id="ip">
+                        </div>
+                      </div>
+                        <button type="submit" class="btn btn-primary">Init</button>
+                    </form>
+                    <form class="form-horizontal" id="swarmJoin">
+                        <div class="form-group">
+                          <label for="ip" class="col-sm-2 control-label">Swarm Join IP : </label>
+                          <div class="col-sm-10">
+                            <input type="text" class="form-control" id="ip">
+                          </div>
+                        </div>
+                          <button type="submit" class="btn btn-primary">Join</button>
+                      </form>
+                      <form class="form-horizontal" id="Access">
+                          <div class="form-group">
+                            <label for="ip" class="col-sm-2 control-label">Worker Access : </label>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" id="accessip">
+                            </div>
+                          </div>
+                            <button type="submit" class="btn btn-primary">Access</button>
+                      </form>
+                </div>
+              </div>
+            </div>
+          </div>
+    </div>
+
+  </body>
+</html>
