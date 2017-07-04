@@ -5,6 +5,7 @@
     <link type="text/css" href="/myapp/css/jquery.terminal.css" rel="stylesheet" />
     <script src="/socket.io/socket.io.js"></script>
     <script src="/myapp/js/swarm.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.10/jquery.mask.js"></script>
   </head>
   <body>
     <% include ./partials/topnav %>
@@ -31,6 +32,33 @@
                           </div>
                         </div>
                           <button type="submit" class="btn btn-primary">Join</button>
+                      </form>
+                      <form class="form-horizontal" id="sshConnection">
+                          <div class="form-group">
+                            <label for="hostip" class="col-sm-2 control-label">Remote Host IP : </label>
+                            <div class="col-sm-10">
+                              <input class="form-control ip_address" type="text" id="hostip" name="ip">
+                            </div>
+                          </div>
+                          <div class="form-group">
+                            <label for="port" class="col-sm-2 control-label">Ssh Port : </label>
+                            <div class="col-sm-10">
+                              <input type="number" class="form-control" id="port" value="22">
+                            </div>
+                          </div>
+                          <div class="form-group">
+                            <label for="user" class="col-sm-2 control-label">Ssh User : </label>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" id="user" value="pirate">
+                            </div>
+                          </div>
+                          <div class="form-group">
+                            <label for="passwd" class="col-sm-2 control-label">Ssh Password : </label>
+                            <div class="col-sm-10">
+                              <input type="password" class="form-control" id="passwd">
+                            </div>
+                          </div>
+                            <button type="submit" class="btn btn-primary">Connection</button>
                       </form>
                       <form class="form-horizontal" id="Access">
                           <div class="form-group">

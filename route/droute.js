@@ -1,4 +1,5 @@
 //./routes/droute.js
+"use strict";
 
 module.exports = function(app){//함수로 만들어 객체 app을 전달받음
   var express = require('express');
@@ -22,7 +23,8 @@ module.exports = function(app){//함수로 만들어 객체 app을 전달받음
 function promiseTojson(callback, res){
   callback.then(pval => {
       var data = [];
-      result = pval[0];
+
+      var result = pval[0];
       result.forEach(function (val, index) {
               data.push(val);
     });
@@ -70,6 +72,9 @@ app.route('/myapp/graph').get ( (req, res) => {
 });
 app.route('/myapp/dockerfile').get ( (req, res) => {
   res.render("dockerfile.ejs");
+});
+app.route('/myapp/service').get ( (req, res) => {
+  res.render("service.ejs");
 });
 app.route('/myapp/dockerfile/data.json').get ( (req, res) => {
   var fs = require('fs');

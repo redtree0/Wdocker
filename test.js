@@ -216,29 +216,20 @@ var options = {
 //     console.log(err);
 //   }
 // );
-var Docker = require('dockerode');
 var fs     = require('fs');
 var SSH = require('simple-ssh');
-var privateKey = fs.readFileSync('../../.ssh/id_rsa');
+var privateKey = fs.readFileSync('../../.ssh/id_rsa', "utf8");
+
 var ssh = new SSH({
     host: '192.168.0.11',
     user: 'pirate',
     // pass: 'hypriot'
-    agent: process.env.SSH_AUTH_SOCK,
-    agentForward: true
+    key : privateKey
 });
-console.log(process.env.SSH_AUTH_SOCK);
-var socket = process.env.DOCKER_SOCKET || '/var/run/docker.sock';
-var stats  = fs.statSync(socket);
-
-if (!stats.isSocket()) {
-  throw new Error('Are you sure the docker is running?');
-}
-
 
 /*** Using the `args` options instead ***/
 ssh.exec('docker', {
-    args: ['images'],
+    args: ['swarm', 'join-token', '-q', 'worker'],
     out: function(stdout) {
         console.log(stdout);
     },

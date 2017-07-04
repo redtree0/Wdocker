@@ -7,6 +7,7 @@ function doIt(docker, callback) {
       //   reject(Error("실패!!"));
       // }
       callback.then( val => {
+        // console.log(val);
          resolve(val);
         /*return val*/}  );
   });

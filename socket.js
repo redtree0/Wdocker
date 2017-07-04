@@ -132,8 +132,12 @@ function images(socket){
 container(socket);
 function container(socket){
   socket.on('CreateContainer', function(data) {
-
-      p(docker, 'CreateContainer', data);
+    console.log(data);
+      if(data){
+          p(docker, 'CreateContainer', data);
+      } else {
+        console.log("args more request");
+      }
   });
 
 
@@ -219,21 +223,41 @@ socket.on("swarmInit", function(data){
   docker.swarmInit(opts);
 });
 
-socket.on("Access", function(data){
+socket.on("sshConnection", function(data){
+      var privateKey = fs.readFileSync('../../.ssh/id_rsa', "utf8");
+      var opts = data;
+      opts.key = privateKey;
+      // console.log(opts);
+       console.log(opts);
+      var ssh = require('./ssh')(opts);
+      var cmd = "docker"
+      var args = {
+        "token_manager" : "swarm join-token -q manager",
+        "token_worker" : "swarm join-token -q worker",
+        // "join_manager" : "docker swarm join --token ",
+        // "join_worker"
+      }
+      ssh.exec(cmd, {
+            args : [args.token_worker],
+            out: function(stdout) {
+              console.log(stdout);
+              ssh.end();
+            },
+            err : (err) =>{
+              console.log(err);
+              ssh.end();
+            }
+        }).start();
+
+
+});
+
+socket.on("CreateService", function(data){
   console.log(data);
-  var opts = {
-    host: 'http://192.168.0.11',
-    port: process.env.DOCKER_PORT || 2375,
-  };
-  // var opts = {
-  //   "ListenAddr" : "0.0.0.0:4567",
-  //   "AdvertiseAddr" : "192.168.0.8:4567",
-  //   "JoinToken" : "1234"
-  // };
-  var docker = require('./docker')(opts);
-  docker.listContainers({all: true}).then((data)=>{
-    console.log(data);
+  docker.createService(data).catch((err)=>{
+    console.log(err);
   });
+
 });
 // force client disconnect from server
   socket.on('forceDisconnect', function() {
