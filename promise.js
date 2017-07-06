@@ -3,11 +3,9 @@ var stream = require('stream');
 
 function doIt(docker, callback) {
   return new Promise(function (resolve, reject) {
-      // if (!docker) {
-      //   reject(Error("실패!!"));
-      // }
+
       callback.then( val => {
-        // console.log(val);
+        //  console.log(val);
          resolve(val);
         /*return val*/}  );
   });
@@ -17,7 +15,7 @@ function promisePush(plist, fn) {
   console.log("===================");
   console.log("promise");
   console.log("===================");
-//  console.log(fn);
+  console.log(fn);
   return plist.push(fn);
 }
 function ctlContainer (plist, docker, data, state) {
@@ -34,9 +32,12 @@ var _promise = function (docker, opt, data) {
 var plist = [];
 switch (opt) {
   case 'Container':
+  console.log("con");
+
     promisePush(plist ,doIt(docker, docker.listContainers({all: true})));
   break;
   case 'network':
+    console.log("net");
     promisePush(plist ,doIt(docker, docker.listNetworks({})));
     break;
   case 'image':
@@ -45,11 +46,14 @@ switch (opt) {
   case 'volume':
         promisePush(plist ,doIt(docker, docker.listVolumes({})));
         break;
+  case 'service':
+        promisePush(plist ,doIt(docker, docker.listServices({})));
+              break;
   case 'CreateContainer':
         doIt(docker, docker.createContainer(data));
         break;
   case 'CreateNetwork':
-        console.log(data);
+        // console.log(data);
         doIt(docker, docker.createNetwork(data));
         break;
   case 'dstart':

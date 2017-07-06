@@ -41,9 +41,10 @@
       $(function(){
         var imageslist =[];
         var searchlist =[];
-        initUrlTable('imagelist', columns,'/myapp/images/data.json');
-      //  TestTable('imagelist', '/myapp/images/data.json');
-        checkTableEvent('imagelist', imageslist);
+        var $image = $(".jsonTable");
+
+        initUrlTable($image, columns,'/myapp/images/data.json');
+        checkTableEvent($image, imageslist);
 
         var $status = $('<div></div>');
         var $msgdiag = $("<div></div>");
@@ -66,23 +67,14 @@
              } else {
                $progress.css("width", '0%');
              }
+             if(doneCatch(socket)){
+               $progress.css("width", '100%');
+               $status.append("finished");
+             };
           });
 
-          BootstrapDialog.show({
-              title: 'Progress',
-              message: function(){
-                var $message = $msgdiag;
+          dialogShow("Progress", $msgdiag);
 
-                return $message ;
-              } ,
-
-              buttons: [ {
-                    label: 'Close',
-                    action: function(dialogItself){
-                        dialogItself.close();
-                    }
-                }]
-          });
 
         });
 
@@ -90,41 +82,45 @@
           socket.emit("removeImages", imageslist);
         });
 
-        $("#SearchImages").submit(function(e) {
-            e.preventDefault();
+
+        function imageSettings($term, $limit, $is_automated, $is_official, $stars){
+              var opts = imageDefaultSettings();
+
+              if(!$term.val()){
+                return false;
+              }
+              if(!$limit.val()){
+                return false;
+              }
+              opts.term = $term.val();
+              opts.limit = $limit.val();
+              // console.log(typeof opts.filters["is_automated"]);
+              opts.filters["is-automated"] = [($is_automated.prop('checked').toString())];
+              opts.filters["is-official"] = [$is_official.prop('checked').toString()];
+              if(!$stars.val()) {
+
+              } else {
+                opts.filters["stars"] = [$stars.val()];
+              }
+
+              console.log(opts);
+          return opts;
+        }
+
+        $(".create").click((e)=>{
+          // formSubmit($("#SearchImages"), )
+            // e.preventDefault();
             var $term=$("#term");
             var $limit =$('#limit');
             var $is_automated = $('#is_automated');
             var $is_official = $('#is_official');
             var $stars = $("#stars");
 
-            var _term = $term.val();
-            var _limit = $limit.val();
-            var _is_automated = $is_automated.prop('checked').toString();
-            var _is_official = $is_official.prop('checked').toString();
-            var _stars = $stars.val();
-            if( !_stars ){
-              _stars = "0";
-            }
-            var opts = {
-              term : _term,
-              limit : _limit,
-              filters : {}
-            };
-            opts["filters"] = {
-              "is-automated" : [_is_automated],
-              "is-official": [_is_official],
-              "stars" : [_stars]
-            };
+            var opts = imageSettings($term, $limit, $is_automated, $is_official, $stars);
+            formSubmit($("#SearchImages"), opts, socket);
+        });
 
-
-            socket.emit("searchImages", opts);
-          });
-            socket.on("errCatch", (err)=> {  
-                if(err.statusCode == "409") {
-                  alert(err.json.message);
-                }
-            })
+          socketErrorCatch(socket);
             socket.on("searchResult", function(data){
               var results = JSON.stringify(data);
 
@@ -148,9 +144,9 @@
                   title: 'description'
                 }];
 
-              initDataTable('results', columns, data);
-              loadTable('results', data);
-              checkTableEvent('results', searchlist);
+              initDataTable($(".dataTable"), columns, data);
+              loadTable($(".dataTable"), data);
+              checkTableEvent($(".dataTable"), searchlist);
 
             });
 

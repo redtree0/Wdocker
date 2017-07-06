@@ -1,8 +1,7 @@
 'use strict';
 
 
-function initUrlTable(tableid, columns, urljson) {
-  var $table = $("#" + tableid);
+function initUrlTable($table, columns, urljson) {
   var col = columns;
 //  console.log("do");
   $table.bootstrapTable({
@@ -13,8 +12,7 @@ function initUrlTable(tableid, columns, urljson) {
   });
 }
 
-function initDataTable(tableid, columns, datajson) {
-  var $table = $("#" + tableid);
+function initDataTable($table, columns, datajson) {
   var col = columns;
   //console.log("do");
   $table.bootstrapTable({
@@ -25,32 +23,28 @@ function initDataTable(tableid, columns, datajson) {
   });
 }
 
-function resetTable(tableid){
-  var $table = $("#" + tableid);
+function resetTable($table){
   $table.bootstrapTable('removeAll');
 }
 
-function reloadTable(tableid) {
-  var $table = $("#" + tableid);
+function reloadTable($table) {
       setTimeout(()=> {
         $table.bootstrapTable('refresh');
     }, 1500);
 }
-function loadTable(tableid, data) {
-  var $table = $("#" + tableid);
+function loadTable($table, data) {
   $table.bootstrapTable('load', data);
 }
-function checkTableEvent(tableid, checklist){
-  checkAlltable(tableid, checklist);
-  uncheckAlltable(tableid, checklist);
-  checkOneTable(tableid, checklist);
-  uncheckOneTable(tableid, checklist);
+function checkTableEvent($table, checklist){
+  checkAlltable($table, checklist);
+  uncheckAlltable($table, checklist);
+  checkOneTable($table, checklist);
+  uncheckOneTable($table, checklist);
 }
 
-function clickRowAddColor(_tableid, _class){
-  var $table = $("#" + _tableid);
+function clickRowAddColor($table, _class){
 
-  $("#" + _tableid).on('click-row.bs.table', function (r, e, f){
+  $table.on('click-row.bs.table', function (r, e, f){
     $table.find("tr").removeClass(_class);
     if(!$(f).hasClass(_class)){
       $(f).addClass(_class);
@@ -58,7 +52,7 @@ function clickRowAddColor(_tableid, _class){
   });
 }
 
-function clickTableRow(tableid, viewid){
+function clickTableRow($table, $detail){
   function addNewRow( _id ){
       return $('<div/>', { class: "row", id : _id });
   }
@@ -66,26 +60,24 @@ function clickTableRow(tableid, viewid){
     return $('<div/>', { class: _class, text: _text });
   }
 
-    var $table = $("#" + tableid);
-    var $view = $("#" + viewid);
-
   $table.on('click-row.bs.table', function (r, e, f){
     var data = e;
 
-    $("#" + viewid +" div").remove();
+    $detail.find("div").remove();
     $.each(data, (key, value)=>{
+      console.log(key);
+      console.log(value);
       if(key == "0") { // key 0 인 값 제외
         return true;
       }
-      $view.append(addRowText("col-md-6", key));
-      $view.append(addRowText("col-md-6", value));
+      $detail.append(addRowText("col-md-6", key));
+      $detail.append(addRowText("col-md-6", value));
     });
 
   });
 }
 
-function checkAlltable(tableid, checklist){
-  var $table = $("#" + tableid);
+function checkAlltable($table, checklist){
   $table.on('check-all.bs.table', function (r,e) {
       e.forEach((data) => {
         checklist.push(data);
@@ -94,8 +86,7 @@ function checkAlltable(tableid, checklist){
   });
 }
 
-function uncheckAlltable(tableid, checklist){
-  var $table = $("#" + tableid);
+function uncheckAlltable($table, checklist){
   $table.on('uncheck-all.bs.table', function (r,e) {
           e.forEach((data) => {
             checklist.pop(data);
@@ -104,15 +95,13 @@ function uncheckAlltable(tableid, checklist){
   });
 }
 
-function checkOneTable(tableid, checklist){
-  var $table = $("#" + tableid);
+function checkOneTable($table, checklist){
   $table.on('check.bs.table	', function (element, row) {
     checklist.push(row);
     });
 }
 
-function uncheckOneTable(tableid, checklist){
-  var $table = $("#" + tableid);
+function uncheckOneTable($table, checklist){
   $table.on('uncheck.bs.table', function (element, row) {
     checklist.forEach((d, index, object) => {
       if( (row.Id == d.Id) ) {
@@ -121,14 +110,12 @@ function uncheckOneTable(tableid, checklist){
     });
   });
 }
-function checkAddColor(tableid, item, _class){
-  var $table = $("#" + tableid);
+function checkAddColor($table, item, _class){
   var rows = $table.bootstrapTable('getData');
 
   $.getJSON("/myapp/container/data.json", function(json, textStatus) {
-    console.log("checkAddColor");
-    console.log(item);
-    console.log(json);
+    // console.log("checkAddColor");
+    // console.log(item);
     var searchNetwork = [];
     var container = json;
     container.forEach ( (data) => {
@@ -138,7 +125,7 @@ function checkAddColor(tableid, item, _class){
             }
 
     } );
-    console.log(searchNetwork);
+    // console.log(searchNetwork);
     $table.find("tr").removeClass(_class);
     rows.forEach((data)=>{
       for(var network in searchNetwork){
@@ -154,8 +141,8 @@ function checkAddColor(tableid, item, _class){
   });
 }
 
-// function TestTable(tableid, json) {
-//   var $table = $("#" + tableid);
+// function TestTable($table, json) {
+//   var $table = $("#" + $table);
 //   console.log(json);
 //   getcolumns(json,  (json, list)=>{
 //     //console.log(data);

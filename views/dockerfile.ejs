@@ -11,7 +11,13 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.27.4/mode/dockerfile/dockerfile.js"></script>
 
 </head>
+<style>
+	#editor {
+		text-align : text-left;
 
+	}
+	.CodeMirror { text-align: left; }
+</style>
 <body>
 	<% include ./partials/topnav %>
 	<div class="container-fluid">
@@ -27,8 +33,7 @@
                   <input type="text" class="form-control" id="filename" placeholder="filename">
                 </div>
                 <div class="form-group">
-									<textarea id="editor" name="code">
-</textarea>
+									<textarea id="editor" name="code"></textarea>
 
 
                 </div>

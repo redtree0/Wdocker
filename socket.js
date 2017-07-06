@@ -86,8 +86,7 @@ function network(socket) {
 
 images(socket);
 function images(socket){
-  socket.on("searchImages", function(data){
-    console.log(data);
+  socket.on("SearchImages", function(data){
     docker.searchImages(data).then ( (data)=> {
       console.log(data);
       if(data) {
@@ -97,10 +96,10 @@ function images(socket){
   });
 
   socket.on("pullImages", function(data) {
-    console.log(data);
+    // console.log(data);
     data.forEach( (images) => {
-
-      docker.pull(images.name, {"tag" : "latest"},function(err, stream) {
+      docker.createImage({ "fromImage" : images.name , "tag" : "latest"},
+      function(err, stream) {
 
         if (err) return done(err);
 
@@ -108,11 +107,12 @@ function images(socket){
 
          function onFinished(err, output) {
            console.log("onFinished");
+           done(socket);
          }
          function onProgress(event) {
               socket.emit("progress", event);
           }
-        });
+      });
     });
   });
   socket.on("removeImages", function(data) {
@@ -257,6 +257,19 @@ socket.on("CreateService", function(data){
   docker.createService(data).catch((err)=>{
     console.log(err);
   });
+
+});
+
+socket.on("RemoveService", function(data){
+
+  data.forEach((data)=>{
+    console.log(data.ID);
+    var service = docker.getService(data.ID);
+    service.remove().catch((err)=>{
+      console.log(err);
+    });
+  });
+
 
 });
 // force client disconnect from server

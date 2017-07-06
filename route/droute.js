@@ -20,48 +20,61 @@ module.exports = function(app){//함수로 만들어 객체 app을 전달받음
         //res.send(req.body);
         res.render(file, data);
       });
+
 function promiseTojson(callback, res){
   callback.then(pval => {
       var data = [];
 
       var result = pval[0];
+      console.log("result");
+      console.log(result);
       result.forEach(function (val, index) {
               data.push(val);
     });
+    console.log(data);
     res.json(data);
+    result = new Array();
   });
 }
+
+app.route('/myapp/network/data.json').get( (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  promiseTojson(p(docker, 'network'), res);
+});
+
 app.route('/myapp/container/data.json').get( (req, res) => {
+  res.setHeader("Content-Type", "application/json");
     promiseTojson(p(docker, 'Container'), res);
 })
 app.route('/myapp/images/data.json').get( (req, res) => {
+  res.setHeader("Content-Type", "application/json");
     promiseTojson(p(docker, 'image'), res);
-});
-app.route('/myapp/network/data.json').get( (req, res) => {
-    promiseTojson(p(docker, 'network'), res);
 });
 
 app.route('/myapp/container')
         .get( (req, res) => {
-          res.render("container");
+
+            console.log("'/myapp/container'");
+          res.render("container.ejs");
         });
   app.route('/myapp/network')
           .get( (req, res) => {
-            res.render("network");
+            console.log("'/myapp/network'");
+            res.render("network.ejs");
           });
 
   app.route('/myapp/images')
     .get( (req, res) => {
-      res.render("image");
+      res.render("image.ejs");
     });
 
  app.route('/myapp/volume')
     .get( (req, res) => {
-           res.render("volume");
+           res.render("volume.ejs");
     });
     app.route('/myapp/swarm')
        .get( (req, res) => {
-              res.render("swarm");
+              res.render("swarm.ejs");
        });
 app.route('/myapp/test').get ( (req, res) => {
   res.render("test.ejs");
@@ -97,6 +110,7 @@ app.route('/myapp/dockerfile/data.json').get ( (req, res) => {
     //     console.log(data);
     //   });
 
+    res.setHeader("Content-Type", "application/json");
 
      res.json(test);
   })
@@ -122,6 +136,8 @@ app.route('/myapp/stats/data.json').get ( (req, res) => {
   }
   data.userInfo = os.userInfo();
   data.uptime = os.uptime();
+  res.setHeader("Content-Type", "application/json");
+
   res.json(data);
 });
 
@@ -143,7 +159,15 @@ app.route('/myapp/stats/cpus.json').get ( (req, res) => {
           cpulist[i].per.push({type: type, used: (100 * cpu.times[type] / total).toFixed(2)});
       }
   }
+  res.setHeader("Content-Type", "application/json");
+
   res.json(cpulist);
 });
+
+app.route('/myapp/service/data.json').get( (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+    promiseTojson(p(docker, 'service'), res);
+});
+
 	   return app;	//라우터를 리턴
 };

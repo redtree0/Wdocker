@@ -44,20 +44,7 @@ var columns = [{
       field: 'Labels',
       title: 'Labels'
   }];
-  function initDropdown(url) {
-    $.getJSON(url, function(json, textStatus) {
 
-      json.forEach ( (data) => {
-        // $("<li><a>" +  data.Names + "</a><li/>").appendTo('ul.dropdown-menu');
-          $("<li><a>" +  data.Names + "</a><li/>").appendTo('#container_list');
-      });
-    //    console.log(textStatus);
-    });
-
-    $("<li><a>" + "bridge" + "</a><li/>").appendTo('#driver_list');
-    $("<li><a>" + "overlay" + "</a><li/>").appendTo('#driver_list');
-    $("<li><a>" + "macvlan" + "</a><li/>").appendTo('#driver_list');
-  }
 
   function clickDropdown(id) {
     $("#container_list").on("click", "li a", function(event){
@@ -65,26 +52,41 @@ var columns = [{
           checkAddColor('networklist', $(this).text(), "success");
       });
 
-      $("#driver_list").on("click", "li a", function(event){
-            $('#driver').text($(this).text());
 
-        });
+  }
+
+  function networkSettings($name, $driver, $internal) {
+
+    var opts = networkDefaultSettings();
+    if(!$name.val()) {
+      return false;
+    }
+    if($driver.text().trim() == "driver") {
+      return false;
+    }
+    opts.Name = $name.val();
+    opts.driver = $driver.text().trim();
+    opts.internal = $internal.prop('checked');
+    console.log(opts);
+    return opts;
   }
 
 $(function(){
   var checklist =[];
-  initUrlTable("networklist", columns, "/myapp/network/data.json");
+  var $network = $(".jsonTable");
+  var $detail = $(".detail");
 
-  clickTableRow('networklist', 'detail');
+  initUrlTable($network, columns, "/myapp/network/data.json");
 
-  checkOneTable('networklist', checklist);
-  uncheckOneTable('networklist', checklist);
-  checkAlltable('networklist', checklist);
-  uncheckAlltable('networklist', checklist);
-  clickRowAddColor('networklist', "danger");
+  clickTableRow($network, $detail);
 
-  initDropdown("/myapp/container/data.json");
-  clickDropdown("container");
+  checkTableEvent($network, checklist);
+
+  clickRowAddColor($network, "danger");
+// (text) => {checkAddColor('networklist', text, "success");}
+  initDropdown("/myapp/container/data.json", $('#container_list'), $("#container"), "Names", checkAddColor);
+  initDropdownArray(["bridge", "overlay", "macvlan"], $("#driver_list") , $("#driver"));
+  // clickDropdown("container");
 
   $("#remove").click(()=>{
     console.log(checklist);
@@ -101,54 +103,13 @@ $(function(){
     }
 
   });
-  $("#CreateNetwork").submit(function(e) {
-    e.preventDefault();
-    var $name=$("#name");
-    var $driver =$('#driver');
-    var $internal = $("#internal");
 
-    var _name = $name.val();
-    //  var _driver = $image.text().trim();
-    var _driver = $driver.text().trim();
-    // var _internal = $internal.prop('checked').toString();
-    var _internal = $internal.prop('checked');
-    //console.log(images.trim());
-    console.log(_driver);
-    var opts = {
-      Name : _name,
-      Driver: _driver,
-      // Internal: _internal,
-      Internal: false,
-      Ingress : false,
-      Attachable : false,
-      IPAM : {
-      //  "Driver": _driver,
-        "Config": [
-              {
-                  "Subnet": "192.168.0.0/24",
-                  "IPRange": "192.168.0.0/24"
-                  // , "Gateway": "192.168.0.1"
-              }
-            ]
-            ,
-            "Options" : {
-              "parent" : "wlan0"
-            }
-          },
-      "Options": {
-                "com.docker.network.bridge.default_bridge": "false",
-                "com.docker.network.bridge.enable_icc": "true",
-                "com.docker.network.bridge.enable_ip_masquerade": "true",
-                // "com.docker.network.bridge.host_binding_ipv4": "192.168.0.8",
-                // "com.docker.network.bridge.name": "k",
-                "com.docker.network.driver.mtu": "1500"
-              }
-    }
-    // 서버로 메시지를 전송한다.
-    console.log(opts);
-    socket.emit("CreateNetwork", opts);
-    $name.val("");
-    $driver.val("");
 
-  });
+  $(".create").click((e)=>{
+
+    var opts = networkSettings($("#name"), $('#driver'), $("#internal"));
+
+    formSubmit($("#CreateNetwork"), opts
+       , socket, ()=> { reloadTable('networklist'); dialogShow("title", "message")});
+   });
 });

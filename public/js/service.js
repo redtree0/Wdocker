@@ -1,57 +1,74 @@
+
+function serviceSettings ($serviceName, $image, $command, $publishedPort, $targetPort, $healthCheck){
+  var opts = serviceDefaultSettings();
+  if(!(hasValue($serviceName.val(), $image.text().trim()))){
+    alert("t");
+    return false;
+  }
+  // console.log(typeof $publishedPort.val());;
+  opts.Name = $serviceName.val()
+  opts.TaskTemplate.ContainerSpec.Image = $image.text().trim();
+  opts.TaskTemplate.ContainerSpec.Command = [$command.val()];
+  // opts.TaskTemplate.ContainerSpec.HealthCheck.Test = [$healthCheck.val()];
+  opts.EndpointSpec.Ports = [{
+    "Protocol" : "tcp",
+    "PublishedPort" : parseInt($publishedPort.val()),
+    "TargetPort" : parseInt($targetPort.val()),
+  }]
+
+  return opts;
+}
+
+var columns = [{
+      checkbox: true,
+      title: 'Check'
+  },{
+      field: 'ID',
+      title: 'ID'
+  }, {
+      field: 'Spec.Name',
+      title: 'Name'
+  }, {
+      field: 'Spec.TaskTemplate.ContainerSpec.Image',
+      title: 'Image'
+  }, {
+      field: 'Spec.TaskTemplate.ContainerSpec.Command',
+      title: 'Command'
+  }, {
+      field: 'Endpoint.Spec.Ports.0.Protocol',
+      title: 'Protocol'
+  }, {
+      field: 'Endpoint.Spec.Ports.0.PublishedPort',
+      title: 'PublishedPort'
+  }, {
+      field: 'Endpoint.Spec.Ports.0.TargetPort',
+      title: 'TargetPort'
+  }];
+
 $(function(){
   var socket = io();
-  function initDropdown() {
-    $.getJSON('/myapp/images/data.json', function(json, textStatus) {
-
-        json.forEach ( (data) => {
-      //    console.log(data.RepoTags[0]);
-          $("<li><a>" +  data.RepoTags[0] + "</a><li/>").appendTo('ul.dropdown-menu');
-        });
-    //    console.log(textStatus);
-    });
+  var checklist = [];
+  var $service = $(".jsonTable");
+  initDropdown('/myapp/images/data.json', $(".dropdown-menu"), $('#image'), "RepoTags", 0);
+  initUrlTable($service, columns, "/myapp/service/data.json" );
+  checkTableEvent($service, checklist);
+  clickRowAddColor($service, "danger");
 
 
-    $(".dropdown-menu").on("click", "li a", function(event){
-      //    console.log("You clicked the drop downs", event);
-      //    console.log($('#images').text());
-          $('#image').text($(this).text());
-      });
-  }
-
-  initDropdown();
-
-  $("#CreateService").submit((e)=>{
-    e.preventDefault();
-    var $serviceName = $("#serviceName");
-    var $image = $("#image");
-    var $publishedPort = $("#publishedPort");
-    var $targetPort = $("#targetPort");
-
-    var _serviceName = $serviceName.val().toString();
-    var _image = $image.text().trim().toString();
-    var _publishedPort = $publishedPort.val().toString();
-    var _targetPort = $targetPort.val().toString();
-
-    var opts = {
-      "Name" : _serviceName,
-      "TaskTemplate" : {
-        "ContainerSpec" : {
-          "Image" : _image
-        }
-      },
-      "EndpointSpec": {
-            "Ports": [
-                  {
-                  "Protocol": "tcp",
-                  "PublishedPort": _publishedPort,
-                  "TargetPort": _targetPort
-                  }
-              ]
-        }
-    }
-    console.log(JSON.stringify(opts));
-    socket.emit("CreateService", opts);
+  $(".create").click(()=>{
+      var $serviceName = $("#serviceName");
+      var $image = $("#image");
+      var $command = $("#command");
+      var $publishedPort = $("#publishedPort");
+      var $targetPort = $("#targetPort");
+      var $healthCheck = $("#healthCheck");
+      var opts = serviceSettings($serviceName, $image, $command, $publishedPort, $targetPort, $healthCheck);
+      formSubmit($("#CreateService"), opts, socket, ()=> { reloadTable($service); dialogShow("title", "message")});
   });
 
-
+    $(".remove").click(()=>{
+        socket.emit("RemoveService", checklist);
+        reloadTable($service);
+        dialogShow("title", "message");
+    });
 });

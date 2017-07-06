@@ -16,6 +16,13 @@
       if(data){
           alert("done");
           callback();
+          return true;
       }
+    });
+  }
+
+  function socketErrorCatch(socket) {
+    socket.on("errCatch", (err)=> {
+        alert(err.json.message);
     });
   }

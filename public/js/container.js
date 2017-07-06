@@ -83,36 +83,36 @@ function containerSettings ($image, $name, $cmd, $containerPort, $hostPort, $pro
 
 $(function(){
 
-  socket.on("errCatch", (err)=> {
-    alert(JSON.stringify(err));
-      if(err.statusCode == "409") {
-        alert(err.json.message);
-      }
-  });
+    var $container = $(".jsonTable");
+    var $image =$('#image');
+    var $name = $("#name");
+    var $command = $("#command");
+    var $containerPort = $("#containerPort");
+    var $hostPort = $("#hostPort");
+    var $protocol = $("#protocol");
+    var $detail = $(".detail");
 
-    initDropdown('/myapp/images/data.json', $(".dropdown-menu"), $("#image"));
+    initDropdown('/myapp/images/data.json', $(".dropdown-menu"), $image, "RepoTags", 0);
+    initUrlTable($container, columns,'/myapp/container/data.json');
 
-    initUrlTable('ctable', columns,'/myapp/container/data.json');
+    clickTableRow($container, $detail);
+    clickRowAddColor($container, "danger");
+    checkTableEvent($container, dstack);
 
     $(".create").click((e)=>{
 
-      var opts = containerSettings($('#image'), $("#name"),
-          $("#command"), $("#containerPort"), $("#hostPort"), $("#protocol"));
+      var opts = containerSettings($image, $name,
+          $command, $containerPort, $hostPort, $protocol);
 
       formSubmit($("#CreateContainer"), opts, socket,
-          ()=> { reloadTable('ctable'); dialogShow("title", "message")}
+          ()=> { reloadTable($container); dialogShow("title", "message")}
       );
       //  console.log(socket);
     });
 
 
 
-    clickTableRow('ctable', 'detail');
 
-    checkOneTable('ctable', dstack);
-    uncheckOneTable('ctable', dstack);
-    checkAlltable('ctable', dstack);
-    uncheckAlltable('ctable', dstack);
 
 
     $(".ctlbtn").click(function() {
@@ -122,6 +122,6 @@ $(function(){
           doneCatch(socket, ()=>{
             dstack= new Array();
           });
-          reloadTable("ctable");
+          reloadTable($container);
     });
 });

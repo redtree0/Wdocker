@@ -34,7 +34,12 @@
                                 </div>
                             </div>
                           </div>
-
+                          <div class="form-group">
+                            <label for="command" class="col-sm-2 control-label">Command : </label>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" id="command">
+                            </div>
+                          </div>
                           <div class="form-group">
                             <label for="publishedPort" class="col-sm-2 control-label">Published Port : </label>
                             <div class="col-sm-10">
@@ -47,8 +52,20 @@
                               <input type="number" class="form-control" id="targetPort">
                             </div>
                           </div>
-                            <button type="submit" class="btn btn-primary ">Create</button>
+                          <div class="form-group">
+                            <label for="healthCheck" class="col-sm-2 control-label">HealthCheck : </label>
+                            <div class="col-sm-10">
+                              <input type="text" class="form-control" id="healthCheck">
+                            </div>
+                          </div>
+                          <button type="submit" class="btn btn-primary create">Create</button>
                       </form>
+                      <button type="button" class="btn btn-default btn-lg ctlbtn update">Update</button>
+                      <button type="button" class="btn btn-danger btn-lg ctlbtn remove">Remove</button>
+
+                      <table id="ctable" data-pagination="true" class="table table-striped jsonTable">
+                      </table>
+
                 </div>
               </div>
             </div>
