@@ -51,6 +51,14 @@ app.route('/myapp/images/data.json').get( (req, res) => {
     promiseTojson(p(docker, 'image'), res);
 });
 
+app.route('/myapp/node/data.json').get( (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+    promiseTojson(p(docker, 'node'), res);
+});
+app.route('/myapp/service/data.json').get( (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  promiseTojson(p(docker, 'service'), res);
+});
 app.route('/myapp/container')
         .get( (req, res) => {
 
@@ -76,6 +84,11 @@ app.route('/myapp/container')
        .get( (req, res) => {
               res.render("swarm.ejs");
        });
+
+  app.route('/myapp/node')
+    .get( (req, res) => {
+      res.render("node.ejs");
+  });
 app.route('/myapp/test').get ( (req, res) => {
   res.render("test.ejs");
 });
@@ -89,6 +102,7 @@ app.route('/myapp/dockerfile').get ( (req, res) => {
 app.route('/myapp/service').get ( (req, res) => {
   res.render("service.ejs");
 });
+
 app.route('/myapp/dockerfile/data.json').get ( (req, res) => {
   var fs = require('fs');
   var path = require('path');
@@ -164,10 +178,6 @@ app.route('/myapp/stats/cpus.json').get ( (req, res) => {
   res.json(cpulist);
 });
 
-app.route('/myapp/service/data.json').get( (req, res) => {
-  res.setHeader("Content-Type", "application/json");
-    promiseTojson(p(docker, 'service'), res);
-});
 
 	   return app;	//라우터를 리턴
 };

@@ -50,33 +50,28 @@ var columns = [{
 var dstack = [];
 
 
-function containerSettings ($image, $name, $cmd, $containerPort, $hostPort, $protocol){
+function containerSettings ($image, $name, $cmd, portArray){
 
   var opts = containerDefaultSettings();
 
     if($image.text().trim() == "Images"){
       return false;
     }
-    if(!$name.val()){
-      return false;
-    }
-    if(!$cmd.val()) {
-      return false;
-    }
-    if($containerPort.val()){
-      var portinfo = $containerPort.val() +"/"+ ($protocol.prop('checked').toString() ? "tcp" : "udp");
+    if (hasValue($name.val(), $cmd.val(), portArray)) {
 
+    for ( var i in portArray) {
+      var portinfo = portArray[i].containerPort +"/"+ portArray[i].protocol;
       opts.ExposedPorts[portinfo] = {};
-      if($hostPort.val()){
-        opts.HostConfig.PortBindings[portinfo] = [{ "HostPort" : $hostPort.val()}];
-        }
-      }
+        opts.HostConfig.PortBindings[portinfo] = [{ "HostPort" : portArray[i].hostPort}];
+    }
+
 
     opts.Image = $image.text().trim();
     opts.name = $name.val();
     opts.Cmd.push($cmd.val());
+  }
 
-  // console.log(opts);
+   console.log(opts);
   return  opts;
 }
 
@@ -100,9 +95,8 @@ $(function(){
     checkTableEvent($container, dstack);
 
     $(".create").click((e)=>{
-
       var opts = containerSettings($image, $name,
-          $command, $containerPort, $hostPort, $protocol);
+          $command, portlist);
 
       formSubmit($("#CreateContainer"), opts, socket,
           ()=> { reloadTable($container); dialogShow("title", "message")}
@@ -110,7 +104,25 @@ $(function(){
       //  console.log(socket);
     });
 
+    var portlist= [];
+    var id = 0;
 
+    $(".add").click((e)=>{
+        e.preventDefault();
+        var $array = [$containerPort, $hostPort, $protocol];
+        var state = true;
+        for (var i in $array) {
+          if(!(hasValue($array[i].val()))){
+            state = false;
+          }
+        }
+        if(state) {
+          addlist($array, $(".addlist") , id++, portlist);
+
+        }
+    });
+
+        clickDeleteList($(".addlist"));
 
 
 

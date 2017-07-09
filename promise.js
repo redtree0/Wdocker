@@ -46,6 +46,9 @@ switch (opt) {
   case 'volume':
         promisePush(plist ,doIt(docker, docker.listVolumes({})));
         break;
+  case 'node':
+        promisePush(plist ,doIt(docker, docker.listNodes()));
+        break;
   case 'service':
         promisePush(plist ,doIt(docker, docker.listServices({})));
               break;

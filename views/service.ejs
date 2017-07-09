@@ -41,22 +41,35 @@
                             </div>
                           </div>
                           <div class="form-group">
-                            <label for="publishedPort" class="col-sm-2 control-label">Published Port : </label>
-                            <div class="col-sm-10">
-                              <input type="number" class="form-control" id="publishedPort">
-                            </div>
-                          </div>
-                          <div class="form-group">
-                            <label for="targetPort" class="col-sm-2 control-label">Target Port : </label>
-                            <div class="col-sm-10">
-                              <input type="number" class="form-control" id="targetPort">
-                            </div>
-                          </div>
-                          <div class="form-group">
                             <label for="healthCheck" class="col-sm-2 control-label">HealthCheck : </label>
                             <div class="col-sm-10">
                               <input type="text" class="form-control" id="healthCheck">
                             </div>
+                          </div>
+
+                          <div class="form-group">
+                            <label for="publishedPort" class="col-sm-2 control-label">Published Port : </label>
+                            <div class="col-sm-2">
+                              <input type="number" class="form-control" id="publishedPort">
+                            </div>
+
+                            <label for="targetPort" class="col-sm-2 control-label">Target Port : </label>
+                            <div class="col-sm-2">
+                              <input type="number" class="form-control" id="targetPort">
+                            </div>
+
+                            <label for="protocol" class="col-sm-2 control-label">protocal : </label>
+                            <div class="col-sm-2">
+                              <label class="checkbox-inline">
+                                 <input type="checkbox" id="protocol" checked data-toggle="toggle" data-on="tcp"
+                                 data-off="udp" data-onstyle="success" data-offstyle="primary"></input>
+                              </label>
+                            </div>
+                            
+                            <button class="btn btn-primary add">Add</button>
+                          </div>
+                          <div class="form-group">
+                            <div class = "addlist"></div>
                           </div>
                           <button type="submit" class="btn btn-primary create">Create</button>
                       </form>

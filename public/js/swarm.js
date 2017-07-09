@@ -6,10 +6,16 @@ $(function(){
 
 
   $("#swarmInit").submit(()=>{
-    var $ip = $("#ip").val();
+    var $swarmPort = $("#swarmPort");
 
-    socket.emit("swarmInit" ,$ip);
-    console.log($ip);
+    socket.emit("swarmInit" ,$swarmPort.val());
+  });
+
+  $("#swarmLeave").submit((e)=>{
+    e.preventDefault();
+    var $force = $("#force").prop('checked') ? false : true;
+    console.log($force);
+    socket.emit("swarmLeave" , $force);
   });
 
   $("#Access").submit(()=>{

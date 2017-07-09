@@ -17,13 +17,23 @@
                 <div class="container">
                   <form class="form-horizontal" id="swarmInit">
                       <div class="form-group">
-                        <label for="ip" class="col-sm-2 control-label">Swarm Init IP : </label>
+                        <label for="swarmPort" class="col-sm-2 control-label">swarm Init Port : </label>
                         <div class="col-sm-10">
-                          <input type="text" class="form-control" id="ip">
+                          <input type="text" class="form-control" id="swarmPort">
                         </div>
                       </div>
                         <button type="submit" class="btn btn-primary">Init</button>
                     </form>
+                    <form class="form-horizontal" id="swarmLeave">
+                      <label for="force" class="col-sm-2 control-label">force : </label>
+                      <div class="col-sm-2">
+                        <label class="checkbox-inline">
+                           <input type="checkbox" id="force" checked data-toggle="toggle" data-on="unforce"
+                           data-off="force" data-onstyle="success" data-offstyle="danger"></input>
+                        </label>
+                      </div>
+                          <button class="btn btn-primary">Leave</button>
+                      </form>
                     <form class="form-horizontal" id="swarmJoin">
                         <div class="form-group">
                           <label for="ip" class="col-sm-2 control-label">Swarm Join IP : </label>

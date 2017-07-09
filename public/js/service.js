@@ -1,5 +1,5 @@
 
-function serviceSettings ($serviceName, $image, $command, $publishedPort, $targetPort, $healthCheck){
+function serviceSettings ($serviceName, $image, $command, portlist, $healthCheck){
   var opts = serviceDefaultSettings();
   if(!(hasValue($serviceName.val(), $image.text().trim()))){
     alert("t");
@@ -10,11 +10,7 @@ function serviceSettings ($serviceName, $image, $command, $publishedPort, $targe
   opts.TaskTemplate.ContainerSpec.Image = $image.text().trim();
   opts.TaskTemplate.ContainerSpec.Command = [$command.val()];
   // opts.TaskTemplate.ContainerSpec.HealthCheck.Test = [$healthCheck.val()];
-  opts.EndpointSpec.Ports = [{
-    "Protocol" : "tcp",
-    "PublishedPort" : parseInt($publishedPort.val()),
-    "TargetPort" : parseInt($targetPort.val()),
-  }]
+  opts.EndpointSpec.Ports = portlist;
 
   return opts;
 }
@@ -49,6 +45,15 @@ $(function(){
   var socket = io();
   var checklist = [];
   var $service = $(".jsonTable");
+  var $serviceName = $("#serviceName");
+  var $image = $("#image");
+  var $command = $("#command");
+  var $publishedPort = $("#publishedPort");
+  var $targetPort = $("#targetPort");
+  var $healthCheck = $("#healthCheck");
+  var $publishedPort = $("#publishedPort");
+  var $targetPort = $("#targetPort");
+  var $protocol = $("#protocol");
   initDropdown('/myapp/images/data.json', $(".dropdown-menu"), $('#image'), "RepoTags", 0);
   initUrlTable($service, columns, "/myapp/service/data.json" );
   checkTableEvent($service, checklist);
@@ -56,13 +61,9 @@ $(function(){
 
 
   $(".create").click(()=>{
-      var $serviceName = $("#serviceName");
-      var $image = $("#image");
-      var $command = $("#command");
-      var $publishedPort = $("#publishedPort");
-      var $targetPort = $("#targetPort");
-      var $healthCheck = $("#healthCheck");
-      var opts = serviceSettings($serviceName, $image, $command, $publishedPort, $targetPort, $healthCheck);
+
+      var opts = serviceSettings($serviceName, $image, $command, portlist, $healthCheck);
+      console.log(portlist);
       formSubmit($("#CreateService"), opts, socket, ()=> { reloadTable($service); dialogShow("title", "message")});
   });
 
@@ -71,4 +72,26 @@ $(function(){
         reloadTable($service);
         dialogShow("title", "message");
     });
+
+    var id = 0;
+    var portlist = [];
+    $(".add").click((e)=>{
+        e.preventDefault();
+        var $array = [$publishedPort, $targetPort, $protocol];
+        var state = true;
+        for (var i in $array) {
+          if(!(hasValue($array[i].val()))){
+            state = false;
+          }
+        }
+        if(state) {
+          addlist($array, $(".addlist") , id++, portlist);
+
+        }
+    });
+
+
+    clickDeleteList($(".addlist"));
+
+
 });

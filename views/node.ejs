@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <% include ./partials/head %>
+  <!-- 스크립트 -->
+  <script src='/myapp/js/io.js'></script>
+  <script src='/myapp/js/node.js'></script>
+
+</head>
+
+<body>
+  <% include ./partials/topnav %>
+
+<div class="container-fluid">
+      <div class="row">
+
+        <% include ./partials/nav %>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+          <div class="row placeholders">
+
+              <table class="table table-striped jsonTable">
+              </table>
+          </div>
+
+        </div>
+        </div>
+</div>
+
+</body>
+</html>

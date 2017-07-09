@@ -43,9 +43,11 @@ function changeTextDropdown ($li, $button, callback) {
 }
 
 
-function hasValue (...arg){
-  alert(arg);
+function hasValue (){
+  var arg = arguments;
+  // console.log(arguments);
   for(var i in arg) {
+    // console.log(arg[i]);
     if (arg[i] == "" || arg[i] == null || typeof arg[i] == undefined){
       return false;
     }
@@ -53,6 +55,68 @@ function hasValue (...arg){
   return true;
 }
 
+
+function addlist ($array, $list, id, list) {
+  var rowid = "#row"+ id;
+  var $row = createElement("<div/>", "row", "", "row"+ id);
+  var $button = createElement("<button/>", "btn btn-danger delete", "", id);
+  var $icon = createElement("<span/>", "glyphicon glyphicon-remove", "");
+  var $button = $button.append($icon);
+
+
+  $list.append(createRow($row, $array,  $button));
+  var idArr = []
+    for (var i in $array) {
+        idArr.push($array[i].attr("id"));
+
+    }
+  list.push(rowdatalist(rowid, $list, idArr));
+}
+
+
+  function createRow($row, $array, $button){
+    var data = $array;
+
+    for (var i in data ) {
+        var attr = data[i].attr("id");
+        var val = data[i].val();
+        if(data[i].val() == "on" || data[i].val() == "off") {
+          val = (data[i].prop('checked') ? "tcp" : "udp");
+        }
+        $row.append(createElement("<div/>", "col-sm-2 " + attr, val));
+
+        // console.log($row.attr("id"));
+    }
+    $row.append($button);
+
+    return $row;
+    // $row.append($e_containerPort, $e_hostPort, $button);
+
+  }
+    function rowdatalist(rowid, $list, array){
+      var data = array;
+      var $row = $list.find(rowid);
+      // if( typeof _data == "Array") {
+      var json = {};
+        for (var i in data) {
+          var attr = data[i];
+          json[attr] =  $row.find("."+attr).text().toString();
+        }
+      // portlist.push({"Protocol" : "tcp", "containerPort" :  containerPort, "hostPort" : hostPort});
+      // console.log(portlist);
+      return json;
+
+    }
+
+function clickDeleteList($list){
+      $list.on('click', 'button', function(e){
+      e.preventDefault();
+
+      var id = "#row" + $(this).attr("id");
+
+      $(id).fadeOut("slow");
+    });
+}
 
 function containerDefaultSettings() {
   return {
@@ -189,4 +253,8 @@ function dialogShow(_title, _message) {
               }
           }]
     });
+}
+
+function createElement( _element, _class,  _text, _id){
+  return $(_element, { class: _class, text: _text , id: _id});
 }
