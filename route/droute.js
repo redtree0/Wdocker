@@ -27,11 +27,13 @@ function promiseTojson(callback, res){
 
       var result = pval[0];
       console.log("result");
-      console.log(result);
-      result.forEach(function (val, index) {
-              data.push(val);
-    });
-    console.log(data);
+      console.log(typeof(result));
+      for ( var i in result) {
+        data.push(result[i]);
+      }
+    //   result.forEach(function (val, index) {
+    //           data.push(val);
+    // });
     res.json(data);
     result = new Array();
   });
@@ -59,6 +61,12 @@ app.route('/myapp/service/data.json').get( (req, res) => {
   res.setHeader("Content-Type", "application/json");
   promiseTojson(p(docker, 'service'), res);
 });
+
+app.route('/myapp/swarm/data.json').get( (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  promiseTojson(p(docker, 'swarm'), res);
+});
+
 app.route('/myapp/container')
         .get( (req, res) => {
 

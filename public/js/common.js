@@ -54,67 +54,71 @@ function hasValue (){
   }
   return true;
 }
-
-
-function addlist ($array, $list, id, list) {
-  var rowid = "#row"+ id;
-  var $row = createElement("<div/>", "row", "", "row"+ id);
-  var $button = createElement("<button/>", "btn btn-danger delete", "", id);
-  var $icon = createElement("<span/>", "glyphicon glyphicon-remove", "");
-  var $button = $button.append($icon);
-
-
-  $list.append(createRow($row, $array,  $button));
-  var idArr = []
-    for (var i in $array) {
-        idArr.push($array[i].attr("id"));
-
-    }
-  list.push(rowdatalist(rowid, $list, idArr));
+ // glyphicon-log-in
+function createButton( buttonid , action, color, icon){
+  var $button = createElement("<button/>", "btn " + action + " " + color, "", buttonid);
+  var $icon = createElement("<span/>", "glyphicon " + icon, "");
+  return $button.append($icon);
 }
 
+    function addDataArray(array, $dataArray){
 
-  function createRow($row, $array, $button){
-    var data = $array;
-
-    for (var i in data ) {
-        var attr = data[i].attr("id");
-        var val = data[i].val();
-        if(data[i].val() == "on" || data[i].val() == "off") {
-          val = (data[i].prop('checked') ? "tcp" : "udp");
+      var json = {};
+      for ( var i in  $dataArray) {
+        var val = $dataArray[i].val();
+        if( $dataArray[i].val() == "on" ||  $dataArray[i].val() == "off") {
+          val = ( $dataArray[i].prop('checked') ? "tcp" : "udp");
         }
-        $row.append(createElement("<div/>", "col-sm-2 " + attr, val));
+        if($dataArray[i].attr("id") == "token" && ($dataArray[i].val() == "on" ||  $dataArray[i].val() == "off")) {
+          val = ( $dataArray[i].prop('checked') ? "Manager" : "Worker");
+        }
+        json[$dataArray[i].attr("id")] = val;
+      }
+      array.push(json);
 
-        // console.log($row.attr("id"));
     }
-    $row.append($button);
 
+function makeList ( $list, array ) {
+    $list.children().remove();
+  for(var index in array) {
+    var rowid = "#row"+ index;
+    var $row = createElement("<div/>", "row", "", "row"+ index);
+    var $deletebutton = createButton(index, "delete", "btn-danger", "glyphicon-remove");
+    var $connectbutton = createButton(index, "connection", "btn-success", "glyphicon-log-in");
+
+    $list.append(createRow($row, array[index],  [$deletebutton, $connectbutton]));
+  }
+
+}
+
+  function createRow($row, array, $buttons){
+    var data = array;
+
+    for (var index in data ) {
+
+        $row.append(createElement("<div/>", "col-sm-2 " + index, data[index]));
+    }
+    // for (var i in $elements) {
+    // }
+    for (var i in $buttons) {
+      $row.append($buttons[i]);
+    }
     return $row;
-    // $row.append($e_containerPort, $e_hostPort, $button);
 
   }
-    function rowdatalist(rowid, $list, array){
-      var data = array;
-      var $row = $list.find(rowid);
-      // if( typeof _data == "Array") {
-      var json = {};
-        for (var i in data) {
-          var attr = data[i];
-          json[attr] =  $row.find("."+attr).text().toString();
-        }
-      // portlist.push({"Protocol" : "tcp", "containerPort" :  containerPort, "hostPort" : hostPort});
-      // console.log(portlist);
-      return json;
 
-    }
-
-function clickDeleteList($list){
+function clickDeleteList($list, array){
       $list.on('click', 'button', function(e){
       e.preventDefault();
 
       var id = "#row" + $(this).attr("id");
+          if($(this).hasClass("delete")) {
+            $(id).fadeOut("slow");
 
-      $(id).fadeOut("slow");
+            array.splice($(this).attr("id"), 1);
+
+            makeList ( $list, array);
+          }
     });
 }
 
@@ -255,6 +259,6 @@ function dialogShow(_title, _message) {
     });
 }
 
-function createElement( _element, _class,  _text, _id){
-  return $(_element, { class: _class, text: _text , id: _id});
+function createElement( _element, _class,  _text, _id, _type){
+  return $(_element, { class: _class, text: _text , id: _id, type: _type});
 }

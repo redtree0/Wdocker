@@ -1,6 +1,13 @@
 var socket = io();
 
 $(function(){
+    var $ip = $("#host");
+    var $port = $("#port");
+    var $user = $("#user");
+    var $passwd = $("#password");
+    var $privateKey = $("privateKey");
+    var $list = $(".addlist");
+    var $token = $("#token");
 
   $('.ip_address').mask('0ZZ.0ZZ.0ZZ.0ZZ', { translation: { 'Z': { pattern: /[0-9]/, optional: true } } });
 
@@ -18,37 +25,54 @@ $(function(){
     socket.emit("swarmLeave" , $force);
   });
 
-  $("#Access").submit(()=>{
-    var $accessip = $("#accessip").val();
+  var sshlist = [];
 
-    socket.emit("Access" ,$accessip);
-    console.log($ip);
+
+  $(".add").click((e)=>{
+      e.preventDefault();
+      var $array = [$ip, $port, $user, $token];
+      var state = true;
+      for (var i in $array) {
+        if(!(hasValue($array[i].val()))){
+          state = false;
+        }
+      }
+      if(state) {
+        addDataArray(sshlist, $array);
+        makeList( $list, sshlist) ;
+
+      }
   });
+    clickDeleteList($list, sshlist);
 
 
-  $("#sshConnection").submit((e)=>{
+    $list.on('click', 'button', function(e){
     e.preventDefault();
-    var $ip = $("#hostip");
-    var $port = $("#port");
-    var $user = $("#user");
-    var $passwd = $("#passwd");
 
-    console.log($ip);
-     var _ip = $ip.val();
-    var _port = $port.val();
-    var _user = $user.val();
-    var _passwd = $passwd.val();
-    console.log($ip.masked());
-    alert($ip.masked());
-    var opts = {
-      host : _ip,
-      port : _port,
-      user : _user
-    };
-    if(_passwd) {
-      opts.pass = _passwd;
-    }
+    var id = "#row" + $(this).attr("id");
+        if($(this).hasClass("connection")) {
+            var opts = (sshlist[$(this).attr("id")]);
+            socket.emit("sshConnection" , opts);
+        }
+    });
 
-    socket.emit("sshConnection" , opts);
-  });
+
+    $.getJSON('/myapp/swarm/data.json', function(json, textStatus) {
+      function addRowText( _class,  _text){
+        return $('<div/>', { class: _class, text: _text });
+      }
+      function addNewRow( _id ){
+        return $('<div/>', { class: "row", id : _id });
+      }
+
+      var indexCol = "col-md-2";
+      var dataCol = "col-md-10";
+      var swarmToken = (json[json.length -1]);
+      $(".token").append(addNewRow("manager"));
+      $("#manager").append(createElement("<button/>", indexCol + " btn btn-primary", "Manager"));
+      $("#manager").append(addRowText(dataCol, swarmToken.Manager));
+      $(".token").append(addNewRow("worker"));
+      $("#worker").append(createElement("<button/>", indexCol + " btn btn-default", "Worker"));
+      $("#worker").append(addRowText(dataCol, swarmToken.Worker));
+    });
 });

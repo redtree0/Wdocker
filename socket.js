@@ -5,6 +5,23 @@ var fs = require('fs');
 var path = require('path');
 var os = require('os');
 
+
+function getServerIp() {
+    var ifaces = os.networkInterfaces();
+    var result = '';
+    for (var dev in ifaces) {
+        var alias = 0;
+        ifaces[dev].forEach(function(details) {
+            if (details.family == 'IPv4' && details.internal === false) {
+                result = details.address;
+                ++alias;
+            }
+        });
+    }
+
+    return result;
+}
+
 // 메시지를 전송한 클라이언트를 제외한 모든 클라이언트에게 메시지를 전송한다
 //socket.broadcast.emit('chat', msg);
 
@@ -216,25 +233,10 @@ function dockerfile(socket){
 
 socket.on("swarmInit", function(port){
 
-  function getServerIp() {
-      var ifaces = os.networkInterfaces();
-      var result = '';
-      for (var dev in ifaces) {
-          var alias = 0;
-          ifaces[dev].forEach(function(details) {
-              if (details.family == 'IPv4' && details.internal === false) {
-                  result = details.address;
-                  ++alias;
-              }
-          });
-      }
-
-      return result;
-  }
 
   console.log(getServerIp());
   var opts = {
-    "ListenAddr" : "0.0.0.0:" + port,
+    "ListenAddr" : getServerIp() + ":" + "8888",
     "AdvertiseAddr" : getServerIp() + ":" + port
   };
   docker.swarmInit(opts);
@@ -253,14 +255,20 @@ socket.on("sshConnection", function(data){
        console.log(opts);
       var ssh = require('./ssh')(opts);
       var cmd = "docker"
+      if ( opts.token == "Manager") {
+        var token = "SWMTKN-1-2r2lyyvvwkgu2yxae914g8mmqq3zu8pw09hwnzn8ut5jj8t1yd-25nkzp02y0kwd1terxb4ga4dr";
+      }
+      if ( opts.token == "Worker") {
+        var token = "SWMTKN-1-2r2lyyvvwkgu2yxae914g8mmqq3zu8pw09hwnzn8ut5jj8t1yd-7q8gmhqfpm10yzd5bv9dk23ib";
+      }
       var args = {
         "token_manager" : "swarm join-token -q manager",
         "token_worker" : "swarm join-token -q worker",
-        // "join_manager" : "docker swarm join --token ",
-        // "join_worker"
+        "join_manager" : "swarm join --token " + token + " " + getServerIp() + ":7890",
+        "join_worker" : "swarm join --token " + token + " " + getServerIp() + ":7890"
       }
       ssh.exec(cmd, {
-            args : [args.token_worker],
+            args : [args.join_worker],
             out: function(stdout) {
               console.log(stdout);
               ssh.end();

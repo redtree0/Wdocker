@@ -51,7 +51,10 @@ switch (opt) {
         break;
   case 'service':
         promisePush(plist ,doIt(docker, docker.listServices({})));
-              break;
+        break;
+  case 'swarm':
+        promisePush(plist ,doIt(docker, docker.swarmInspect()));
+        break;
   case 'CreateContainer':
         doIt(docker, docker.createContainer(data));
         break;
