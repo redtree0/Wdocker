@@ -69,7 +69,7 @@ function createButton( buttonid , action, color, icon){
         if( $dataArray[i].val() == "on" ||  $dataArray[i].val() == "off") {
           val = ( $dataArray[i].prop('checked') ? "tcp" : "udp");
         }
-        if($dataArray[i].attr("id") == "token" && ($dataArray[i].val() == "on" ||  $dataArray[i].val() == "off")) {
+        if($dataArray[i].attr("id") == "tokenType" && ($dataArray[i].val() == "on" ||  $dataArray[i].val() == "off")) {
           val = ( $dataArray[i].prop('checked') ? "Manager" : "Worker");
         }
         json[$dataArray[i].attr("id")] = val;

@@ -5,6 +5,9 @@ module.exports = function(opts) {
 
 
   // opts = json, attr = host, user, password, port, privatekey
+  var opts = opts;
+  opts.timeout = 300000
+
   var ssh = new SSH(opts);
 
 
