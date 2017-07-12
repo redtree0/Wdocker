@@ -28,20 +28,34 @@ var columns = [{
   }, {
       field: 'ManagerStatus.Addr',
       title: 'IP'
-  }];
+  }, {
+      field: 'Status.State',
+      title: 'State'
+  }, {
+      field: 'Status.Addr',
+      title: 'Addr'
+  }
+ ];
 var socket = io ();
 
 $(function () {
 
     var $node = $(".jsonTable");
     var $detail = $(".detail");
-
+    var $availability = $("#availability");
+    var $role = $("#role");
     var checklist = [];
     initUrlTable($node, columns,'/myapp/node/data.json');
     checkTableEvent($node, checklist);
     clickTableRow($node, $detail);
     clickRowAddColor($node, "danger");
 
+    changeTextDropdown($(".dropdown-menu"), $availability);
+
+    $(".start").click((e)=>{
+      e.preventDefault();
+      socket.emit("StartNode",checklist);
+    })
 
     $(".delete").click((e)=>{
       e.preventDefault();
@@ -50,6 +64,12 @@ $(function () {
 
     $(".update").click((e)=>{
       e.preventDefault();
-      socket.emit("UpdateNode",checklist);
+      var opts = {
+        "Availability" : $availability.text(),
+        "Role" : $role.prop('checked') ? "manager" : "worker"
+       };
+
+      socket.emit("UpdateNode",checklist, opts);
+      reloadTable($node);
     })
 });

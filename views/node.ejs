@@ -27,9 +27,23 @@
                    data-off="Worker" data-onstyle="primary" data-offstyle="default"></input>
                 </label>
               </div>
+              <label for="availability" class="col-sm-2 control-label">Availability : </label>
+
+              <div class="col-sm-2">
+                <button id="availability" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                   Availability <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                  <li><a>Active</a></li>
+                  <li><a>Pause</a></li>
+                  <li><a>Drain</a></li>
+                </ul>
+              </div>
+
               <table class="table table-striped jsonTable">
               </table>
 
+              <button class="btn btn-success start">Start</button>
               <button class="btn btn-primary update">update</button>
               <button class="btn btn-danger delete">delete</button>
           </div>

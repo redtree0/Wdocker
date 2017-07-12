@@ -86,6 +86,7 @@ $(function(){
     var $hostPort = $("#hostPort");
     var $protocol = $("#protocol");
     var $detail = $(".detail");
+    var $list = $(".addlist");
 
     initDropdown('/myapp/images/data.json', $(".dropdown-menu"), $image, "RepoTags", 0);
     initUrlTable($container, columns,'/myapp/container/data.json');
@@ -117,12 +118,12 @@ $(function(){
           }
         }
         if(state) {
-          addlist($array, $(".addlist") , id++, portlist);
-
+          addDataArray(portlist, $array);
+          makeList ( $list, portlist );
         }
     });
 
-        clickDeleteList($(".addlist"));
+        clickDeleteList($list, portlist);
 
 
 

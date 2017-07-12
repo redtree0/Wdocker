@@ -302,29 +302,103 @@ socket.on("RemoveService", function(data){
 
 
 });
+function getSwarmToken () {
+  var p = new Promise(function (resolve, reject) {
+    docker.swarmInspect().then((data) =>{
+    console.log(data);
+    resolve(data);
+    })
+  });
+  return p;
+}
+
+function getSwarmPort () {
+  var p = new Promise(function (resolve, reject) {
+    docker.swarmInspect().then((data) =>{
+    // console.log(data);
+    resolve(data);
+    })
+  });
+  return p;
+}
+
+socket.on("StartNode", function(node){
+  node.forEach((data)=>{
+    var role = data.Spec.Role;
+    var token = getSwarmToken();
+    token.then((data)=>{
+
+      var joinToken = "";
+      if(role =="worker") {
+        joinToken = (data.JoinTokens.Worker);
+      } else if (role == "manager") {
+        joinToken = (data.JoinTokens.Manager);
+      }
+      // resolve(joinToken);
+      var leave = "docker swarm leave;"
+      var join = "docker swarm join --token " + joinToken +" " +  "192.168.0.108" + ":2377"
+      console.log(join);
+      // console.log(ssh);
+      ssh.exec(leave, {
+        args : [join],
+        out: function(stdout) {
+          console.log(stdout);
+          ssh.end();
+        },
+        err : (err) =>{
+          console.log(err);
+          ssh.end();
+        }
+      }).start();
+    });
+    var node = docker.getNode(data.ID);
+    node.remove().catch((err)=>{
+      console.log(err);
+    });
+    // var hostname = os.hostname();
+    // var node = docker.getNode(hostname);
+    // node.inspect().then((data)=> {
+    //   var addr = data.ManagerStatus.Addr;
+    //   // console.log(data);
+    // });
+    var privateKey = fs.readFileSync('../../.ssh/id_rsa', "utf8");
+    var opts = {
+      "host" : data.Status.Addr,
+      "user" : "pirate",
+      "port" : "22",
+      "key" : privateKey
+    }  ;
+    // opts.key = privateKey;
+    var ssh = require('./ssh')(opts);
+
+
+  });
+});
 
 socket.on("RemoveNode", function(data){
   data.forEach((data)=>{
     var node = docker.getNode(data.ID);
-    node.remove().catch((err)=>{
+    node.remove({force: true}).catch((err)=>{
       console.log(err);
     });
   });
 });
 
-socket.on("UpdateNode", function(data){
-  data.forEach((data)=>{
+socket.on("UpdateNode", function(node, json){
+
+  node.forEach((data)=>{
     var node = docker.getNode(data.ID);
     var opts = {
       "id" : data.ID,
-      "Role" : "manager",
       "version" : data.Version.Index,
-      "Availability" : "pause"
+      "Role" : json.Role,
+      "Availability" : json.Availability
     };
+
     // console.log(data);
-    // console.log(opts);
+    console.log(opts);
     node.update(opts).catch((err)=>{
-      // console.log(err);
+      console.log(err);
     });
   });
 });
