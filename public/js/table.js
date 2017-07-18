@@ -1,16 +1,31 @@
 'use strict';
 
 
-function initUrlTable($table, columns, urljson) {
+function initUrlTable($table, columns, urljson, detailformat ) {
   var col = columns;
 //  console.log("do");
-  $table.bootstrapTable({
-      url: urljson,
-      columns: col,
-      silent: true,
-      search : true
-  });
+  if(detailformat) {
+      var opts = {
+          url: urljson,
+          columns: col,
+          silent: true,
+          search : true,
+          detailView : true,
+          detailFormatter : detailFormatter
+      }
+  }else {
+    var opts = {
+        url: urljson,
+        columns: col,
+        silent: true,
+        search : true,
+      }
+  }
+
+  $table.bootstrapTable(opts);
 }
+
+
 
 function initDataTable($table, columns, datajson) {
   var col = columns;

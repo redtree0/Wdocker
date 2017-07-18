@@ -1,9 +1,9 @@
-var docker = require('./docker');
-var p = require('./promise');
+var docker = require('./docker')();
 var spawn = require('child_process').spawn;
 var fs = require('fs');
 var path = require('path');
 var os = require('os');
+var p = require('./p');
 
 
 function getServerIp() {
@@ -41,9 +41,11 @@ var socket = function(io) {
 // connection이 수립되면 event handler function의 인자로 socket인 들어온다
 
 io.on('connection', function(socket) {
-    function done(socket){
-      socket.emit("doneCatch", true);
+
+    function isFinished(){
+      socket.emit("isFinished", true);
     }
+
 
     function errCatch(callback){
       callback.catch( (err) => {
@@ -148,41 +150,39 @@ function images(socket){
 }
 container(socket);
 function container(socket){
-  socket.on('CreateContainer', function(data) {
-    console.log(data);
+  console.log("contianer");
+  socket.on('CreateContainer', function(data, fn) {
       if(data){
-          p(docker, 'CreateContainer', data);
+          p.container.create(data, fn);
       } else {
         console.log("args more request");
+        fn(false);
       }
   });
 
-
-   socket.on("dstart", function(data){
-    // console.log(data);
-     p(docker, "dstart", data).then ( (container) => {
-       container.forEach ( (container) => {
-           errCatch(container.start());
-       });
-     });
+   socket.on("StartContainer", function(data, fn){
+      p.container.start(data, fn);
    });
-   socket.on("dstop", function(data){
-    // console.log(data);
-     p(docker, "dstop", data).then ( (container) => {
-       container.forEach ( (container) => {
-           errCatch(container.stop());
-       });
-     });
+   socket.on("StopContainer", function(data, fn){
+       p.container.stop(data, fn);
    });
-   socket.on("dremove", function(data){
-     console.log("remove");
-     console.log(data);
-     p(docker, "dremove", data).then ( (container) => {
-       container.forEach ((container) => {
-         setTimeout( () => {errCatch(container.remove()); }, "500");
-       });
-       done(socket);
-     });
+   socket.on("RemoveContainer", function(data, fn){
+     p.container.remove(data, fn);
+   });
+   socket.on("KillContainer", function(data, fn){
+     p.container.kill(data, fn);
+   });
+   socket.on("PauseContainer", function(data, fn){
+     p.container.pause(data, fn);
+   });
+   socket.on("UnpauseContainer", function(data, fn){
+     p.container.unpause(data, fn);
+   });
+   socket.on("StatsContainer", function(data, fn){
+     p.container.stats(data, fn);
+   });
+   socket.on("ArchiveContainer", function(data, fn){
+     p.container.getArchive(data, fn);
    });
 }
 

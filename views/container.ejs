@@ -23,18 +23,23 @@
               <div class="row">
                 <div class="col-md-6" >
                   <h3>Create a Container</h3>
-                    <form class="form-horizontal" id="CreateContainer">
+                  <!-- onSubmit="return false;"  -->
+                    <form class="form-horizontal" id="CreateContainer"  >
+                    <!-- <form class="form-horizontal" id="CreateContainer"
+                      , enctype='application/x-www-form-urlencoded'> -->
+                      <!-- <form class="form-horizontal" id="CreateContainer" action = "/myapp/container" method="post"
+                        , enctype='application/x-www-form-urlencoded'> -->
                         <div class="form-group">
                           <label for="name" class="col-sm-2 control-label">Container Name: </label>
                           <div class="col-sm-10">
-                            <input type="text" class="form-control" id="name" placeholder="Name">
+                            <input type="text" class="form-control" id="name"  name="container[name]" placeholder="Name">
                           </div>
                         </div>
                         <div class="form-group">
                           <label for="image" class="col-sm-2 control-label">Images : </label>
                           <div class="col-sm-10">
                               <div class="btn-group">
-                                <button id="image" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                <button id="image" type="button" class="btn btn-default dropdown-toggle"  data-toggle="dropdown" aria-expanded="false">
                                    Images <span class="caret"></span>
                                 </button>
                                 <ul class="dropdown-menu">
@@ -76,7 +81,7 @@
                         <div class="form-group">
                           <div class = "addlist"></div>
                         </div>
-                        <button type="submit" class="btn btn-primary create">Create</button>
+                        <button type="submit" onclick=" return false;" class="btn btn-primary create">Create</button>
                     </form>
                 </div>
                 <div class="col-md-6">
@@ -95,9 +100,12 @@
               <h3 id="title">Containers List</h3>
 
               <div id="bgrp" class="btn-group" role="group">
-                      <button id="dstart" type="button" class="btn btn-primary btn-lg ctlbtn">Start</button>
-                      <button id="dstop" type="button" class="btn btn-default btn-lg ctlbtn">Stop</button>
-                      <button id="dremove" type="button" class="btn btn-danger btn-lg ctlbtn">Remove</button>
+                      <button  onclick=" return false;"  type="button" class="btn btn-primary btn-lg start">Start</button>
+                      <button  onclick=" return false;"  type="button" class="btn btn-default btn-lg stop">Stop</button>
+                      <button  onclick=" return false;"  type="button" class="btn btn-success btn-lg pause">Pause</button>
+                      <button  onclick=" return false;"  type="button" class="btn btn-info btn-lg unpause">Unpause</button>
+                      <button  onclick=" return false;"  type="button" class="btn btn-warning btn-lg remove">Remove</button>
+                      <button  onclick=" return false;"  type="button" class="btn btn-danger btn-lg kill">Kill</button>
               </div>
             </div>
 

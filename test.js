@@ -216,27 +216,27 @@ var options = {
 //     console.log(err);
 //   }
 // );
-var fs     = require('fs');
-var SSH = require('simple-ssh');
-var privateKey = fs.readFileSync('../../.ssh/id_rsa', "utf8");
-
-var ssh = new SSH({
-    host: '192.168.0.11',
-    user: 'pirate',
-    // pass: 'hypriot'
-    key : privateKey
-});
-
-/*** Using the `args` options instead ***/
-ssh.exec('docker', {
-    args: ['swarm', 'join-token', '-q', 'worker'],
-    out: function(stdout) {
-        console.log(stdout);
-    },
-    err : (err) =>{
-      console.log(err);
-    }
-}).start();
+// var fs     = require('fs');
+// var SSH = require('simple-ssh');
+// var privateKey = fs.readFileSync('../../.ssh/id_rsa', "utf8");
+//
+// var ssh = new SSH({
+//     host: '192.168.0.11',
+//     user: 'pirate',
+//     // pass: 'hypriot'
+//     key : privateKey
+// });
+//
+// /*** Using the `args` options instead ***/
+// ssh.exec('docker', {
+//     args: ['swarm', 'join-token', '-q', 'worker'],
+//     out: function(stdout) {
+//         console.log(stdout);
+//     },
+//     err : (err) =>{
+//       console.log(err);
+//     }
+// }).start();
 // var cmd = "var docker = require('dockerode'); docker.listContainers({all:true}).then((data)=>{console.log(data);});"
 // ssh.exec('echo', {
 //     args: ["\""+cmd+"\"", "| node"],
@@ -247,3 +247,22 @@ ssh.exec('docker', {
 //       console.log(err);
 //     }
 // }).start();
+var docker = require('./docker')({host: 'http://192.168.0.120', port: 2376});
+
+
+// var docker = new Docker({host: 'http://192.168.0.120', port: 2376});
+docker.listImages().then((d)=>{
+  console.log(d);
+});
+
+function getPromise(callback) {
+  return new Promise(function (resolve, reject) {
+
+      callback.then( (val) => {
+         console.log(val);
+         resolve(val);
+        });
+  });
+}
+
+getPromise(docker.listImages());

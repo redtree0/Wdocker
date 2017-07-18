@@ -30,51 +30,24 @@ var _promise = function (docker, opt, data) {
       return new Promise(reject("args more request"));
    }
 var plist = [];
-switch (opt) {
-  case 'Container':
-  console.log("con");
 
-    promisePush(plist ,doIt(docker, docker.listContainers({all: true})));
-  break;
-  case 'network':
-    console.log("net");
-    promisePush(plist ,doIt(docker, docker.listNetworks({})));
-    break;
-  case 'image':
-      promisePush(plist ,doIt(docker, docker.listImages()));
-      break;
-  case 'volume':
-        promisePush(plist ,doIt(docker, docker.listVolumes({})));
-        break;
-  case 'node':
-        promisePush(plist ,doIt(docker, docker.listNodes()));
-        break;
-  case 'service':
-        promisePush(plist ,doIt(docker, docker.listServices({})));
-        break;
-  case 'swarm':
-        promisePush(plist ,doIt(docker, docker.swarmInspect()));
-        break;
+switch (opt) {
+
   case 'CreateContainer':
-        doIt(docker, docker.createContainer(data));
+        p.create.container(data);
         break;
   case 'CreateNetwork':
-        // console.log(data);
-        doIt(docker, docker.createNetwork(data));
+        p.create.network(data);
         break;
-  case 'dstart':
-          ctlContainer(plist, docker, data, "running");
+  case 'StartContainer':
+  p.start.container(data);
+
           break;
- case 'dstop':
-          ctlContainer(plist, docker, data, "exited");
+ case 'StopContainer':
+    p.stop.container(data);
           break;
-  case 'dremove':
-              data.forEach((data) => {
-                  if( data.State == "running" ) {
-                      docker.getContainer(data.Id).stop();
-                  }
-                    promisePush(plist ,docker.getContainer(data.Id));
-                });
+  case 'RemoveContainer':
+          p.remove.container(data);
 
             break;
 

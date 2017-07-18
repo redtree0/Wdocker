@@ -229,17 +229,32 @@ function serviceDefaultSettings() {
       }
   };
 }
+function formAction($form, settings, socket, callback){
+
+  if(!settings) {
+    alert("more need arguments");
+  } else {
+    socket.emit($form.attr("id"), settings, callback);
+  }
+  //
+  // if(callback != null) {
+  //   callback();
+  // }
+}
+
 function formSubmit($form, settings, socket, callback) {
+  console.log(arguments);
+
   $form.submit(function(e) {
-    var opts = settings;
-    // console.log($form.attr("id"));
-    if(!opts) {
+
+    // e.preventDefault();
+    console.log(settings);
+    if(!settings) {
       alert("more need arguments");
     } else {
-      socket.emit($form.attr("id"), opts);
+      socket.emit($form.attr("id"), settings);
     }
 
-    e.preventDefault();
     if(callback != null) {
       callback();
     }

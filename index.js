@@ -13,6 +13,7 @@ var socketEvents  = require('./socket');
 //var mongo = require('./mongo');
 
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/myapp', express.static(path.join(__dirname, 'public')));
 
 
@@ -21,11 +22,13 @@ app.set('view engine', 'ejs');
 app.engine('ejs', ejs.renderFile);
 
 app.route('/')
-  .get( (req, res) => { res.redirect('/myapp'); }
+  .get( (req, res) => { res.redirect('/myapp/index'); }
 );
 
 var route = require('./route/droute.js')(app);
+var json = require("./route/jsonRoute.js")(app);
 app.use('', route);
+app.use('', json);
 
 
 const port = 3000;

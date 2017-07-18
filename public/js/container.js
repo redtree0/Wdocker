@@ -47,13 +47,12 @@ var columns = [{
       title: 'Mounts'
   }];
 
-var dstack = [];
 
 
 function containerSettings ($image, $name, $cmd, portArray){
 
   var opts = containerDefaultSettings();
-
+  console.log(arguments);
     if($image.text().trim() == "Images"){
       return false;
     }
@@ -75,7 +74,9 @@ function containerSettings ($image, $name, $cmd, portArray){
   return  opts;
 }
 
+function detailFormatter(index, row) {
 
+}
 $(function(){
 
     var $container = $(".jsonTable");
@@ -87,26 +88,39 @@ $(function(){
     var $protocol = $("#protocol");
     var $detail = $(".detail");
     var $list = $(".addlist");
-
+    var checklist = [];
+    var $form = $("#CreateContainer");
     initDropdown('/myapp/images/data.json', $(".dropdown-menu"), $image, "RepoTags", 0);
-    initUrlTable($container, columns,'/myapp/container/data.json');
+    initUrlTable($container, columns,'/myapp/container/data.json', detailFormatter);
 
     clickTableRow($container, $detail);
     clickRowAddColor($container, "danger");
-    checkTableEvent($container, dstack);
+    checkTableEvent($container, checklist);
 
+    $container.on("expand-row.bs.table", function (e, index, row, $detail){
+      console.log(index);
+      console.log(row);
+      // console.log($detail.closest(".detail-view").append("1234"));
+      $.getJSON("/myapp/container/stats/"+ row.Id,  {}, function(json, textStatus) {
+        $detail.html("<p>" + json.read + "</p>");
+      });
+      // $detail.append("<span style='color:black'>12345</span>");
+    })
     $(".create").click((e)=>{
-      var opts = containerSettings($image, $name,
-          $command, portlist);
 
-      formSubmit($("#CreateContainer"), opts, socket,
-          ()=> { reloadTable($container); dialogShow("title", "message")}
-      );
-      //  console.log(socket);
+      var opts = containerSettings($image, $name, $command, portlist);
+
+      formAction($("#CreateContainer"), opts, socket,
+      (data)=>  {
+        console.log("reloa");
+        console.log(data);
+        reloadTable($container);
+        dialogShow("title", "message");
+      });
+
     });
 
     var portlist= [];
-    var id = 0;
 
     $(".add").click((e)=>{
         e.preventDefault();
@@ -124,17 +138,72 @@ $(function(){
     });
 
         clickDeleteList($list, portlist);
+        // isFinished();
 
+function socketEvent(eventName, listArray){
+  socket.emit(eventName, checklist, (data)=>{
+    checklist.splice(0,checklist.length);
+    console.log(data);
+      reloadTable($container);
+     dialogShow("title", data.msg);
 
+  });
+}
 
-
-    $(".ctlbtn").click(function() {
-          var doIt =$(this).attr('id');
-          // console.log(dstack);
-          socket.emit(doIt, dstack);
-          doneCatch(socket, ()=>{
-            dstack= new Array();
-          });
-          reloadTable($container);
+    $(".start").click((e)=>{
+                socketEvent("StartContainer", checklist);
     });
+
+    $(".stop").click((e)=>{
+        socketEvent("StopContainer", checklist);
+    });
+
+    $(".remove").click((e)=>{
+        socketEvent("RemoveContainer", checklist);
+    });
+
+    $(".kill").click((e)=>{
+        socketEvent("KillContainer", checklist);
+    });
+
+    $(".pause").click((e)=>{
+        socketEvent("PauseContainer", checklist);
+    });
+
+    $(".unpause").click((e)=>{
+        socketEvent("UnpauseContainer", checklist);
+    });
+
+    // $(".ctlbtn").click(function() {
+    //       var doIt =$(this).attr('id');
+    //       // console.log(dstack);
+    //       socket.emit(doIt, dstack);
+    //       doneCatch(socket, ()=>{
+    //         dstack= new Array();
+    //       });
+    //       reloadTable($container);
+    // });
 });
+
+
+
+// function postSubmit (_url, _data) {
+//   $.ajax({
+//               type: 'POST',
+//               url: _url,
+//               data: _data,
+//               dataType: 'json',
+//               success: function(req) {
+//                 console.log('success');
+//                 console.log(req);
+//               },
+//               error : function(request, status, error ) {   // 오류가 발생했을 때 호출된다.
+//                 console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+//               },
+//               complete : function () {   // 정상이든 비정상인든 실행이 완료될 경우 실행될 함수
+//                     console.log("complete");
+//                     // setTimeout(postSubmit(_url, _data), 5000);
+//                     // getAjax ();
+//               }
+//       });
+// }

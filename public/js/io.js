@@ -9,7 +9,17 @@
     userid: "test"
   });
 
-
+  function isFinished(callback){
+    socket.on("isFinished", (data)=>{
+      if(data){
+        console.log("isFinished");
+          if(callback) {
+            console.log("call");
+            callback();
+          }
+      }
+    });
+  }
 
   function doneCatch(socket, callback){
     socket.on("doneCatch", (data)=>{
