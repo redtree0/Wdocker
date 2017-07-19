@@ -11,7 +11,8 @@ function initUrlTable($table, columns, urljson, detailformat ) {
           silent: true,
           search : true,
           detailView : true,
-          detailFormatter : detailFormatter
+          detailFormatter : detailFormatter,
+          pageSize : 5
       }
   }else {
     var opts = {
@@ -19,6 +20,8 @@ function initUrlTable($table, columns, urljson, detailformat ) {
         columns: col,
         silent: true,
         search : true,
+        pageSize : 5
+
       }
   }
 

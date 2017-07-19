@@ -45,6 +45,36 @@ module.exports = function(app){//함수로 만들어 객체 app을 전달받음
     });
   });
 
+  app.route('/myapp/container/top/:id').get( (req, res) => {
+    // promiseTojson(docker.swarmInspect(), res);
+    var id = req.params.id;
+    var p = require("../p");
+    var promise = (p.container.top(id));
+    res.setHeader("Content-Type", "application/json");
+
+    promise.then((result)=>{
+      res.json(result);
+    }).catch((error)=>{
+      res.json(error);
+    });
+  });
+
+  app.route('/myapp/container/logs/:id').get( (req, res) => {
+    // promiseTojson(docker.swarmInspect(), res);
+    var id = req.params.id;
+    var p = require("../p");
+    var promise = (p.container.logs(id));
+    // console.log(id);
+    promise.then((result)=>{
+      // console.log(result);
+
+      res.json(result);
+    }).catch((error)=>{
+      res.json(error);
+    });
+  });
+
+
   app.route('/myapp/dockerfile/data.json').get ( (req, res) => {
     var fs = require('fs');
     var path = require('path');

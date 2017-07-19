@@ -6,9 +6,14 @@
           checkbox: true,
           title: 'Check'
       },{
-          field: 'Containers',
-          title: 'Containers'
-      },{
+          field: 'RepoTags',
+          title: 'RepoTags'
+      }
+      // ,{
+      //     field: 'Containers',
+      //     title: 'Containers'
+      // }
+      ,{
           field: 'Created',
           title: 'Created'
       },{
@@ -23,9 +28,6 @@
       },{
           field: 'RepoDigests',
           title: 'RepoDigests'
-      },{
-          field: 'RepoTags',
-          title: 'RepoTags'
       },{
           field: 'SharedSize',
           title: 'SharedSize'

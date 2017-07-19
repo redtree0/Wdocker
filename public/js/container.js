@@ -8,43 +8,55 @@ var columns = [{
       title: 'Check'
   },{
       field: 'Id',
-      title: 'Id'
+      title: '컨테이너 ID'
   }, {
       field: 'Names',
-      title: 'Item Names'
+      title: '컨테이너 명',
+      sortable : true,
+      halign : "center",
+      align : "center"
   }, {
       field: 'Image',
-      title: 'Image'
+      title: '이미지',
+      sortable : true,
+      halign : "center",
+      align : "center"
   }, {
       field: 'ImageID',
-      title: 'ImageID'
+      title: '이미지 ID'
   }, {
       field: 'Command',
-      title: 'Command'
+      title: '실행 명령어',
+      sortable : true,
+      halign : "center",
+      align : "center"
   }, {
       field: 'Created',
-      title: 'Created'
+      title: '생성일'
   }, {
       field: 'Ports',
-      title: 'Ports'
+      title: 'Ports(hiden)'
   }, {
       field: 'Labels',
-      title: 'Labels'
+      title: '라벨'
   }, {
       field: 'State',
-      title: 'State'
+      title: '상태',
+      sortable : true,
+      halign : "center",
+      align : "center"
   }, {
       field: 'Status',
-      title: 'Status'
+      title: '상황'
   }, {
       field: 'HostConfig',
-      title: 'HostConfig'
+      title: 'HostConfig(hiden)'
   }, {
       field: 'NetworkingSettings',
-      title: 'NetworkingSettings'
+      title: 'NetworkingSettings(hiden)'
   }, {
       field: 'Mounts',
-      title: 'Mounts'
+      title: 'Mounts(hiden)'
   }];
 
 
@@ -92,20 +104,100 @@ $(function(){
     var $form = $("#CreateContainer");
     initDropdown('/myapp/images/data.json', $(".dropdown-menu"), $image, "RepoTags", 0);
     initUrlTable($container, columns,'/myapp/container/data.json', detailFormatter);
-
+    $container.bootstrapTable("hideColumn", "Id");
+    $container.bootstrapTable("hideColumn", "ImageID");
+    $container.bootstrapTable("hideColumn", "Ports");
+    $container.bootstrapTable("hideColumn", "Mounts");
+    $container.bootstrapTable("hideColumn", "HostConfig");
+    $container.bootstrapTable("hideColumn", "NetworkingSettings");
+    $form.hide();
     clickTableRow($container, $detail);
     clickRowAddColor($container, "danger");
     checkTableEvent($container, checklist);
-
-    $container.on("expand-row.bs.table", function (e, index, row, $detail){
-      console.log(index);
-      console.log(row);
-      // console.log($detail.closest(".detail-view").append("1234"));
-      $.getJSON("/myapp/container/stats/"+ row.Id,  {}, function(json, textStatus) {
-        $detail.html("<p>" + json.read + "</p>");
+    clickDeleteList($list, portlist);
+    $(".plus").click((e)=>{
+      e.preventDefault();
+      BootstrapDialog.show({
+          title: "컨테이너 생성",
+          message: $form.show(),
+          onhide: function(dialogRef){
+              //  var fruit = dialogRef.getModalBody().find('input').val();
+              //  if($.trim(fruit.toLowerCase()) !== 'banana') {
+              //      alert('Need banana!');
+              //      return false;
+              //  }
+           },
+          buttons: [ {
+                label: 'Create',
+                cssClass: 'btn-primary create',
+                action: function(dialogItself){
+                    var opts = containerSettings($image, $name, $command, portlist);
+                    formAction($("#CreateContainer"), opts, socket,
+                    (data)=>  {
+                      console.log("reloa");
+                      console.log(data);
+                      reloadTable($container);
+                      dialogShow("title", "message");
+                    });
+                }
+            }, {
+                label: 'Close',
+                action: function(dialogItself){
+                    dialogItself.close();
+                }
+            }]
       });
-      // $detail.append("<span style='color:black'>12345</span>");
     })
+    $container.on("expand-row.bs.table", function (e, index, row, $detail){
+      // console.log(index);
+      // console.log(row);
+      var top = new Promise(function(resolve, reject) {
+          $.getJSON("/myapp/container/top/"+ row.Id,  {}, function(json, textStatus) {
+            console.log(JSON.stringify(json));
+            var data = {};
+            data.titles = json.Titles;
+            data.processes = json.Processes;
+            var detail = "";
+
+            for(var i in data){
+              if(data[i] == undefined || JSON.stringify(data[i])=='{}' || data[i].length == 0) {
+              }else {
+                detail += "<p> " + i +" : </p><p>" + JSON.stringify(data[i]) + "</p>";
+              }
+            }
+            resolve(detail);
+
+          });
+      });
+      var stats = new Promise(function(resolve, reject) {
+          $.getJSON("/myapp/container/stats/"+ row.Id,  {}, function(json, textStatus) {
+            // console.log(JSON.stringify(json));
+
+            var data = {};
+            data.id = json.id;
+            data.name = json.name;
+            data.memory = json.memory_stats;
+            data.network = json.networks;
+            data.cpu = json.cpu_stats;
+            data.port = row.Ports;
+            var detail = "";
+            for(var i in data){
+              if(data[i] == undefined || JSON.stringify(data[i])=='{}' || data[i].length == 0) {
+              }else {
+                detail += "<p> " + i +" : </p><p>" + JSON.stringify(data[i]) + "</p>";
+              }
+            }
+            resolve(detail);
+            // $detail.html(detail);
+          });
+      });
+      Promise.all([top, stats]).then(function(value) {
+        $detail.html(value);
+      }, function(reason) {
+        console.log(reason);
+      });
+    });
+
     $(".create").click((e)=>{
 
       var opts = containerSettings($image, $name, $command, portlist);
@@ -137,18 +229,16 @@ $(function(){
         }
     });
 
-        clickDeleteList($list, portlist);
         // isFinished();
 
-function socketEvent(eventName, listArray){
-  socket.emit(eventName, checklist, (data)=>{
-    checklist.splice(0,checklist.length);
-    console.log(data);
-      reloadTable($container);
-     dialogShow("title", data.msg);
+  function socketEvent(eventName, listArray){
+    socket.emit(eventName, checklist, (data)=>{
+      checklist.splice(0,checklist.length);
+        reloadTable($container);
+       dialogShow("title", data.msg);
 
-  });
-}
+    });
+  }
 
     $(".start").click((e)=>{
                 socketEvent("StartContainer", checklist);
@@ -174,36 +264,5 @@ function socketEvent(eventName, listArray){
         socketEvent("UnpauseContainer", checklist);
     });
 
-    // $(".ctlbtn").click(function() {
-    //       var doIt =$(this).attr('id');
-    //       // console.log(dstack);
-    //       socket.emit(doIt, dstack);
-    //       doneCatch(socket, ()=>{
-    //         dstack= new Array();
-    //       });
-    //       reloadTable($container);
-    // });
+
 });
-
-
-
-// function postSubmit (_url, _data) {
-//   $.ajax({
-//               type: 'POST',
-//               url: _url,
-//               data: _data,
-//               dataType: 'json',
-//               success: function(req) {
-//                 console.log('success');
-//                 console.log(req);
-//               },
-//               error : function(request, status, error ) {   // 오류가 발생했을 때 호출된다.
-//                 console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
-//               },
-//               complete : function () {   // 정상이든 비정상인든 실행이 완료될 경우 실행될 함수
-//                     console.log("complete");
-//                     // setTimeout(postSubmit(_url, _data), 5000);
-//                     // getAjax ();
-//               }
-//       });
-// }

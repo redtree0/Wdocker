@@ -85,7 +85,24 @@ var p = {
       return new Promise(function (resolve, reject) {
           resolve(container.stats({"stream": false}));
       });
+    },
+    "top" : function (data, callback){
+      var container = docker.getContainer(data);
+      return new Promise(function (resolve, reject) {
+          resolve(container.top ({"ps_args": "aux"}));
+      });
+    },
+    "logs" : function (data, callback){
+      var container = docker.getContainer(data);
+      return new Promise(function (resolve, reject) {
+        //  "follow" : true, , "stderr": true
+        container.logs ({ "stdout" : true}).then((data)=>{
+          console.log(data);
+        });
+          resolve(container.logs ({ "stdout" : true}));
+      });
     }
+
   }
 
 }

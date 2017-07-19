@@ -133,8 +133,14 @@ function containerDefaultSettings() {
     "Tty": false,
     "Cmd": [  ],
     "OpenStdin": true,
-    "StdinOnce": false,
+    "StdinOnce": true,
      "HostConfig" : {
+       "LogConfig": {
+            "Type": "json-file",
+            "Config": {
+                "max-size": "10m"
+             }
+            },
        "PortBindings" : {}
      }
   }
