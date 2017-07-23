@@ -4,9 +4,10 @@
 <head>
   <% include ./partials/head %>
   <!-- 스크립트 -->
-  <script src='/myapp/js/io.js'></script>
-  <script src='/myapp/js/container.js'></script>
-
+  <!-- <script src='/myapp/js/io.js'></script> -->
+  <script src='/myapp/js/bundle/container.bundle.js'></script>
+  <!-- <script src='/myapp/js/bundle/table.bundle.js'></script> -->
+  <!-- <script src='/myapp/js/container.js'></script> -->
 
 </head>
 
@@ -14,6 +15,7 @@
 <body>
   <% include ./partials/topnav %>
 
+  <p id='test'></p>
 <div class="container-fluid">
       <div class="row">
         <% include ./partials/nav %>
@@ -94,10 +96,10 @@
                         </label>
                       </div>
 
-                        <button class="btn btn-primary add">Add</button>
+                        <button class="btn btn-primary portAdd">Add</button>
                     </div>
                     <div class="form-group">
-                      <div class = "addlist"></div>
+                      <div class = "portlists"></div>
                     </div>
                 </form>
             </div>

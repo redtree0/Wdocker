@@ -1,6 +1,5 @@
 // client index.js
 'use strict';
-
 var socket = io();
 
 var columns = [{
@@ -61,161 +60,85 @@ var columns = [{
 
 
 
-function containerSettings ($image, $name, $cmd, portArray){
-
-  var opts = containerDefaultSettings();
-  console.log(arguments);
-    if($image.text().trim() == "Images"){
+function containerSettings (image, name, cmd, portArray){
+  var config = require("./config");
+  // var opts = settings.container;
+    if(image == "Images"){
       return false;
     }
-    if (hasValue($name.val(), $cmd.val(), portArray)) {
-
-    for ( var i in portArray) {
-      var portinfo = portArray[i].containerPort +"/"+ portArray[i].protocol;
-      opts.ExposedPorts[portinfo] = {};
-        opts.HostConfig.PortBindings[portinfo] = [{ "HostPort" : portArray[i].hostPort}];
-    }
-
-
-    opts.Image = $image.text().trim();
-    opts.name = $name.val();
-    opts.Cmd.push($cmd.val());
-  }
-
-   console.log(opts);
-  return  opts;
+    if (hasValue(name, cmd)) {
+      config.setContainer({"Image" : image, "name" : name, "Cmd" : cmd},
+          portArray);
+   };
+  return  config.getContainer();
 }
 
-function detailFormatter(index, row) {
 
-}
 $(function(){
-
+    var table = require("./table.js");
     var $container = $(".jsonTable");
-    var $image =$('#image');
-    var $name = $("#name");
-    var $command = $("#command");
-    var $containerPort = $("#containerPort");
-    var $hostPort = $("#hostPort");
-    var $protocol = $("#protocol");
     var $detail = $(".detail");
-    var $list = $(".addlist");
-    var checklist = [];
-    var $form = $("#CreateContainer");
-    initDropdown('/myapp/images/data.json', $(".dropdown-menu"), $image, "RepoTags", 0);
-    initUrlTable($container, columns,'/myapp/container/data.json', detailFormatter);
-    $container.bootstrapTable("hideColumn", "Id");
-    $container.bootstrapTable("hideColumn", "ImageID");
-    $container.bootstrapTable("hideColumn", "Ports");
-    $container.bootstrapTable("hideColumn", "Mounts");
-    $container.bootstrapTable("hideColumn", "HostConfig");
-    $container.bootstrapTable("hideColumn", "NetworkingSettings");
-    $form.hide();
-    clickTableRow($container, $detail);
-    clickRowAddColor($container, "danger");
-    checkTableEvent($container, checklist);
-    clickDeleteList($list, portlist);
+    var $list = $(".portlists");
+    var portlists= [];
+
+    var containerTable = new table($container, columns);
+    function detailFormatter() {
+
+    };
+    containerTable.initUrlTable('/myapp/container/data.json', detailFormatter);
+    containerTable.hideColumns(["Id", "ImageID", "Ports", "Mounts", "HostConfig", "NetworkingSettings"]);
+    containerTable.checkAllEvents();
+    containerTable.clickRow($detail);
+    containerTable.clickRowAddColor("danger");
+     var expendinfo = [{
+       url : "/myapp/container/top/",
+       keys : ["Titles", "Processes"]
+     },{
+       url : "/myapp/container/stats/",
+       keys : ["id", "name", "memory_stats", "networks", "cpu_stats", "Ports"]
+     }];
+     containerTable.expendRow(expendinfo);
+
+     var $form = $("#CreateContainer");
+     $form.hide();
+     clickDeleteList($list, portlists);
+  //
     $(".plus").click((e)=>{
       e.preventDefault();
-      BootstrapDialog.show({
-          title: "컨테이너 생성",
-          message: $form.show(),
-          onhide: function(dialogRef){
-              //  var fruit = dialogRef.getModalBody().find('input').val();
-              //  if($.trim(fruit.toLowerCase()) !== 'banana') {
-              //      alert('Need banana!');
-              //      return false;
-              //  }
-           },
-          buttons: [ {
-                label: 'Create',
-                cssClass: 'btn-primary create',
-                action: function(dialogItself){
-                    var opts = containerSettings($image, $name, $command, portlist);
-                    formAction($("#CreateContainer"), opts, socket,
-                    (data)=>  {
-                      console.log("reloa");
-                      console.log(data);
-                      reloadTable($container);
-                      dialogShow("title", "message");
-                    });
-                }
-            }, {
-                label: 'Close',
-                action: function(dialogItself){
-                    dialogItself.close();
-                }
-            }]
-      });
-    })
-    $container.on("expand-row.bs.table", function (e, index, row, $detail){
-      // console.log(index);
-      // console.log(row);
-      var top = new Promise(function(resolve, reject) {
-          $.getJSON("/myapp/container/top/"+ row.Id,  {}, function(json, textStatus) {
-            console.log(JSON.stringify(json));
-            var data = {};
-            data.titles = json.Titles;
-            data.processes = json.Processes;
-            var detail = "";
+      var $image =$('#image');
+      var $name = $("#name");
+      var $command = $("#command");
 
-            for(var i in data){
-              if(data[i] == undefined || JSON.stringify(data[i])=='{}' || data[i].length == 0) {
-              }else {
-                detail += "<p> " + i +" : </p><p>" + JSON.stringify(data[i]) + "</p>";
-              }
-            }
-            resolve(detail);
+        initDropdown('/myapp/images/data.json', $(".dropdown-menu"), $image, "RepoTags", 0);
+        var button = dialogbutton('Create', 'btn-primary create',
+                  function(dialogItself){
 
-          });
-      });
-      var stats = new Promise(function(resolve, reject) {
-          $.getJSON("/myapp/container/stats/"+ row.Id,  {}, function(json, textStatus) {
-            // console.log(JSON.stringify(json));
+                      var image = $image.text().trim();
+                      var name = $name.val();
+                      var cmd = $command.val();
+                      var opts = containerSettings(image, name, command, portlists);
+                      formAction($("#CreateContainer"), opts, socket,
+                      (data)=>  {
+                        reloadTable($container);
+                        console.log(data);
+                        dialogShow("title", data);
+                      });
+                  }
+      );
 
-            var data = {};
-            data.id = json.id;
-            data.name = json.name;
-            data.memory = json.memory_stats;
-            data.network = json.networks;
-            data.cpu = json.cpu_stats;
-            data.port = row.Ports;
-            var detail = "";
-            for(var i in data){
-              if(data[i] == undefined || JSON.stringify(data[i])=='{}' || data[i].length == 0) {
-              }else {
-                detail += "<p> " + i +" : </p><p>" + JSON.stringify(data[i]) + "</p>";
-              }
-            }
-            resolve(detail);
-            // $detail.html(detail);
-          });
-      });
-      Promise.all([top, stats]).then(function(value) {
-        $detail.html(value);
-      }, function(reason) {
-        console.log(reason);
-      });
-    });
-
-    $(".create").click((e)=>{
-
-      var opts = containerSettings($image, $name, $command, portlist);
-
-      formAction($("#CreateContainer"), opts, socket,
-      (data)=>  {
-        console.log("reloa");
-        console.log(data);
-        reloadTable($container);
-        dialogShow("title", "message");
-      });
+      dialogShow("컨테이너 생성", $form.show(), button);
 
     });
 
-    var portlist= [];
 
-    $(".add").click((e)=>{
+  //
+  //
+    $(".portAdd").click((e)=>{
         e.preventDefault();
+        var $protocol = $("#protocol");
+        var $containerPort = $("#containerPort");
+        var $hostPort = $("#hostPort");
+
         var $array = [$containerPort, $hostPort, $protocol];
         var state = true;
         for (var i in $array) {
@@ -224,28 +147,26 @@ $(function(){
           }
         }
         if(state) {
-          addDataArray(portlist, $array);
-          makeList ( $list, portlist );
+          insertArray(portlists, $array);
+          createList ( $list, portlists );
         }
     });
-
-        // isFinished();
-
-  function socketEvent(eventName, listArray){
+  //
+  //
+  function socketEvent(eventName, checklist, callback){
     socket.emit(eventName, checklist, (data)=>{
       checklist.splice(0,checklist.length);
-        reloadTable($container);
+      reloadTable($container);
        dialogShow("title", data.msg);
-
     });
   }
 
     $(".start").click((e)=>{
-                socketEvent("StartContainer", checklist);
+          socketEvent("StartContainer", checklist);
     });
 
     $(".stop").click((e)=>{
-        socketEvent("StopContainer", checklist);
+          socketEvent("StopContainer", checklist);
     });
 
     $(".remove").click((e)=>{

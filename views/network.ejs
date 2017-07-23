@@ -4,8 +4,7 @@
 <head>
   <% include ./partials/head %>
   <!-- 스크립트 -->
-  <script src='/myapp/js/io.js'></script>
-  <script src='/myapp/js/network.js'></script>
+  <script src='/myapp/js/bundle/network.bundle.js'></script>
 
 </head>
 
@@ -18,43 +17,12 @@
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
           <div class="row placeholders">
             <div class="col-md-6" >
-              <h3>Create a Network</h3>
-                <form class="form-horizontal" id="CreateNetwork">
-                    <div class="form-group">
-                      <label for="name" class="col-sm-2 control-label">Network Name: </label>
-                      <div class="col-sm-10">
-                        <input type="text" class="form-control" id="name" placeholder="Name">
-                      </div>
-                    </div>
-                    <div class="form-group">
-                      <label for="driver" class="col-sm-2 control-label">Network Driver: </label>
-
-                      <div class="btn-group" >
-                        <button id="driver" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                           driver <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu" id="driver_list">
-                        </ul>
-                      </div>
-                    </div>
-                    <div class="form-group">
-                      <label for="internal" class="col-sm-2 control-label">Internal : </label>
-                      <label class="checkbox-inline">
-                         <input type="checkbox" id="internal" checked data-toggle="toggle" data-on="true"
-                         data-off="false" data-onstyle="success" data-offstyle="danger"></input>
-                      </label>
-                    </div>
-                    <div class="form-group">
-                      <label for="options" class="col-sm-2 control-label">Options : </label>
-                      <div class="col-sm-10">
-                        <input type="text" class="form-control" id="options" placeholder="options">
-                      </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary create">Create</button>
-
-                </form>
             </div>
             <button id="remove" class="btn btn-danger">Remove</button>
+            <button  onclick=" return false;"  type="button" class="btn btn-info btn-lg plus">
+              <span class="glyphicon glyphicon-plus"></span> Plus
+              </a></button>
+
               <div id="detail" class="row detail">
               </div>
               <table id="networklist" class="table table-striped jsonTable">
@@ -72,6 +40,39 @@
               </div>
 
           </div>
+
+          <form class="form-horizontal" id="CreateNetwork">
+            <div class="form-group">
+              <label for="name" class="col-sm-2 control-label">Network Name: </label>
+              <div class="col-sm-10">
+                <input type="text" class="form-control" id="name" placeholder="Name">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="driver" class="col-sm-2 control-label">Network Driver: </label>
+
+              <div class="btn-group" >
+                <button id="driver" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                  driver <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" id="driver_list">
+                </ul>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="internal" class="col-sm-2 control-label">Internal : </label>
+              <label class="checkbox-inline">
+                <input type="checkbox" id="internal" checked data-toggle="toggle" data-on="true"
+                data-off="false" data-onstyle="success" data-offstyle="danger"></input>
+              </label>
+            </div>
+            <div class="form-group">
+              <label for="options" class="col-sm-2 control-label">Options : </label>
+              <div class="col-sm-10">
+                <input type="text" class="form-control" id="options" placeholder="options">
+              </div>
+            </div>
+          </form>
 
         </div>
         </div>

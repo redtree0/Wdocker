@@ -19,7 +19,7 @@ function initDropdown(jsonUrl, $li, $button, attr, index, callback) {
           value = (data[attr])[index];
         }
 
-        $("<li><a>" +  value + "</a><li/>").appendTo('ul.dropdown-menu');
+        $("<li><a>" +  value + "</a><li/>").appendTo($li);
       });
   });
   changeTextDropdown($li, $button, callback);
@@ -61,33 +61,33 @@ function createButton( buttonid , action, color, icon){
   return $button.append($icon);
 }
 
-    function addDataArray(array, $dataArray){
+    function insertArray(lists, $arrays){
 
       var json = {};
-      for ( var i in  $dataArray) {
-        var val = $dataArray[i].val();
-        if( $dataArray[i].val() == "on" ||  $dataArray[i].val() == "off") {
-          val = ( $dataArray[i].prop('checked') ? "tcp" : "udp");
+      for ( var i in  $array) {
+        var val = $arrays[i].val();
+        if( $arrays[i].val() == "on" ||  $arrays[i].val() == "off") {
+          val = ( $arrays[i].prop('checked') ? "tcp" : "udp");
         }
-        if($dataArray[i].attr("id") == "tokenType" && ($dataArray[i].val() == "on" ||  $dataArray[i].val() == "off")) {
-          val = ( $dataArray[i].prop('checked') ? "Manager" : "Worker");
+        if($arrays[i].attr("id") == "tokenType" && ($arrays[i].val() == "on" ||  $arrays[i].val() == "off")) {
+          val = ( $arrays[i].prop('checked') ? "Manager" : "Worker");
         }
-        json[$dataArray[i].attr("id")] = val;
+        json[$arrays[i].attr("id")] = val;
       }
-      array.push(json);
+      lists.push(json);
 
     }
 
-function makeList ( $list, array ) {
+function createList ( $list, array ) {
     $list.children().remove();
-  for(var index in array) {
-    var rowid = "#row"+ index;
-    var $row = createElement("<div/>", "row", "", "row"+ index);
-    var $deletebutton = createButton(index, "delete", "btn-danger", "glyphicon-remove");
-    var $connectbutton = createButton(index, "connection", "btn-success", "glyphicon-log-in");
+    for(var index in array) {
+        var rowid = "#row"+ index;
+        var $row = createElement("<div/>", "row", "", "row"+ index);
+        var $deletebutton = createButton(index, "delete", "btn-danger", "glyphicon-remove");
+        var $connectbutton = createButton(index, "connection", "btn-success", "glyphicon-log-in");
 
-    $list.append(createRow($row, array[index],  [$deletebutton, $connectbutton]));
-  }
+        $list.append(createRow($row, array[index],  [$deletebutton, $connectbutton]));
+    }
 
 }
 
@@ -107,7 +107,7 @@ function makeList ( $list, array ) {
 
   }
 
-function clickDeleteList($list, array){
+function clickDeleteList($list, dataLists){
       $list.on('click', 'button', function(e){
       e.preventDefault();
 
@@ -115,126 +115,14 @@ function clickDeleteList($list, array){
           if($(this).hasClass("delete")) {
             $(id).fadeOut("slow");
 
-            array.splice($(this).attr("id"), 1);
+            dataLists.splice($(this).attr("id"), 1);
 
-            makeList ( $list, array);
+            createList ( $list, dataLists);
           }
     });
 }
 
-function containerDefaultSettings() {
-  return {
-    "Image" : "",
-    "name" : "",
-    "AttachStdin": false,
-    "AttachStdout": true,
-    "AttachStderr": true,
-    "ExposedPorts": { },
-    "Tty": false,
-    "Cmd": [  ],
-    "OpenStdin": true,
-    "StdinOnce": true,
-     "HostConfig" : {
-       "LogConfig": {
-            "Type": "json-file",
-            "Config": {
-                "max-size": "10m"
-             }
-            },
-       "PortBindings" : {}
-     }
-  }
-}
 
-function networkDefaultSettings() {
-  return {
-    "Name" : "" ,
-    "Driver": "" ,
-    "Internal": false,
-    "Ingress" : false,
-    "Attachable" : false,
-    "IPAM" : {
-      // "Config": [
-      //       {
-      //           // "Subnet" : "",
-      //           // "IPRange" : "",
-      //           // "Gateway" : ""
-      //       }
-      //     ]
-          // ,
-          "Options" : {
-            // "parent" : "wlan0"
-          }
-        },
-    "Options": {
-              "com.docker.network.bridge.default_bridge": "false",
-              "com.docker.network.bridge.enable_icc": "true",
-              "com.docker.network.bridge.enable_ip_masquerade": "true",
-              // "com.docker.network.bridge.host_binding_ipv4": "192.168.0.8",
-              // "com.docker.network.bridge.name": "k",
-              "com.docker.network.driver.mtu": "1500"
-            }
-  }
-}
-
-function imageDefaultSettings() {
-  return {
-    "term" : "",
-    "limit" : "",
-    "filters" : {
-      "is-automated" : [],
-      "is-official": [],
-      "stars" : ["0"]
-    }
-  };
-}
-
-function serviceDefaultSettings() {
-  return  {
-    "Name" : "",
-    "TaskTemplate" : {
-      "ContainerSpec" : {
-        "Image" : "",
-        "Command" : [],
-        "HealthCheck" : {
-          "Test" : [],
-          "Interval" : 30000000 ,
-          "Timeout" : 300000000 , //  1000000 = 1ms
-          "Retries" : 3,
-          "StartPeriod" : 10000000
-        }
-      }
-    },
-    "Mode": {
-        "Replicated": {
-          "Replicas": 4
-        }
-    },
-    "UpdateConfig": {
-          "Parallelism": 2,
-          "Delay": 1000000000,
-          "FailureAction": "pause",
-          "Monitor": 15000000000,
-          "MaxFailureRatio": 0.15
-    },
-    "RollbackConfig": {
-          "Parallelism": 1,
-          "Delay": 1000000000,
-          "FailureAction": "pause",
-          "Monitor": 15000000000,
-          "MaxFailureRatio": 0.15
-    },
-    "EndpointSpec": {
-          "Ports": [
-                {
-                "Protocol": "tcp",
-                "PublishedPort": null,
-                "TargetPort": null
-                }
-            ]
-      }
-  };
-}
 function formAction($form, settings, socket, callback){
 
   if(!settings) {
@@ -267,18 +155,7 @@ function formSubmit($form, settings, socket, callback) {
   });
 }
 
-function dialogShow(_title, _message) {
-    return BootstrapDialog.show({
-        title: _title,
-        message: _message,
-        buttons: [ {
-              label: 'Close',
-              action: function(dialogItself){
-                  dialogItself.close();
-              }
-          }]
-    });
-}
+
 
 function createElement( _element, _class,  _text, _id, _type){
   return $(_element, { class: _class, text: _text , id: _id, type: _type});

@@ -1,3 +1,5 @@
+"use strict";
+
 var docker = require('./docker')();
 var spawn = require('child_process').spawn;
 var fs = require('fs');
@@ -40,8 +42,9 @@ var socket = function(io) {
   // connection event handler
 // connection이 수립되면 event handler function의 인자로 socket인 들어온다
 
-io.on('connection', function(socket) {
 
+io.on('connection', function(socket) {
+  console.log('check 1', socket.connected);
     function isFinished(){
       socket.emit("isFinished", true);
     }
@@ -56,19 +59,16 @@ io.on('connection', function(socket) {
       return callback;
     }
 
-// 접속한 클라이언트의 정보가 수신되면
-socket.on('login', function(data) {
-  console.log('Client logged-in:\n name:' + data.name + '\n userid: ' + data.userid);
+      // 접속한 클라이언트의 정보가 수신되면
+      socket.on('login', function(data) {
 
-  // socket에 클라이언트 정보를 저장한다
-  socket.name = data.name;
-  socket.userid = data.userid;
+          console.log('Client logged-in:\n name:' + data.name + '\n userid: ' + data.userid);
 
-
-  // 접속된 모든 클라이언트에게 메시지를 전송한다
-  io.emit('login', data.name );
-});
-
+          // socket에 클라이언트 정보를 저장한다
+          socket.name = data.name;
+          socket.userid = data.userid;
+          isFinished();
+      });
 
 
 network(socket);
