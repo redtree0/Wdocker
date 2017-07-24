@@ -4,8 +4,7 @@
 <head>
   <% include ./partials/head %>
   <!-- 스크립트 -->
-  <script src='/myapp/js/io.js'></script>
-  <script src="/myapp/js/images.js"></script>
+  <script src="/myapp/js/bundle/image.bundle.js"></script>
 
 </head>
 
@@ -19,51 +18,60 @@
             <div class="row placeholders">
 
                 <div class="col-md-6" >
-                  <h3>Search Images</h3>
-                    <form class="form-horizontal" id="SearchImages">
-                        <div class="form-group">
-                          <label for="term" class="col-sm-2 control-label">Term: </label>
-                          <div class="col-sm-10">
-                            <input type="text" class="form-control" id="term" placeholder="Term">
-                          </div>
-                        </div>
-                        <div class="form-group">
-                          <label for="limit" class="col-sm-2 control-label">limit: </label>
-                          <div class="col-sm-10">
-                            <input type="number" class="form-control" id="limit"  placeholder="limit">
-                          </div>
-                        </div>
-                        <div class="form-group">
-                          <label for="filters" class="col-sm-2 control-label">filters: </label>
-                          <div class="col-sm-10">
-                            <label class="checkbox-inline">
-                              is_automated <input type="checkbox" id="is_automated" checked data-toggle="toggle" data-on="true"
-                               data-off="false" data-onstyle="success" data-offstyle="danger">
-                            </label>
-                            <label class="checkbox-inline">
-                              is_official <input type="checkbox" id="is_official" checked data-toggle="toggle" data-on="true"
-                               data-off="false" data-onstyle="success" data-offstyle="danger">
-                            </label>
-                            <div class="col-sm-10">
-                              <input type="text" class="form-control" id="stars"  placeholder="stars">
-                            </div>
-                          </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary create">Search</button>
-                    </form>
-                </div>
-                <div class="col-md-6" >
-                    <h3>Search Results &amp; Images Pull / Remove </h3>
-                    <button id="download" class="btn-default btn">Download</button>
-                    <button id="remove" class="btn-danger btn">Remove</button>
-                    <table id="results" class="table table-striped dataTable"></table>
-                </div>
-          </div>
+                  <div id="bgrp" class="btn-group" role="group">
+                          <button  onclick=" return false;"  type="button" class="btn btn-info btn-lg plus">
+                            <span class="glyphicon glyphicon-plus"></span> Plus
+                            </button>
+                            <button class="btn-danger btn btn-lg remove">Remove</button>
+                  </div>
 
-                  <h3>Images List</h3>
+                </div>
+
                   <table id="imagelist" class="table table-striped jsonTable"></table>
 
+              </div>
           </div>
+
+<!-- hide -->
+          <form class="form-horizontal" id="SearchImages">
+              <div class="form-group">
+                <label for="term" class="col-sm-2 control-label">Term: </label>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" id="term" placeholder="Term">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="limit" class="col-sm-2 control-label">limit: </label>
+                <div class="col-sm-10">
+                  <input type="number" class="form-control" id="limit"  placeholder="limit">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="filters" class="col-sm-2 control-label">filters: </label>
+                <div class="col-sm-10">
+                  <label class="checkbox-inline">
+                    is_automated <input type="checkbox" id="is_automated" checked data-toggle="toggle" data-on="true"
+                     data-off="false" data-onstyle="success" data-offstyle="danger">
+                  </label>
+                  <label class="checkbox-inline">
+                    is_official <input type="checkbox" id="is_official" checked data-toggle="toggle" data-on="true"
+                     data-off="false" data-onstyle="success" data-offstyle="danger">
+                  </label>
+                  <div class="col-sm-10">
+                    <input type="text" class="form-control" id="stars"  placeholder="stars">
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                  <div class="row results">
+                    <div class="col-md-12">
+                        <table class="table table-striped dataTable"></table>
+                        <button class="btn-default btn download">Download</button>
+
+                    </div>
+                  </div>
+              </div>
+          </form>
         </div>
 
 </div>

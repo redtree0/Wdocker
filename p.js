@@ -1,6 +1,14 @@
 var docker = require("./docker")();
 
-
+// docker.modem.followProgress(stream, onFinished, onProgress);
+//
+//    function onFinished(err, output) {
+//      console.log("onFinished");
+//      done(socket);
+//    }
+//    function onProgress(event) {
+//         socket.emit("progress", event);
+//     }
 
 function successCallback(callback, data){
   console.log("successed");
@@ -8,7 +16,7 @@ function successCallback(callback, data){
   var result = {
     "state" : true,
     "msg" : data
-  }
+  };
   callback(result);
 }
 function failureCallback(callback, data){
@@ -26,10 +34,76 @@ function dockerPromiseEvent(promiselist, callback) {
 }
 
 var p = {
+  "image" : {
+     "get" : function (data, opts ,callback) {
+      if(arguments.length == 2) {
+        callback = opts;
+        opts = null;
+      }
+        var list = [];
+        console.log(data);
+        for(var i in data) {
+            var image = docker.getImage(data[i].Id);
+            console.log(data);
+            list.push( new Promise(function (resolve, reject) {
+                  resolve(image[callback](opts) );
+            }));
+          };
+          return list;
+        }
+    ,
+     "search" : function (filters, callback) {
+       docker.searchImages(filters).then(successCallback.bind(null, callback) , failureCallback.bind(null, callback));
+     },
+     "remove" : function (data, callback) {
+       var promiseList = p.image.get(data, "remove");
+       dockerPromiseEvent(promiseList, callback);
+      //  docker.searchImages(filters).then(successCallback.bind(null, callback) , failureCallback.bind(null, callback));
+     },
+     "create" : function (data,  callback) {
+      //  progress,
+       docker.createImage(data, callback);
+     }
+  },
   "network" : {
+    "list" : function (filters, callback) {
+      console.log(filters);
+      console.log(callback);
+      docker.listNetworks(filters).then(successCallback.bind(null, callback) , failureCallback.bind(null, callback));
+    },
+    "get" : function (data, opts ,callback) {
+      if(arguments.length == 2) {
+        callback = opts;
+        opts = null;
+      }
+        var list = [];
+        for(var i in data) {
+            var network = docker.getNetwork(data[i].Id);
+            console.log(callback);
+            list.push( new Promise(function (resolve, reject) {
+                  resolve(network[callback](opts) );
+            }));
+          };
+          return list;
+        }
+    ,
     "create" : function (data, callback) {
       docker.createNetwork(data).then(successCallback.bind(null, callback) , failureCallback.bind(null, callback));
-    }
+    },
+    "remove" : function (data, callback) {
+      var promiseList = p.network.get(data, "remove");
+      dockerPromiseEvent(promiseList, callback);
+    },
+    "connect" : function (data, callback) {
+      var opts = {Container: data[1], EndpointConfig : {NetworkID : (data[0])[0].Id}};
+      var promiseList = p.network.get(data[0], opts,"connect");
+      dockerPromiseEvent(promiseList, callback);
+    },
+    "disconnect" : function (data, callback) {
+      var opts = {Container: data[1]}
+      var promiseList = p.network.get(data[0], opts,"disconnect");
+      dockerPromiseEvent(promiseList, callback);
+    },
   },
   "container" : {
     "create" : function (data, callback) {

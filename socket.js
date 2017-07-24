@@ -73,31 +73,35 @@ io.on('connection', function(socket) {
 
 network(socket);
 function network(socket) {
-  socket.on('ConnectNetwork', function(data, t) {
-    data.forEach((data)=>{
-      var network = docker.getNetwork(data.Id);
+  socket.on('ConnectNetwork', function(data, fn) {
+    // data.forEach((data)=>{
+    //   var network = docker.getNetwork(data.Id);
+    //
+    //   network.connect({Container: t, EndpointConfig : {NetworkID : data.Id}}, (data, err) => {console.log(data); console.log(err);});
+    // })
+    console.log(data);
+    p.network.connect(data, fn);
 
-      network.connect({Container: t, EndpointConfig : {NetworkID : data.Id}}, (data, err) => {console.log(data); console.log(err);});
-    })
   });
 
   socket.on('DisconnectNetwork', function(data, t) {
-    data.forEach((data)=>{
-      var network = docker.getNetwork(data.Id);
-      network.disconnect({Container: t}, (data, err) => {console.log(data); console.log(err);});
-    })
+    // data.forEach((data)=>{
+    //   var network = docker.getNetwork(data.Id);
+    //   network.disconnect({Container: t}, (data, err) => {console.log(data); console.log(err);});
+    // })
   });
 
-  socket.on('CreateNetwork', function(data) {
+  socket.on('CreateNetwork', function(data, fn) {
       console.log("socket");
-      p(docker, 'CreateNetwork', data);
+      p.network.create(data, fn);
   });
 
-  socket.on('RemoveNetwork', function(data) {
-      data.forEach((data)=>{
-        var network = docker.getNetwork(data.Id);
-        network.remove();
-      });
+  socket.on('RemoveNetwork', function(data, fn) {
+        // var network = docker.getNetwork(data.Id);
+        // network.remove();
+        console.log(data);
+        p.network.remove(data, fn);
+
       //network.disconnect({id: "bridge", Container: "xx"}, (data, err) => {console.log(data); console.log(err);});
       //network.connect(options, (data) => {console.log(data);});
   });
@@ -105,19 +109,35 @@ function network(socket) {
 
 images(socket);
 function images(socket){
-  socket.on("SearchImages", function(data){
-    docker.searchImages(data).then ( (data)=> {
-      console.log(data);
-      if(data) {
-        socket.emit('searchResult', data);
-      }
-    });
+  socket.on("SearchImages", function(data, fn){
+    console.log(data);
+    p.image.search(data, fn);
+    // docker.searchImages(data).then ( (data)=> {
+    //   console.log(data);
+    //   if(data) {
+    //     socket.emit('searchResult', data);
+    //   }
+    // });
   });
 
-  socket.on("pullImages", function(data) {
+  // function(err, stream) {
+  //
+  //   if (err) return done(err);
+  //
+  //   docker.modem.followProgress(stream, onFinished, onProgress);
+  //
+  //    function onFinished(err, output) {
+  //      console.log("onFinished");
+  //      done(socket);
+  //    }
+  //    function onProgress(event) {
+  //         socket.emit("progress", event);
+  //     }
+  // }
+  socket.on("PullImages", function(data, fn) {
     // console.log(data);
     data.forEach( (images) => {
-      docker.createImage({ "fromImage" : images.name , "tag" : "latest"},
+      p.image.create({ "fromImage" : images.name , "tag" : "latest"},
       function(err, stream) {
 
         if (err) return done(err);
@@ -126,7 +146,8 @@ function images(socket){
 
          function onFinished(err, output) {
            console.log("onFinished");
-           done(socket);
+           socket.emit("progress", true);
+
          }
          function onProgress(event) {
               socket.emit("progress", event);
@@ -134,18 +155,8 @@ function images(socket){
       });
     });
   });
-  socket.on("removeImages", function(data) {
-    data.forEach( (images) => {
-      var multiTag = images.RepoTags;
-      multiTag.forEach( (singleTag)=> {
-        var searchimage = docker.getImage(singleTag);
-        searchimage.remove().catch( (err) => {
-            socket.emit("errCatch", err);
-        }).then(()=>{
-          //console.log("remove");
-        });
-      });
-    });
+  socket.on("RemoveImages", function(data, fn) {
+    p.image.remove(data, fn);
   });
 }
 container(socket);

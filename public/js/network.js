@@ -6,13 +6,19 @@ var columns = [{
       title: 'Check'
   },{
       field: 'Name',
-      title: 'Name'
+      title: '네트워크 명',
+      sortable : true,
+      halign : "center",
+      align : "center"
   },{
       field: 'Id',
-      title: 'Id'
+      title: '네트워크 Id',
+      sortable : true,
+      halign : "center",
+      align : "center"
   },{
       field: 'Created',
-      title: 'Created'
+      title: '네트워크 생성일'
   },{
       field: 'Scope',
       title: 'Scope'
@@ -27,13 +33,22 @@ var columns = [{
       title: 'IPAM'
   },{
       field: 'IPAM.Config.0.IPRange',
-      title: 'IPRange'
+      title: 'IPRange',
+      sortable : true,
+      halign : "center",
+      align : "center"
   },{
       field: 'IPAM.Config.0.Subnet',
-      title: 'Subnet'
+      title: 'Subnet',
+      sortable : true,
+      halign : "center",
+      align : "center"
   },{
       field: 'IPAM.Config.0.Gateway',
-      title: 'Gateway'
+      title: 'Gateway',
+      sortable : true,
+      halign : "center",
+      align : "center"
   },{
       field: 'Internal',
       title: 'Internal'
@@ -89,10 +104,17 @@ $(function(){
 
   };
   networkTable.initUrlTable('/myapp/network/data.json', detailFormatter);
-  networkTable.hideColumns(["EnableIPv6", "Labels", "IPAM", "Containers", "Options"]);
+  networkTable.hideColumns(["EnableIPv6", "Labels", "IPAM", "Containers", "Options", "Created", "Id"]);
   networkTable.checkAllEvents();
   networkTable.clickRow($detail);
   networkTable.clickRowAddColor("danger");
+
+
+  var expandinfo = [{
+    url : "/myapp/network/",
+    keys : ["Containers", "Name", "Id", "Driver"]
+  }];
+  networkTable.expandRow(expandinfo);
 //   initUrlTable($network, columns, "/myapp/network/data.json");
 //
 //   clickTableRow($network, $detail);
@@ -103,6 +125,9 @@ $(function(){
 // initDropdown("/myapp/container/data.json", $('#container_list'), $("#container"), "Names", checkAddColor);
   initDropdown("/myapp/container/data.json", $('#container_list'), $("#container"), "Names");
   // clickDropdown("container");
+
+
+
   var $form = $("#CreateNetwork");
   $form.hide();
   $(".plus").click((e)=>{
@@ -111,8 +136,6 @@ $(function(){
     initDropdownArray(["bridge", "overlay", "macvlan"], $("#driver_list") , $("#driver"));
       var button = dialogbutton('Create', 'btn-primary create',
                 function(dialogItself){
-                  console.log($("#driver_list"));
-                  console.log($("#driver"));
 
                   var name = $("#name").val();
                   var driver = $('#driver').text().trim();
@@ -122,7 +145,7 @@ $(function(){
 
                     formAction($("#CreateNetwork"), opts, socket,
                     (data)=>  {
-                      reloadTable($container);
+                      networkTable.reload();
                       dialogShow("title", "message");
                     });
                 }
@@ -132,19 +155,42 @@ $(function(){
 
   })
 
+  function socketEvent(eventName, checkedRowLists, callback){
+    socket.emit(eventName, checkedRowLists, (data)=>{
+      checkedRowLists.splice(0,checkedRowLists.length);
+
+      callback(networkTable, data);
+    });
+  }
+
+  function completeEvent(table, data){
+     table.reload();
+     console.log(data);
+     var msg = "id : " + (data.msg) + "작업 완료";
+     dialogShow("네트워크", msg);
+  }
+
 
   $("#remove").click(()=>{
-    console.log(checklist);
-    socket.emit("RemoveNetwork", checklist);
+    if(hasValue(networkTable.checkedRowLists)){
+      socketEvent("RemoveNetwork", networkTable.checkedRowLists, completeEvent);
+    } else {
+      alert("선택하시요.");
+    }
   });
   $("#connect").click(()=>{
     if( $('#container').text().trim() != "Containers") {
-        socket.emit("ConnectNetwork", checklist, $('#container').text().trim());
+      if(hasValue(networkTable.checkedRowLists)){
+
+        socketEvent("ConnectNetwork", [networkTable.checkedRowLists, $('#container').text().trim()], completeEvent);
+      }
     }
   });
   $("#disconnect").click(()=>{
     if( $('#container').text().trim() != "Containers") {
-        socket.emit("DisconnectNetwork", checklist, $('#container').text().trim());
+      if(hasValue(networkTable.checkedRowLists)){
+        socketEvent("DisconnectNetwork", [networkTable.checkedRowLists, $('#container').text().trim()],completeEvent );
+      }
     }
 
   });

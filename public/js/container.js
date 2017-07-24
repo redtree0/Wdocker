@@ -90,14 +90,14 @@ $(function(){
     containerTable.checkAllEvents();
     containerTable.clickRow($detail);
     containerTable.clickRowAddColor("danger");
-     var expendinfo = [{
+     var expandinfo = [{
        url : "/myapp/container/top/",
        keys : ["Titles", "Processes"]
      },{
        url : "/myapp/container/stats/",
        keys : ["id", "name", "memory_stats", "networks", "cpu_stats", "Ports"]
      }];
-     containerTable.expendRow(expendinfo);
+     containerTable.expandRow(expandinfo);
 
      var $form = $("#CreateContainer");
      $form.hide();
@@ -119,9 +119,8 @@ $(function(){
                       var opts = containerSettings(image, name, command, portlists);
                       formAction($("#CreateContainer"), opts, socket,
                       (data)=>  {
-                        reloadTable($container);
-                        console.log(data);
-                        dialogShow("title", data);
+                        containerTable.reload();
+                        dialogShow("컨테이너", data);
                       });
                   }
       );
@@ -153,36 +152,53 @@ $(function(){
     });
   //
   //
-  function socketEvent(eventName, checklist, callback){
-    socket.emit(eventName, checklist, (data)=>{
-      checklist.splice(0,checklist.length);
-      reloadTable($container);
-       dialogShow("title", data.msg);
+  function socketEvent(eventName, checkedRowLists, callback){
+    socket.emit(eventName, checkedRowLists, (data)=>{
+      checkedRowLists.splice(0,checkedRowLists.length);
+      callback(containerTable, data);
     });
   }
 
+  function completeEvent(table, data){
+     table.reload();
+     var msg = "id : " + (data.msg)[0].id + "작업 완료";
+     dialogShow("컨테이너", msg);
+  }
+
     $(".start").click((e)=>{
-          socketEvent("StartContainer", checklist);
+      if(hasValue(containerTable.checkedRowLists)){
+        socketEvent("StartContainer", containerTable.checkedRowLists, completeEvent);
+      }
     });
 
     $(".stop").click((e)=>{
-          socketEvent("StopContainer", checklist);
+      if(hasValue(containerTable.checkedRowLists)){
+        socketEvent("StopContainer", containerTable.checkedRowLists, completeEvent);
+      }
     });
 
     $(".remove").click((e)=>{
-        socketEvent("RemoveContainer", checklist);
+      if(hasValue(containerTable.checkedRowLists)){
+        socketEvent("RemoveContainer", containerTable.checkedRowLists, completeEvent);
+      }
     });
 
     $(".kill").click((e)=>{
-        socketEvent("KillContainer", checklist);
+      if(hasValue(containerTable.checkedRowLists)){
+        socketEvent("KillContainer", containerTable.checkedRowLists, completeEvent);
+      }
     });
 
     $(".pause").click((e)=>{
-        socketEvent("PauseContainer", checklist);
+      if(hasValue(containerTable.checkedRowLists)){
+        socketEvent("PauseContainer", containerTable.checkedRowLists, completeEvent);
+      }
     });
 
     $(".unpause").click((e)=>{
-        socketEvent("UnpauseContainer", checklist);
+      if(hasValue(containerTable.checkedRowLists)){
+        socketEvent("UnpauseContainer", containerTable.checkedRowLists, completeEvent);
+      }
     });
 
 

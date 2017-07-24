@@ -18,7 +18,7 @@ module.exports = function(app){//함수로 만들어 객체 app을 전달받음
   app.route('/myapp/container/data.json').get( (req, res) => {
       promiseTojson(docker.listContainers({all: true}), res);
   })
-  app.route('/myapp/images/data.json').get( (req, res) => {
+  app.route('/myapp/image/data.json').get( (req, res) => {
       promiseTojson(docker.listImages(), res);
   });
 
@@ -37,43 +37,38 @@ module.exports = function(app){//함수로 만들어 객체 app을 전달받음
     // promiseTojson(docker.swarmInspect(), res);
     var id = req.params.id;
     var p = require("../p");
-    var promise = (p.container.stats(id));
-    promise.then((result)=>{
-      res.json(result);
-    }).catch((error)=>{
-      res.json(error);
-    });
+    var promise = (p.container.stats(id, (data)=>{res.json(data);}));
+
   });
 
   app.route('/myapp/container/top/:id').get( (req, res) => {
     // promiseTojson(docker.swarmInspect(), res);
     var id = req.params.id;
     var p = require("../p");
-    var promise = (p.container.top(id));
-    res.setHeader("Content-Type", "application/json");
+    var promise = (p.container.top(id, (data)=>{res.json(data.msg);}));
+    // res.setHeader("Content-Type", "application/json");
 
-    promise.then((result)=>{
-      res.json(result);
-    }).catch((error)=>{
-      res.json(error);
-    });
   });
 
   app.route('/myapp/container/logs/:id').get( (req, res) => {
     // promiseTojson(docker.swarmInspect(), res);
     var id = req.params.id;
     var p = require("../p");
-    var promise = (p.container.logs(id));
+    var promise = (p.container.logs(id, (data)=>{res.json(data.msg);}));
     // console.log(id);
-    promise.then((result)=>{
-      // console.log(result);
 
-      res.json(result);
-    }).catch((error)=>{
-      res.json(error);
-    });
   });
 
+  app.route('/myapp/network/:id').get( (req, res) => {
+    // promiseTojson(docker.swarmInspect(), res);
+    var id = req.params.id;
+    var p = require("../p");
+    var filters = { "filters" : {
+            id : [id]}
+          };
+    var promise = (p.network.list(filters, (data)=>{res.json(data.msg[0]);}));
+
+  });
 
   app.route('/myapp/dockerfile/data.json').get ( (req, res) => {
     var fs = require('fs');

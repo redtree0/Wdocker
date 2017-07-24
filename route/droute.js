@@ -61,7 +61,7 @@ app.route('/myapp/container')
             res.render("network.ejs");
           });
 
-  app.route('/myapp/images')
+  app.route('/myapp/image')
     .get( (req, res) => {
       res.render("image.ejs");
     });

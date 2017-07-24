@@ -18,27 +18,36 @@
           <div class="row placeholders">
             <div class="col-md-6" >
             </div>
-            <button id="remove" class="btn btn-danger">Remove</button>
-            <button  onclick=" return false;"  type="button" class="btn btn-info btn-lg plus">
-              <span class="glyphicon glyphicon-plus"></span> Plus
-              </a></button>
+            <div id="bgrp" class="btn-group" role="group">
+              <button  onclick=" return false;"  type="button" class="btn btn-info btn-lg plus">
+                <span class="glyphicon glyphicon-plus"></span> Plus
+              </button>
+                <button id="remove" class="btn btn-danger btn-lg">
+                  <span class="glyphicon glyphicon-remove"></span>
+                  Remove</button>
+            </div>
+
+
+            <div class="btn-group">
+              <button id="container" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                 Containers <span class="caret"></span>
+              </button>
+              <ul class="dropdown-menu" id="container_list">
+              </ul>
+            </div>
+            <div id="network" class="btn-group" role="group">
+                    <button id="connect" type="button" class="btn btn-success btn-lg ctlbtn">
+                      <span class="glyphicon glyphicon-log-in"></span>
+                      Connect</button>
+                    <button id="disconnect" type="button" class="btn btn-default btn-lg ctlbtn">
+                      <span class="glyphicon glyphicon-log-out"></span>Disconnect</button>
+            </div>
+
+              <table id="networklist" class="table table-striped jsonTable">
+              </table>
 
               <div id="detail" class="row detail">
               </div>
-              <table id="networklist" class="table table-striped jsonTable">
-              </table>
-              <div class="btn-group">
-                <button id="container" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                   Containers <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu" id="container_list">
-                </ul>
-              </div>
-              <div id="network" class="btn-group" role="group">
-                      <button id="connect" type="button" class="btn btn-success btn-lg ctlbtn">Connect</button>
-                      <button id="disconnect" type="button" class="btn btn-default btn-lg ctlbtn">Disconnect</button>
-              </div>
-
           </div>
 
           <form class="form-horizontal" id="CreateNetwork">
