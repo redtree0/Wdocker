@@ -71,6 +71,14 @@ io.on('connection', function(socket) {
       });
 
 
+      socket.on('dirtree', function(data, fn) {
+        const PATH = require('path');
+        const dirTree = require('directory-tree');
+
+        const tree = dirTree('/home/pirate/dockerfile/', {extensions:/\W/, exclude:/^\./});
+        fn(tree);
+      });
+
 network(socket);
 function network(socket) {
   socket.on('ConnectNetwork', function(data, fn) {
@@ -97,43 +105,20 @@ function network(socket) {
   });
 
   socket.on('RemoveNetwork', function(data, fn) {
-        // var network = docker.getNetwork(data.Id);
-        // network.remove();
-        console.log(data);
+
         p.network.remove(data, fn);
 
-      //network.disconnect({id: "bridge", Container: "xx"}, (data, err) => {console.log(data); console.log(err);});
-      //network.connect(options, (data) => {console.log(data);});
   });
 }
 
 images(socket);
 function images(socket){
   socket.on("SearchImages", function(data, fn){
-    console.log(data);
     p.image.search(data, fn);
-    // docker.searchImages(data).then ( (data)=> {
-    //   console.log(data);
-    //   if(data) {
-    //     socket.emit('searchResult', data);
-    //   }
-    // });
+
   });
 
-  // function(err, stream) {
-  //
-  //   if (err) return done(err);
-  //
-  //   docker.modem.followProgress(stream, onFinished, onProgress);
-  //
-  //    function onFinished(err, output) {
-  //      console.log("onFinished");
-  //      done(socket);
-  //    }
-  //    function onProgress(event) {
-  //         socket.emit("progress", event);
-  //     }
-  // }
+
   socket.on("PullImages", function(data, fn) {
     // console.log(data);
     data.forEach( (images) => {
@@ -159,6 +144,8 @@ function images(socket){
     p.image.remove(data, fn);
   });
 }
+
+
 container(socket);
 function container(socket){
   console.log("contianer");

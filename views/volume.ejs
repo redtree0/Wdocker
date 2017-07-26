@@ -4,9 +4,9 @@
 <head>
   <% include ./partials/head %>
   <!-- 스크립트 -->
-  <script src='/myapp/js/ajaxTest.js'></script>
-  <script src='/myapp/js/socketio.js'></script>
-
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.2/themes/default/style.min.css" />
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.2/jstree.min.js"></script>
+  <script src='/myapp/js/volume.js'></script>
 </head>
 
 <body>
@@ -19,7 +19,7 @@
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
           <div class="row placeholders">
 
-        <table class="table table-striped">
+        <!-- <table class="table table-striped">
           <thead>
             <tr>
               <td>#</td>
@@ -27,7 +27,16 @@
               <td>Warnings</td>
             </tr>
           </thead>
-        </table>
+        </table> -->
+
+        <div id="filelist">
+        </div>
+          <!-- <div class="row">
+                <div class="col-md-12">
+                      <div id="filelist">
+                      </div>
+                </div>
+          </div> -->
           </div>
 
         </div>
