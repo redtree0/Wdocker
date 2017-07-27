@@ -4,10 +4,18 @@ module.exports = function(app){//함수로 만들어 객체 app을 전달받음
 
   var docker = require('../docker')();
 
-  function promiseTojson(callback, res){
+  function promiseTojson(callback, res, opts){
     callback.then( (resultJson) => {
       res.setHeader("Content-Type", "application/json");
-      res.json(resultJson);
+      if(opts) {
+        var resdata = resultJson[opts];
+      }else {
+          var resdata  = resultJson;
+      }
+      if( resdata === null ){
+          res.json(false);
+      }
+      res.json(resdata);
     });
   }
 
@@ -21,7 +29,9 @@ module.exports = function(app){//함수로 만들어 객체 app을 전달받음
   app.route('/myapp/image/data.json').get( (req, res) => {
       promiseTojson(docker.listImages(), res);
   });
-
+  app.route('/myapp/volume/data.json').get( (req, res) => {
+      promiseTojson(docker.listVolumes(), res, "Volumes");
+  });
   app.route('/myapp/node/data.json').get( (req, res) => {
       promiseTojson(docker.listNodes(), res);
   });

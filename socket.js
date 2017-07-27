@@ -75,7 +75,8 @@ io.on('connection', function(socket) {
         const PATH = require('path');
         const dirTree = require('directory-tree');
 
-        const tree = dirTree('/home/pirate/dockerfile/', {extensions:/\W/, exclude:/^\./});
+        const tree = dirTree('/home/pirate/dockerfile/', { exclude:/^\./});
+        console.log(tree);
         fn(tree);
       });
 
@@ -100,14 +101,11 @@ function network(socket) {
   });
 
   socket.on('CreateNetwork', function(data, fn) {
-      console.log("socket");
       p.network.create(data, fn);
   });
 
   socket.on('RemoveNetwork', function(data, fn) {
-
         p.network.remove(data, fn);
-
   });
 }
 
@@ -227,6 +225,20 @@ function dockerfile(socket){
       });
       done(socket);
   });
+}
+
+volume(socket);
+function volume(socket){
+  socket.on("CreateVolume", function(data, fn){
+      console.log(data);
+      p.volume.create(data, fn);
+  });
+
+  socket.on("RemoveVolume", function(data, fn){
+    p.volume.remove(data, fn);
+    // console.log(data);
+  });
+
 }
 
 socket.on("swarmInit", function(port){

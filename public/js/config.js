@@ -106,6 +106,21 @@ var config = (function(){
     }
   };
 
+  var volume = {
+    "Name" : "",
+    "Driver" : ""
+    // , "DriverOpts"  : ""
+  };
+
+  var getVolume = function(){
+    return volume;
+  }
+  var setVolume = function (filter){
+    var opts = volume;
+    opts.Name = filter.Name;
+    opts.Driver = filter.Driver;
+  }
+
   var service = {
           "Name" : "",
           "TaskTemplate" : {
@@ -158,7 +173,9 @@ var config = (function(){
     getNetwork : getNetwork,
     setNetwork : setNetwork,
     getImage : getImage,
-    setImage : setImage
+    setImage : setImage,
+    getVolume : getVolume,
+    setVolume : setVolume 
   };
 
 })();

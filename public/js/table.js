@@ -22,7 +22,7 @@ table.prototype.initUrlTable = function (urljson, detailformat) {
   if(detailformat) {
     init.detailFormatter = detailFormatter
   }
-
+  console.log(init);
   (this.$table).bootstrapTable(init);
 }
 

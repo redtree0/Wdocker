@@ -1,7 +1,8 @@
 // client index.js
 'use strict';
-var socket = io();
 
+// console.log(socket);
+// var a = new t(socket);
 var columns = [{
       checkbox: true,
       title: 'Check'
@@ -75,6 +76,10 @@ function containerSettings (image, name, cmd, portArray){
 
 
 $(function(){
+  var socket = io();
+  var Socket = require("./io");
+  var client = new Socket(socket, $('body'));
+    var spin = require("./spinner");
     var table = require("./table.js");
     var $container = $(".jsonTable");
     var $detail = $(".detail");
@@ -98,6 +103,7 @@ $(function(){
        keys : ["id", "name", "memory_stats", "networks", "cpu_stats", "Ports"]
      }];
      containerTable.expandRow(expandinfo);
+
 
      var $form = $("#CreateContainer");
      $form.hide();
@@ -151,54 +157,39 @@ $(function(){
         }
     });
   //
-  //
-  function socketEvent(eventName, checkedRowLists, callback){
-    socket.emit(eventName, checkedRowLists, (data)=>{
-      checkedRowLists.splice(0,checkedRowLists.length);
-      callback(containerTable, data);
-    });
-  }
 
-  function completeEvent(table, data){
+
+
+  var completeEvent = function(table, data, callback){
+    console.log(arguments);
      table.reload();
      var msg = "id : " + (data.msg)[0].id + "작업 완료";
      dialogShow("컨테이너", msg);
+     callback;
   }
 
     $(".start").click((e)=>{
-      if(hasValue(containerTable.checkedRowLists)){
-        socketEvent("StartContainer", containerTable.checkedRowLists, completeEvent);
-      }
+      client.socketTableEvent("StartContainer", containerTable, completeEvent);
     });
 
     $(".stop").click((e)=>{
-      if(hasValue(containerTable.checkedRowLists)){
-        socketEvent("StopContainer", containerTable.checkedRowLists, completeEvent);
-      }
+        client.socketTableEvent("StopContainer", containerTable, completeEvent);
     });
 
     $(".remove").click((e)=>{
-      if(hasValue(containerTable.checkedRowLists)){
-        socketEvent("RemoveContainer", containerTable.checkedRowLists, completeEvent);
-      }
+        client.socketTableEvent("RemoveContainer", containerTable, completeEvent);
     });
 
     $(".kill").click((e)=>{
-      if(hasValue(containerTable.checkedRowLists)){
-        socketEvent("KillContainer", containerTable.checkedRowLists, completeEvent);
-      }
+        client.socketTableEvent("KillContainer", containerTable, completeEvent);
     });
 
     $(".pause").click((e)=>{
-      if(hasValue(containerTable.checkedRowLists)){
-        socketEvent("PauseContainer", containerTable.checkedRowLists, completeEvent);
-      }
+        client.socketTableEvent("PauseContainer", containerTable, completeEvent);
     });
 
     $(".unpause").click((e)=>{
-      if(hasValue(containerTable.checkedRowLists)){
-        socketEvent("UnpauseContainer", containerTable.checkedRowLists, completeEvent);
-      }
+        client.socketTableEvent("UnpauseContainer", containerTable, completeEvent);
     });
 
 

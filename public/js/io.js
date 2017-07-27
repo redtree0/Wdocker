@@ -1,33 +1,50 @@
 
   // socket.io 서버에 접속한다
 
-var socket = function (io) {
-  var socket = io;
-  return {
-    login : function(callback) {
-      socket.emit("login", {
-        // name: "ungmo2",
-        name: "my",
-        userid: "test"
-      });
+var clientsocket = (function clientsocket(io, $body) {
+  this.socket = io;
+  this.$body = $body;
+  console.log(io);
+});
+
+  clientsocket.prototype.login = function(callback) {
+    this.socket.emit("login", {
+      // name: "ungmo2",
+      name: "my",
+      userid: "test"
+    });
+    if(typeof callback === "function") {
+      callback;
+    }
+  };
+
+  clientsocket.prototype.isFinished = function(callback){
+    this.socket.on("isFinished", (data)=>{
+      if(data){
+        console.log("isFinished");
+      }
       if(typeof callback === "function") {
         callback;
       }
-    },
+    });
+  };
 
-   isFinished : function(callback){
-      socket.on("isFinished", (data)=>{
-        if(data){
-          console.log("isFinished");
+  clientsocket.prototype.socketTableEvent = function(eventName, table, callback){
+      var checkedRowLists = table.checkedRowLists;
+      if(hasValue(checkedRowLists)){
+          var socket =  this.socket;
+          (this.$body).spinStart();
+          console.log(socket);
+          socket.emit(eventName, checkedRowLists, (data)=>{
+            table.checkedRowLists.splice(0, checkedRowLists.length);
+            callback(table, data, (this.$body).spinStop());
+          });
         }
-        if(typeof callback === "function") {
-          callback;
-        }
-      });
-    }
+    };
 
-  }
-}
+    clientsocket.prototype.completeEvent = function(){
+
+    };
 
 
   //
@@ -47,4 +64,4 @@ var socket = function (io) {
   //   });
   // }
 
-module.exports = socket;
+module.exports = clientsocket;

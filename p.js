@@ -1,15 +1,5 @@
 var docker = require("./docker")();
 
-// docker.modem.followProgress(stream, onFinished, onProgress);
-//
-//    function onFinished(err, output) {
-//      console.log("onFinished");
-//      done(socket);
-//    }
-//    function onProgress(event) {
-//         socket.emit("progress", event);
-//     }
-
 function successCallback(callback, data){
   console.log("successed");
   console.log(data);
@@ -34,6 +24,34 @@ function dockerPromiseEvent(promiselist, callback) {
 }
 
 var p = {
+  "volume": {
+    "get" : function (data, opts ,callback) {
+     if(arguments.length == 2) {
+       callback = opts;
+       opts = null;
+     }
+       var list = [];
+       console.log(data);
+       for(var i in data) {
+           var volume = docker.getVolume(data[i].Name);
+           console.log(data);
+           list.push( new Promise(function (resolve, reject) {
+                 resolve(volume[callback](opts) );
+           }));
+         };
+         return list;
+       },
+    "create" : function (data, callback) {
+      docker.createVolume(data).then(successCallback.bind(null, callback) , failureCallback.bind(null, callback));
+
+       },
+    "remove" : function (data, callback) {
+      var promiseList = p.volume.get(data, "remove");
+      dockerPromiseEvent(promiseList, callback);
+     //  docker.searchImages(filters).then(successCallback.bind(null, callback) , failureCallback.bind(null, callback));
+    }
+  },
+
   "image" : {
      "get" : function (data, opts ,callback) {
       if(arguments.length == 2) {

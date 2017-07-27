@@ -4,27 +4,24 @@
 <head>
   <% include ./partials/head %>
   <!-- 스크립트 -->
-  <!-- <script src='/myapp/js/io.js'></script> -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/spin.js/2.3.2/spin.min.js"></script>
   <script src='/myapp/js/bundle/container.bundle.js'></script>
-  <!-- <script src='/myapp/js/bundle/table.bundle.js'></script> -->
-  <!-- <script src='/myapp/js/container.js'></script> -->
+  <!-- <script src="//code.jquery.com/jquery-3.1.1.slim.min.js"></script> -->
+  <!-- <script src="js/jquery.loadingModal.js"></script> -->
+
 
 </head>
 
 
-<body>
+<body id="body">
   <% include ./partials/topnav %>
 
-  <p id='test'></p>
 <div class="container-fluid">
       <div class="row">
         <% include ./partials/nav %>
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
           <div class="row placeholders">
-            <div class="container">
 
-
-            </div>
             <div>
               <h3 id="title">Containers List</h3>
 
