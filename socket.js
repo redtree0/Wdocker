@@ -118,12 +118,12 @@ function images(socket){
 
 
   socket.on("PullImages", function(data, fn) {
-    // console.log(data);
+    console.log(data);
     data.forEach( (images) => {
       p.image.create({ "fromImage" : images.name , "tag" : "latest"},
       function(err, stream) {
 
-        if (err) return done(err);
+        if (err) return fn(err);
 
         docker.modem.followProgress(stream, onFinished, onProgress);
 

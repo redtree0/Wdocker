@@ -1,6 +1,5 @@
 // network.js
 "use strict";
-var socket = io();
 var columns = [{
       checkbox: true,
       title: 'Check'
@@ -93,6 +92,10 @@ var columns = [{
   }
 
 $(function(){
+  var socket = io();
+  var Socket = require("./io");
+  var client = new Socket(socket, $('body'));
+  var spin = require("./spinner");
   var checklist =[];
   var $network = $(".jsonTable");
   var $detail = $(".detail");
@@ -115,26 +118,19 @@ $(function(){
     keys : ["Containers", "Name", "Id", "Driver"]
   }];
   networkTable.expandRow(expandinfo);
-//   initUrlTable($network, columns, "/myapp/network/data.json");
-//
-//   clickTableRow($network, $detail);
-//
-//   checkTableEvent($network, checklist);
-//
-//   clickRowAddColor($network, "danger");
 // initDropdown("/myapp/container/data.json", $('#container_list'), $("#container"), "Names", checkAddColor);
   initDropdown("/myapp/container/data.json", $('#container_list'), $("#container"), "Names");
-  // clickDropdown("container");
-
 
 
   var $form = $("#CreateNetwork");
   $form.hide();
   $(".plus").click((e)=>{
     e.preventDefault();
+    var dialog = require("./dialog");
+    var popup = new dialog("네트워크 생성", $form.show(), $("body"));
 
     initDropdownArray(["bridge", "overlay", "macvlan"], $("#driver_list") , $("#driver"));
-      var button = dialogbutton('Create', 'btn-primary create',
+    popup.appendButton('Create', 'btn-primary create',
                 function(dialogItself){
 
                   var name = $("#name").val();
@@ -143,67 +139,49 @@ $(function(){
 
                   var opts = networkSettings(name, driver, internal);
 
-                    formAction($("#CreateNetwork"), opts, socket,
-                    (data)=>  {
-                      networkTable.reload();
-                      dialogShow("title", "message");
-                    });
+                    client.socketEvent("CreateNetwork", opts,  networkTable, completeEvent);
+
                 }
     );
 
-    dialogShow("네트워크 생성", $form.show(), button);
+    popup.show();
 
   })
 
-  function socketEvent(eventName, checkedRowLists, callback){
-    socket.emit(eventName, checkedRowLists, (data)=>{
-      checkedRowLists.splice(0,checkedRowLists.length);
 
-      callback(networkTable, data);
-    });
-  }
+  var completeEvent = function(table, data, callback){
+    if(hasValue(table, data)){
+      table.reload();
 
-  function completeEvent(table, data){
-     table.reload();
-     console.log(data);
-     var msg = "id : " + (data.msg) + "작업 완료";
-     dialogShow("네트워크", msg);
-  }
+      var finished = new dialog("네트워크", data.msg + data.statusCode, $("body"));
+      finished.setDefaultButton('Close[Enker]', 'btn-primary create');
+      finished.show();
 
-
-  $("#remove").click(()=>{
-    if(hasValue(networkTable.checkedRowLists)){
-      socketEvent("RemoveNetwork", networkTable.checkedRowLists, completeEvent);
-    } else {
-      alert("선택하시요.");
+      callback;
     }
+  }
+
+  var opts = {
+    "table" : networkTable,
+    "lists" : networkTable.checkedRowLists
+  }
+  $("#remove").click(()=>{
+    client.socketTableEvent("RemoveNetwork", opts, completeEvent);
   });
   $("#connect").click(()=>{
     if( $('#container').text().trim() != "Containers") {
-      if(hasValue(networkTable.checkedRowLists)){
-
-        socketEvent("ConnectNetwork", [networkTable.checkedRowLists, $('#container').text().trim()], completeEvent);
-      }
+      opts.container = $('#container').text().trim();
+      client.socketTableEvent("ConnectNetwork", opts, completeEvent);
     }
+
+
   });
   $("#disconnect").click(()=>{
     if( $('#container').text().trim() != "Containers") {
-      if(hasValue(networkTable.checkedRowLists)){
-        socketEvent("DisconnectNetwork", [networkTable.checkedRowLists, $('#container').text().trim()],completeEvent );
-      }
+        opts.container = $('#container').text().trim();
+        client.socketTableEvent("DisconnectNetwork", opts, completeEvent);
     }
-
   });
 
 
-  // $(".create").click((e)=>{
-  //   var name = $("#name").val();
-  //   var driver = $('#driver').text().trim();
-  //   var internal = $("#internal").prop('checked');
-  //
-  //   var opts = networkSettings(name, driver, internal);
-  //
-  //   formSubmit($("#CreateNetwork"), opts
-  //      , socket, ()=> { reloadTable('networklist'); dialogShow("title", "message")});
-  //  });
 });

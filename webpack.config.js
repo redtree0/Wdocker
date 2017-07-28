@@ -1,6 +1,7 @@
 module.exports = {
   entry: {
     config : './public/js/config.js',
+    dialog : './public/js/dialog.js',
     io : "./public/js/io.js",
     container : './public/js/container.js',
     network : './public/js/network.js',

@@ -48,7 +48,7 @@ function hasValue (){
   // console.log(arguments);
   for(var i in arg) {
     // console.log(arg[i]);
-    if (arg[i] == "" || arg[i] == null || typeof arg[i] == undefined){
+    if (arg[i] === "" || arg[i] === null || typeof arg[i] === undefined ){
       return false;
     }
   }
@@ -64,7 +64,7 @@ function createButton( buttonid , action, color, icon){
     function insertArray(lists, $arrays){
 
       var json = {};
-      for ( var i in  $array) {
+      for ( var i in  $arrays) {
         var val = $arrays[i].val();
         if( $arrays[i].val() == "on" ||  $arrays[i].val() == "off") {
           val = ( $arrays[i].prop('checked') ? "tcp" : "udp");
@@ -121,40 +121,6 @@ function clickDeleteList($list, dataLists){
           }
     });
 }
-
-
-function formAction($form, settings, socket, callback){
-
-  if(!settings) {
-    alert("more need arguments");
-  } else {
-    socket.emit($form.attr("id"), settings, callback);
-  }
-  //
-  // if(callback != null) {
-  //   callback();
-  // }
-}
-
-function formSubmit($form, settings, socket, callback) {
-  console.log(arguments);
-
-  $form.submit(function(e) {
-
-    // e.preventDefault();
-    console.log(settings);
-    if(!settings) {
-      alert("more need arguments");
-    } else {
-      socket.emit($form.attr("id"), settings);
-    }
-
-    if(callback != null) {
-      callback();
-    }
-  });
-}
-
 
 
 function createElement( _element, _class,  _text, _id, _type){

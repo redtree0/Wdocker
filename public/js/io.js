@@ -29,16 +29,32 @@ var clientsocket = (function clientsocket(io, $body) {
     });
   };
 
-  clientsocket.prototype.socketTableEvent = function(eventName, table, callback){
-      var checkedRowLists = table.checkedRowLists;
+  clientsocket.prototype.socketTableEvent = function(eventName, opts, callback){
+
+    var state = null;
+    if(opts.hasOwnProperty("table") && opts.hasOwnProperty("lists")){
+          state = true;
+    }else if(opts.hasOwnProperty("container")){
+          state = false;
+    } else {
+      return false;
+    }
+      var table = opts.table;
+      var checkedRowLists = opts.lists;
       if(hasValue(checkedRowLists)){
           var socket =  this.socket;
           (this.$body).spinStart();
-          console.log(socket);
-          socket.emit(eventName, checkedRowLists, (data)=>{
-            table.checkedRowLists.splice(0, checkedRowLists.length);
-            callback(table, data, (this.$body).spinStop());
-          });
+          if(state){
+            socket.emit(eventName, opts.lists, (data)=>{
+              opts.table.checkedRowLists.splice(0, checkedRowLists.length);
+              callback(table, data, (this.$body).spinStop());
+            });
+          }else {
+            socket.emit(eventName, opts, (data)=>{
+              opts.table.checkedRowLists.splice(0, checkedRowLists.length);
+              callback(table, data, (this.$body).spinStop());
+            });
+          }
         }
     };
 
@@ -46,22 +62,24 @@ var clientsocket = (function clientsocket(io, $body) {
 
     };
 
+    clientsocket.prototype.socketEvent = function(eventName, settings, table, callback){
+      var socket =  this.socket;
+      var $body = this.$body;
+      if(arguments.length === 3) {
+        callback = table;
+      }
+      if(!settings) {
+        alert("more need arguments");
+      } else {
+        $body.spinStart();
+        socket.emit(eventName, settings, (data)=>{
+          console.log(arguments);
+          // callback(table, data, (this.$body).spinStop());
+          callback(table, data, (this.$body).spinStop());
+        });
 
-  //
-  // function doneCatch(socket, callback){
-  //   socket.on("doneCatch", (data)=>{
-  //     if(data){
-  //       alert("done");
-  //       callback();
-  //       return true;
-  //     }
-  //   });
-  // }
-  //
-  // function socketErrorCatch(socket) {
-  //   socket.on("errCatch", (err)=> {
-  //     alert(err.json.message);
-  //   });
-  // }
+      }
+
+    };
 
 module.exports = clientsocket;

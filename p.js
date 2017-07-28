@@ -14,6 +14,7 @@ function failureCallback(callback, data){
   console.log(data);
   var error = {
       "state" : false ,
+      "statusCode" : data.statusCode,
       "msg" : data.json.message
     }
   callback(error);
@@ -113,8 +114,8 @@ var p = {
       dockerPromiseEvent(promiseList, callback);
     },
     "connect" : function (data, callback) {
-      var opts = {Container: data[1], EndpointConfig : {NetworkID : (data[0])[0].Id}};
-      var promiseList = p.network.get(data[0], opts,"connect");
+      var opts = {Container: data.container, EndpointConfig : {NetworkID : (data[0])[0].Id}};
+      var promiseList = p.network.get(data.lists, opts,"connect");
       dockerPromiseEvent(promiseList, callback);
     },
     "disconnect" : function (data, callback) {
@@ -125,6 +126,7 @@ var p = {
   },
   "container" : {
     "create" : function (data, callback) {
+      console.log(data);
         docker.createContainer(data).then(successCallback.bind(null, callback) , failureCallback.bind(null, callback));
     },
     "get" : function (data, callback) {

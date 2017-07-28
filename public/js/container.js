@@ -81,6 +81,7 @@ $(function(){
   var client = new Socket(socket, $('body'));
     var spin = require("./spinner");
     var table = require("./table.js");
+    var dialog = require("./dialog.js");
     var $container = $(".jsonTable");
     var $detail = $(".detail");
     var $list = $(".portlists");
@@ -114,24 +115,21 @@ $(function(){
       var $image =$('#image');
       var $name = $("#name");
       var $command = $("#command");
+      var dialog = require("./dialog");
+      var popup = new dialog("컨테이너 생성", $form.show(), $("body"));
 
-        initDropdown('/myapp/images/data.json', $(".dropdown-menu"), $image, "RepoTags", 0);
-        var button = dialogbutton('Create', 'btn-primary create',
+      initDropdown('/myapp/image/data.json', $(".dropdown-menu"), $image, "RepoTags", 0);
+      popup.appendButton('Create', 'btn-primary create',
                   function(dialogItself){
 
                       var image = $image.text().trim();
                       var name = $name.val();
-                      var cmd = $command.val();
+                      var command = $command.val();
                       var opts = containerSettings(image, name, command, portlists);
-                      formAction($("#CreateContainer"), opts, socket,
-                      (data)=>  {
-                        containerTable.reload();
-                        dialogShow("컨테이너", data);
-                      });
-                  }
-      );
+                      client.socketEvent("CreateContainer", opts, containerTable, completeEvent);
+                  });
 
-      dialogShow("컨테이너 생성", $form.show(), button);
+      popup.show();
 
     });
 
@@ -161,35 +159,44 @@ $(function(){
 
 
   var completeEvent = function(table, data, callback){
-    console.log(arguments);
-     table.reload();
-     var msg = "id : " + (data.msg)[0].id + "작업 완료";
-     dialogShow("컨테이너", msg);
-     callback;
+    if(hasValue(table, data)){
+      table.reload();
+
+      var finished = new dialog("컨테이너", data.msg + data.statusCode, $("body"));
+      finished.setDefaultButton('Close[Enker]', 'btn-primary create');
+      finished.show();
+
+      callback;
+    }
+  }
+
+  var opts = {
+    "table" : containerTable,
+    "lists" : containerTable.checkedRowLists
   }
 
     $(".start").click((e)=>{
-      client.socketTableEvent("StartContainer", containerTable, completeEvent);
+      client.socketTableEvent("StartContainer", opts, completeEvent);
     });
 
     $(".stop").click((e)=>{
-        client.socketTableEvent("StopContainer", containerTable, completeEvent);
+        client.socketTableEvent("StopContainer", opts, completeEvent);
     });
 
     $(".remove").click((e)=>{
-        client.socketTableEvent("RemoveContainer", containerTable, completeEvent);
+        client.socketTableEvent("RemoveContainer", opts, completeEvent);
     });
 
     $(".kill").click((e)=>{
-        client.socketTableEvent("KillContainer", containerTable, completeEvent);
+        client.socketTableEvent("KillContainer", opts, completeEvent);
     });
 
     $(".pause").click((e)=>{
-        client.socketTableEvent("PauseContainer", containerTable, completeEvent);
+        client.socketTableEvent("PauseContainer", opts, completeEvent);
     });
 
     $(".unpause").click((e)=>{
-        client.socketTableEvent("UnpauseContainer", containerTable, completeEvent);
+        client.socketTableEvent("UnpauseContainer", opts, completeEvent);
     });
 
 

@@ -1,35 +1,61 @@
-function dialogShow(_title, _message, button) {
 
-    var dialog = new BootstrapDialog({
-      title: _title,
-      message: _message,
-      buttons: [ {
-        label: 'Close',
+var dialog = (function dialog(title, message, $body){
+  this.title = title;
+  this.message = message;
+  this.button =  [{
+        label: 'Close'
+        ,
         action: function(dialogItself){
           dialogItself.close();
         }
-      }]
-    });
+   }];
+  this.$body = $body;
+});
 
-    if(button) {
-      appendButton(dialog, button)
-    }else {
+function makeBootstrapDialog(title, message, button){
+  return new BootstrapDialog({
+    title: title,
+    message: message,
+    buttons: button
+  });
+};
 
-    }
-    return dialog.open();
+dialog.prototype.show = function () {
+  // console.log();
+    var dialogShow = makeBootstrapDialog(
+      this.title,
+      this.message,
+      this.button
+    );
 
-}
+    dialogShow.open();
+};
 
-function appendButton(dialog, button) {
-    return dialog.options.buttons.unshift(button);
-}
+dialog.prototype.setDefaultButton= function(label, className) {
 
-function dialogbutton(_label, _class, Actionfn) {
+  var enterKey = 13;
+  this.button = [{
+       label: label,
+       cssClass: className,
+       hotkey: enterKey
+       ,
+       action:  function(dialogItself){
+         dialogItself.close();
+       }
+   }];
 
-    var button = {
-       label: _label,
-       cssClass: _class,
-       action: Actionfn
+};
+
+dialog.prototype.appendButton = function(label, className, fn) {
+
+  var button = {
+       label: label,
+       cssClass: className,
+       action: fn
    }
-  return button;
-}
+
+   this.button.unshift(button)
+};
+
+
+module.exports = dialog;
