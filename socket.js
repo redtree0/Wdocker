@@ -70,12 +70,18 @@ io.on('connection', function(socket) {
           isFinished();
       });
 
-
       socket.on('dirtree', function(data, fn) {
         const PATH = require('path');
         const dirTree = require('directory-tree');
+        var tree = null;
 
-        const tree = dirTree('/home/pirate/dockerfile/', { exclude:/^\./});
+        if (data == ""){
+           var home = '/home/pirate/dockerfile/';
+          //  var home = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
+          tree = dirTree(home, { exclude:/^\./ , extensions:/\W/ } );
+        } else if (data){
+          tree = dirTree(data, { exclude:/^\./ , extensions:/\W/ } );
+        }
         console.log(tree);
         fn(tree);
       });

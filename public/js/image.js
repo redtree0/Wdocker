@@ -85,7 +85,7 @@
 
 
         var $msgdiag = $("#msgdiag");
-$msgdiag.hide();
+        $msgdiag.hide();
         $(".download").click((e)=> {
           e.preventDefault();
 
@@ -98,12 +98,14 @@ $msgdiag.hide();
           var $progress = $(".progress-bar");
           $progress.css("width", '0%');
           var popup = new dialog("이미지 다운 중", $msgdiag.show(), $("body"));
-
+          var $status = $("#status");
           socket.on("progress", (event)=> {
-            // console.log(JSON.stringify(event.progressDetail.current));
-            // console.log(JSON.stringify(event.progressDetail.total));
-// 일부값 ÷ 전체값 X 100
-            if(event.progressDetail){
+
+
+            if((event.status)){
+              $status.text(event.status);
+            }
+            if((event.progressDetail)){
               var download = event.progressDetail;
               if(download.current && download.total){
 
@@ -116,6 +118,9 @@ $msgdiag.hide();
                 }
 
               }
+            }else if (event === true) {
+                popup.close(5000);
+                imageTable.reload();
             }
 
 

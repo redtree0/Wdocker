@@ -48,7 +48,7 @@ function hasValue (){
   // console.log(arguments);
   for(var i in arg) {
     // console.log(arg[i]);
-    if (arg[i] === "" || arg[i] === null || typeof arg[i] === undefined ){
+    if (arg[i] === "" || typeof arg[i] === null || arg[i] === null || typeof arg[i] === undefined ){
       return false;
     }
   }

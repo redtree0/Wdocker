@@ -26,7 +26,7 @@
      return this;
    };
 
-   $.fn.spinStop = function stopMe($body){
+   $.fn.spinStop = function stopMe(){
      $(this).data().spinner.stop();
      // $('#'+id).data('spinner').stop();
    }

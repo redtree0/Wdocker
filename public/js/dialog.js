@@ -10,6 +10,7 @@ var dialog = (function dialog(title, message, $body){
         }
    }];
   this.$body = $body;
+  this.dialogInstance = null;
 });
 
 function makeBootstrapDialog(title, message, button){
@@ -22,13 +23,23 @@ function makeBootstrapDialog(title, message, button){
 
 dialog.prototype.show = function () {
   // console.log();
-    var dialogShow = makeBootstrapDialog(
+    this.dialogInstance = makeBootstrapDialog(
       this.title,
       this.message,
       this.button
     );
 
-    dialogShow.open();
+    (this.dialogInstance).open();
+};
+
+dialog.prototype.close = function (timeout) {
+    var diaglogInstance = (this.dialogInstance);
+    var $body = (this.$body);
+    diaglogInstance.getModalBody().html('Dialog closes in 5 seconds.');
+    setTimeout(function(){
+              diaglogInstance.close();
+               $body.spinStop();
+    }, timeout);
 };
 
 dialog.prototype.setDefaultButton= function(label, className) {

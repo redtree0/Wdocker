@@ -2,8 +2,12 @@
 <html>
 <head>
 	<% include ./partials/head %>
-  <script src='/myapp/js/socketio.js'></script>
 	<script src= "/myapp/js/dockerfile.js">	</script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.2/themes/default/style.min.css" />
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.2/jstree.min.js"></script>
+	<link rel="stylesheet" href='/myapp/lib/jstree-bootstrap-theme/dist/themes/proton/style.min.css' />
+
+
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.27.4/codemirror.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.27.4/addon/mode/simple.js"></script>
 
@@ -28,12 +32,19 @@
 		            <div class="container">
 									<div id="filelist">
 									</div>
+
                   <form class="form-horizontal" id="CreateFile">
                       <div class="form-group">
                   <input type="text" class="form-control" id="filename" placeholder="filename">
                 </div>
                 <div class="form-group">
-									<textarea id="editor" name="code"></textarea>
+									<div class="col-md-2" style="text-align : left">
+												<div id="jstree">
+												</div>
+									</div>
+									<div class="col-md-10">
+										<textarea id="editor" name="code"></textarea>
+									</div>
 
 
                 </div>
