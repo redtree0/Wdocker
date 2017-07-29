@@ -126,12 +126,12 @@ $(function(){
             //      break;
             //    }
             //  }
-            socket.emit("dirtree", path , (data)=>{
-              lists = [];
-              jstreeList(data, null, lists);
-              $('#jstree').jstree(true).settings.core.data = lists;
-              $('#jstree').jstree(true).refresh();
-            });
+            // socket.emit("dirtree", path , (data)=>{
+            //   lists = [];
+            //   jstreeList(data, null, lists);
+            //   $('#jstree').jstree(true).settings.core.data = lists;
+            //   $('#jstree').jstree(true).refresh();
+            // });
           }
       });
 
