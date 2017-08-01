@@ -19,58 +19,103 @@ describe("dirtree 테스트", ()=>{
   });
 });
 
-function jstreeList(json, parentid, lists){
-  if (json === null) return null;
-
-  var ID = function () {
-    return '_' + Math.random().toString(36).substr(2, 9);
-  };
-  function getDepth(path) {
-    var splitPath = path.split("/");
-
-    return splitPath.filter((val)=>{if(val) {return val;}}).length;
+function arraysEqual(a,b) {
+  /*
+      Array-aware equality checker:
+      Returns whether arguments a and b are == to each other;
+      however if they are equal-lengthed arrays, returns whether their
+      elements are pairwise == to each other recursively under this
+      definition.
+  */
+  if (a instanceof Array && b instanceof Array) {
+      if (a.length!=b.length)  // assert same length
+          return false;
+      for(var i=0; i<a.length; i++)  // assert each element equal
+          if (!arraysEqual(a[i],b[i]))
+              return false;
+      return true;
+  } else {
+      return a==b;  // if not both arrays, should be the same
   }
+}
 
-  // console.log(JSON.stringify(json));
-  var data = function (id, text, parent, path) {
-      this.id = id;
-      this.text = text;
-      this.parent = parent;
-      this.path = path;
-      this.depth = getDepth(path);
-  };
-  data.prototype.getJSON = function() {
-      var self = this;
-      return { id : self.id, text : self.text, parent : self.parent, path : self.path, depth : self.depth};
-  }
+function jstreeList(json, parentid, leafs){
+    if (json === null) {
+      // console.log("done");
+      return null;
+    }
+    if( arguments.length === 1 ){
+      var lists = [];
+    }else {
+      var lists = leafs;
+    }
+    var ID = function () {
+      return '_' + Math.random().toString(36).substr(2, 9);
+    };
+    // console.log(JSON.stringify(json));
+        var tree = function (id, text, parent, path) {
 
-  if(parentid == null) {
+        function getDepth(path) {
+          var splitPath = path.split("/");
+
+          return splitPath.filter((val)=>{if(val) {return val;}}).length;
+        }
+
+          var id = null;
+          var text = null;
+          var parent = null;
+          var path = null;
+          var depth = null;
+          var getLeaf = function() {
+              return { id : id, text : text, parent : parent, path : path, depth : depth};
+          }
+          var setLeaf = function(_id, _text, _parent, _path) {
+                 id = _id;
+                 text = _text;
+                 parent = _parent;
+                 path = _path;
+                 depth = getDepth(_path);
+                 return getLeaf();
+          }
+          var getId = function () {
+            return id;
+          }
+          return { getLeaf : getLeaf, setLeaf : setLeaf ,getId : getId };
+      }();
+
+  if(parentid === null) {
       var splitPath = json.path.split("/").filter((val)=>{if(val) {return val;}});
       splitPath.pop();
       var parentPath = splitPath.join("/");
-      var parentDir = new data(ID(".."), "..","#", parentPath);
+      var parentDir = tree.setLeaf(ID(".."), "..","#", parentPath);
+      // console.log(data.getId());
+      // console.log(parentDir);
       var id = ID(json.name);
-      var workingDir = new data(id, json.name,"#", json.path);
+      var workingDir = tree.setLeaf(id, json.name,"#", json.path);
 
-      lists.push(parentDir.getJSON());
-      lists.push(workingDir.getJSON());
+      lists.push(parentDir);
+      lists.push(workingDir);
+      var parentid = tree.getId();
   }
 
   var child = json.children;
-  if(typeof child == undefined) {
+  if(typeof child === undefined) {
+    // console.log("no have child");
     return null;
   }
 
   for(var i in child) {
-    var leaf = new data(ID(child[i].name), child[i].name, parentid, child[i].path);
-    var leafNode = leaf.getJSON();
+    var leaf = tree.setLeaf(ID(child[i].name), child[i].name, parentid, child[i].path);
+    // var leafNode = data.getLeaf();
     if(child[i].hasOwnProperty("extension")){
-      leafNode.icon = "glyphicon glyphicon-file"
+      leaf.icon = "glyphicon glyphicon-file"
     }
-    lists.push(leafNode);
-    jstreeList(child[i], leaf.id, lists);
+    lists.push(leaf);
+    console.log(tree.getId());
+    jstreeList(child[i], tree.getId(), lists);
 
   }
+  return lists;
 }
 
 describe("dirtree 테스트", ()=>{
@@ -78,10 +123,8 @@ describe("dirtree 테스트", ()=>{
   // var home = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
   var home = '/home/pirate/dockerfile/';
 
-  var lists = [];
   var tree = dirTree(home, {extensions:/\W/, exclude:/^\./});
-  jstreeList(tree, null, lists);
-
+  var data = jstreeList(tree);
   // console.log(lists);
   done();
   // 	console.log(item);
@@ -94,39 +137,54 @@ describe("dirtree 테스트", ()=>{
   // var home = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
   var home = '/home/pirate/dockerfile/';
 
-  var lists = [];
   var tree = dirTree(home, {extensions:/\W/, exclude:/^\./});
-  jstreeList(tree, null, lists);
-
+  var lists = jstreeList(tree);
+  console.log(lists);
+  console.log(typeof lists);
   // console.log(lists);
   var searchDepth = 5;
+  var condition =  [ 'home', 'pirate', 'dockerfile', '1' ];
   function getSplitPath(path) {
     var splitPath = path.split("/");
 
     return splitPath.filter((val)=>{if(val) {return val;}});
   }
-  var storage = [];
+  var jstree = [];
   for (var i in lists) {
     if(searchDepth === lists[i].depth){
-          // console.log(lists[i]);
           var tmp = lists[i].path;
-          var filter = getSplitPath(tmp);
-          filter.pop();
-          storage.push(filter);
-          // console.log(filter);
+          var spacefilter = getSplitPath(tmp);
+          spacefilter.pop();
+          if(arraysEqual(spacefilter,  condition)){
+            // console.log(lists[i]);
+            jstree.push(lists[i]);
+            // console.log(i);
+            var n = parseInt(i)+1;
+            var start = i;
+            break;
+            // console.log(n);
+            // console.log(lists[n]);
+          }
     }
   }
-  var condition =  [ 'home', 'pirate', 'dockerfile', '1' ];
-  console.log(storage);
-  for (var i in storage) {
-    ;
-    console.log(storage[i]);
-    console.log(condition);
-    console.log(condition.sort().toString() == storage[i].sort().toString());
-
+  var len = lists.length;
+  var parentDepth = lists[start].depth -1;
+  console.log(parentDepth);
+  for (var i = start; i<len; i++){
+    console.log(lists[i].depth);
+    // if((parentDepth == (lists[i].depth)) || (depth > (lists[i].depth))) {
+    if(parentDepth >= (lists[i].depth)) {
+      var end = i;
+      break;
+    }
   }
+  var newTree = [];
+  for(var i = start; i < end; i++ ){
+    newTree.push(lists[i]);
+  }
+  console.log(newTree);
+
   done();
-  // 	console.log(item);
-  // });
+
   });
 });

@@ -33,50 +33,56 @@ var columns = [
     }
 ];
 
-function jstreeList(json, parentid, lists){
-  if (json === null) return null;
-
-  var ID = function () {
-    return '_' + Math.random().toString(36).substr(2, 9);
-  };
-  console.log(JSON.stringify(json));
-  var data = function (id, text, parent) {
-    this.id = id;
-    this.text = text;
-    this.parent = parent;
-  };
-  data.prototype.getJSON = function() {
-    var self = this;
-    return { id : self.id, text : self.text, parent : self.parent};
-  }
-
-  if(parentid == null) {
-    var parentid = ID(json.name);
-    var root = new data(parentid, json.name,"#");
-
-    lists.push(root.getJSON());
-  }
-
-  var child = json.children;
-  if(typeof child == undefined) {
-    return null;
-  }
-
-  for(var i in child) {
-    var leaf = new data(ID(child[i].name), child[i].name,parentid);
-    var leafNode = leaf.getJSON();
-    if(child[i].hasOwnProperty("extension")){
-      leafNode.icon = "glyphicon glyphicon-file"
-    }
-    lists.push(leafNode);
-    jstreeList(child[i], leaf.id, lists);
-
-  }
-}
+// function jstreeList(json, parentid, lists){
+//   if (json === null) return null;
+//
+//   var ID = function () {
+//     return '_' + Math.random().toString(36).substr(2, 9);
+//   };
+//   console.log(JSON.stringify(json));
+//   var data = function (id, text, parent) {
+//     this.id = id;
+//     this.text = text;
+//     this.parent = parent;
+//   };
+//   data.prototype.getJSON = function() {
+//     var self = this;
+//     return { id : self.id, text : self.text, parent : self.parent};
+//   }
+//
+//   if(parentid == null) {
+//     var parentid = ID(json.name);
+//     var root = new data(parentid, json.name,"#");
+//
+//     lists.push(root.getJSON());
+//   }
+//
+//   var child = json.children;
+//   if(typeof child == undefined) {
+//     return null;
+//   }
+//
+//   for(var i in child) {
+//     var leaf = new data(ID(child[i].name), child[i].name,parentid);
+//     var leafNode = leaf.getJSON();
+//     if(child[i].hasOwnProperty("extension")){
+//       leafNode.icon = "glyphicon glyphicon-file"
+//     }
+//     lists.push(leafNode);
+//     jstreeList(child[i], leaf.id, lists);
+//
+//   }
+// }
 
 $(function(){
+  var socket = io();
+  var Socket = require("./io");
+  var client = new Socket(socket, $('body'));
+  var spin = require("./spinner");
 
 var table = require("./table.js");
+var dialog = require("./dialog.js");
+
 var $volume = $(".jsonTable");
 var volumeTable = new table($volume, columns);
 function detailFormatter() {
@@ -105,20 +111,33 @@ function volumeSettings( name, driver ){
    e.preventDefault();
    var $name = $("#name");
    var $driver = $("#driver");
-   initDropdownArray(["local", "nfs", "glusterfs", "convoy"], $("#driver_list"), $("#driver"));
-     var button = dialogbutton('Create', 'btn-primary create',
+   initDropdownArray(["local"], $("#driver_list"), $("#driver"));
+  //  var popup = new dialog("컨테이너 생성", $form.show(), $("body"));
+   //
+  //  initDropdown('/myapp/image/data.json', $(".dropdown-menu"), $image, "RepoTags", 0);
+  //  popup.appendButton('Create', 'btn-primary create',
+  //              function(dialogItself){
+   //
+  //                  var image = $image.text().trim();
+  //                  var name = $name.val();
+  //                  var command = $command.val();
+  //                  var opts = containerSettings(image, name, command, portlists);
+  //                  client.socketEvent("CreateContainer", opts, containerTable, completeEvent);
+  //              });
+   //
+  //  popup.show();
+   var popup = new dialog("볼륨 생성", $form.show(), $("body"));
+
+     popup.appendButton('Create', 'btn-primary create',
                function(dialogItself){
                   var name = $name.val();
                   var driver = $driver.text().trim();
                    var opts = volumeSettings(name, driver);
-                   formAction($("#CreateVolume"), opts, socket,
-                   (data)=>  {
-                     volumeTable.reload();
-                     dialogShow("볼륨", data);
-                   });
-               });
+                   client.socketEvent("CreateVolume", opts, volumeTable, completeEvent);
 
-       dialogShow("볼륨 생성", $form.show(), button);
+               });
+    popup.show();
+
   });
 
   function socketEvent(eventName, checkedRowLists, callback){
@@ -128,9 +147,19 @@ function volumeSettings( name, driver ){
     });
   }
   function completeEvent(table, data){
-     table.reload();
-     var msg = "id : " + (data.msg)[0].id + "작업 완료";
-     dialogShow("볼륨", msg);
+    //  table.reload();
+    //  var msg = "id : " + (data.msg)+ "작업 완료";
+    //  dialogShow("볼륨", msg);
+
+     if(hasValue(table, data)){
+       table.reload();
+
+       var finished = new dialog("볼륨", data.msg + data.statusCode, $("body"));
+       finished.setDefaultButton('Close[Enker]', 'btn-primary create');
+       finished.show();
+
+       callback;
+     }
   }
 
   $(".remove").click((e)=>{
@@ -140,20 +169,5 @@ function volumeSettings( name, driver ){
     }
   });
 
-  socket.emit("dirtree", "", (data)=>{
-      var lists = [];
-      jstreeList(data, null, lists);
-      // $("#filelist").jstree("set_theme", "apple");
-      $('#filelist').jstree({
-          'plugins': ["wholerow", "checkbox"],
-           'core' : {
-              'data' : lists,
-              'themes': {
-                  'name': 'proton',
-                  'responsive': true
-                }
-          }
-        });
-      });
 
 });

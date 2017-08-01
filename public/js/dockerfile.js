@@ -3,224 +3,249 @@
 $(function(){
   var socket = io();
   var preindex = 0;
+  var filePath = null;
+  var $path = $("#path");
+  var $fileName = $("#filename");
+  var $editor = $("#editor");
+  var socket = io();
+  var Socket = require("./io");
+  var client = new Socket(socket, $('body'));
+  var spin = require("./spinner");
+  var $jstree = $("#jstree");
 
-////////// function //////////////////////
-  function showFileList(){
-    // console.log("do");
-    function addFileList( _class,  _text){
-      return $('<button/>', { class: _class, text: _text , id: _text});
-    }
-
-    var file =[];
-
-    $.getJSON("/myapp/dockerfile/data.json", function(json, textStatus) {
-      $("#filelist button").remove();
-      json.forEach((data)=>{
-        // console.log(data);
-        file = data;
-         $("#filelist").append(addFileList("btn btn-success file", data.name));
-      });
-    });
-  }
   var editor = CodeMirror.fromTextArea(document.getElementById("editor"), {
     lineNumbers: true,
     mode: "dockerfile"
   });
 
-  console.log("do");
 
-  ///////////////////
-  function jstreeList(json, parentid, lists){
-    if (json === null) return null;
+function reportMenu ($node) {
+          function changePath(path, renew, isReNew){
+            var originPath = path;
+            var splitPath = originPath.split("/");
+            if(isReNew){
+              splitPath.pop();
+            }
+            splitPath.push(renew);
+            return  splitPath.join("/");
+          }
 
-    var ID = function () {
-      return '_' + Math.random().toString(36).substr(2, 9);
-    };
-    console.log(JSON.stringify(json));
-    var data = function (id, text, parent, path) {
-        this.id = id;
-        this.text = text;
-        this.parent = parent;
-        this.path = path;
-    };
-    data.prototype.getJSON = function() {
-        var self = this;
-        return { id : self.id, text : self.text, parent : self.parent, path : self.path};
-    }
+           var tree = $("#jstree").jstree(true);
+           return {
+               "CreateDirectroy": {
+                   "separator_before": false,
+                   "separator_after": false,
+                   "label": "새 폴더",
+                   "action": function (obj) {
+                       $node = tree.create_node($node);
+                       console.log($node);
 
-    if(parentid == null) {
-        var parentid = ID(json.name);
-        var root = new data(parentid, json.name,"#", json.path);
-        console.log(json.path);
-        var splitPath = json.path.split("/");
-        splitPath.pop();
-          /* Initialise a final array to save the paths. Store the first one in there! */
-          var parentPath = splitPath.join("/");
-          console.log(parentPath);
-          /* Check if there are multiple paths available */
+                       tree.edit($node, "",  ($node)=>{
+                         var newDirectory = tree.get_text($node);
+                         var parentId = (tree.get_parent($node));
+                         var parentPath = tree.get_node(parentId).original.path;
+                         var newPath = changePath(parentPath, newDirectory, false);
+                         console.log(newPath);
+                         var opts = {
+                           path : parentPath,
+                           name : newDirectory
+                         }
+                         client.sendEvent("CreateDirectory", opts);
+                         socket.emit("dirtree", "", (data)=>{
+                            jstreeRefresh($jstree, data);
+                         });
+                       });
 
-        var grandParent = new data(ID(".."), "..","#", parentPath);
-        lists.push(grandParent.getJSON());
-        lists.push(root.getJSON());
-    }
+                   }
+               },
+               "CreateFile": {
+                   "separator_before": false,
+                   "separator_after": false,
+                   "label": "새 파일",
+                   "action": function (obj) {
+                       $node = tree.create_node($node);
+                       console.log($node);
 
-    var child = json.children;
-    if(typeof child == undefined) {
-      return null;
-    }
+                       tree.edit($node, "",  ($node)=>{
+                        //  "glyphicon glyphicon-file"
+                         tree.set_icon($node, "glyphicon glyphicon-file");
+                         var newFile = tree.get_text($node);
+                         var parentId = (tree.get_parent($node));
+                         var parentPath = tree.get_node(parentId).original.path;
 
-    for(var i in child) {
-      var leaf = new data(ID(child[i].name), child[i].name, parentid, child[i].path);
-      var leafNode = leaf.getJSON();
-      if(child[i].hasOwnProperty("extension")){
-        leafNode.icon = "glyphicon glyphicon-file"
-      }
-      lists.push(leafNode);
-      jstreeList(child[i], leaf.id, lists);
+                         var opts = {
+                           path : parentPath,
+                           name : newFile
+                         }
+                         client.sendEvent("CreateFile", opts);
+                           socket.emit("dirtree", "", (data)=>{
+                              jstreeRefresh($jstree, data);
+                           });
+                        //  console.log(parentPath);
+                       });
+                   }
+               },
+               "Rename": {
+                   "separator_before": false,
+                   "separator_after": false,
+                   "label": "이름 수정",
+                   "action": function (obj) {
+                       tree.edit($node, "", ($node)=>{
+                         console.log(tree.get_text($node));
+                         console.log($node.original.path);
+                         var rename = tree.get_text($node);
+                         var originPath = $node.original.path;
+                        //  var splitPath = originPath.split("/");
+                        //  splitPath.pop();
+                        //  splitPath.push(rename);
+                        //  var renewPath = splitPath.join("/");
+                        var renewPath = changePath(originPath, rename, true);
+                         var opts ={
+                           origin : originPath,
+                           renew : renewPath
+                         }
+                          client.sendEvent("RenameFile", opts);
+                       });
+                   }
+               },
+               "Remove": {
+                   "separator_before": false,
+                   "separator_after": false,
+                   "label": "삭제",
+                   "action": function (obj) {
+                       var type = ($node.original.type);
+                       var deletePath = ($node.original.path);
+                       tree.delete_node($node);
+                       var opts = {
+                         type : type,
+                         path : deletePath
+                       };
+                       client.socketEvent("RemoveFile", opts, completeEvent);
 
-    }
-  }
+                       console.log($node);
+                       console.log(obj);
+                   }
+               }
+           };
+       }
+
+
   var lists = [];
-      socket.emit("dirtree", "", (data)=>{
+  lists = initJstree(lists);
+  function initJstree(lists){
+    socket.emit("dirtree", "", (data)=>{
+              lists = data;
+              console.log(JSON.stringify(lists));
+              $('#jstree').jstree({
+                  'plugins': ["wholerow", "contextmenu"],
+                   'core' : {
+                      'data' : lists,
+                      "check_callback" : true,
+                      'themes': {
+                          'name': 'proton',
+                          'responsive': true
+                        }
+                  }, "contextmenu":{
+                       "items": reportMenu
+                     }
+                });
+                return lists;
+    });
+  }
 
-          jstreeList(data, null, lists);
-          // $("#filelist").jstree("set_theme", "apple");
-                $('#jstree').jstree({
-                  // 'plugins': ["wholerow", "checkbox"],
-                    'plugins': ["wholerow"],
-                     'core' : {
-                        'data' : lists,
-                        'themes': {
-                            'name': 'proton',
-                            'responsive': true
-                          }
-                    }
-                  });
+
+function jstreeRefresh($jstree, newTree){
+  $jstree.jstree(true).settings.core.data = newTree;
+  $jstree.jstree(true).refresh();
+}
+
+
+      function findNodeIndex(text){
+        for(var i in lists){
+          if(text === lists[i].text){
+            return i;
+          }
+        }
+      }
+      $('#jstree').on("click", ".jstree-anchor", function(e) {
+
+            var node = $('#jstree').jstree(true).get_node($(this)).original;
+            var path = node.path;
+            console.log(node.path);
+            $path.text(node.path);
+            $fileName.text(node.text);
+
       });
 
       $('#jstree').on("dblclick", ".jstree-anchor", function(e) {
         var text = $('#jstree').jstree(true).get_node($(this)).text;
-         var path = null;
-         console.log(path);
-         var index =null;
-         for(var i in lists){
-           if(text == lists[i].text){
-            //  console.log(text);
-             path = (lists[i].path);
-             index = i;
-             console.log(path);
-           }
-          }
-          if(path){
-            // console.log(lists);
-            // console.log(lists[index]);
-            // console.log(path);
-            // var length =lists.length;
-            // var newRootId = lists[index].id ;
-            // console.log(newRootId);
-            // for(var i = index; i< length ; i++){
-            //    if(newRootId == lists[i].parent){
-            //      console.log(lists[i]);
-            //    } else if (newRootId != lists[i].parent){
-            //      console.log(lists[i]);
-            //      break;
-            //    }
-            //  }
-            // socket.emit("dirtree", path , (data)=>{
-            //   lists = [];
-            //   jstreeList(data, null, lists);
-            //   $('#jstree').jstree(true).settings.core.data = lists;
-            //   $('#jstree').jstree(true).refresh();
-            // });
-          }
+        var node = $('#jstree').jstree(true).get_node($(this)).original;
+        var path = node.path;
+        var type = node.type;
+        if(type === "file"){
+          socket.emit("ReadFile", path, (data)=>{
+              editor.setValue(data);
+          });
+        }else if (type === "directory") {
+          socket.emit("dirtree", path , (data)=>{
+              var lists = data;
+               $('#jstree').jstree(true).settings.core.data = lists;
+               $('#jstree').jstree(true).refresh();
+            });
+        }
       });
 
 
-      // $('#jstree').bind("dblclick.jstree", function (event) {
-      //    var node = $(event.target).closest("li");
-      //    var data = node.data(this);
-      //    console.log(node.text());
-      //    console.log(node);
-      //    console.log(data.text());
-      //    console.log(data);
-      //
-      //    var selected = [];
-      //     $('#jstree').jstree('get_selected').each(function () {
-      //         selected.push(this.text);
-      //     });
-      //     // do summit with them
-      //     console.log(selected);
-        //  console.log(JSON.stringify(lists));
-        //  console.log(lists.includes(data));
-        //  for(var i in lists){
-         //
-        //    console.log(lists[i].text);
-        //  }
-        //  socket.emit("dirtree", "..", (data)=>{
-        //      var lists = [];
-        //      jstreeList(data, null, lists);
-        //      $('#jstree').jstree(true).settings.core.data = lists;
-        //      $('#jstree').jstree(true).refresh();
-        //  });
-         // Do some action
-      // });
+
+      function completeEvent(data, callback){
+        if(data){
+          console.log(data);
+          $fileName.val("");
+          $editor.text("");
+        }
+        callback;
+      }
 
 
-    showFileList();
 
-      $("#CreateFile").submit(function(e) {
+      $(".update").click(function(e) {
           e.preventDefault();
-					var file ={};
-					file.name = $("#filename").val();
-					file.context = $("#editor").val();
-          console.log($("#editor").val());
-          console.log($("#editor").html());
-          console.log($("#editor").text());
-					if(file.name == null){
-						return ;
-					}
-					// console.log("createfile");
-					// console.log(file.context);
-          socket.emit("CreateFile", file);
-          socket.on("doneCatch", (istrue)=>{
-            if(istrue)
-              { showFileList();}
-          })
+          console.log("update click");
 
+          // fileNode.setName($fileName.val());
+          // fileNode.setContext(editor.getValue());
+          var opts ={
+            path : $path.text(),
+            context : editor.getValue()
+          }
+          client.socketEvent("UpdateFile", opts, completeEvent);
       });
 
-      $("#removeFile").click(()=>{
-          socket.emit("RemoveFile",$("#filename").val());
-          $("#filename").val("");
-          $("#editor").text("");
-          socket.on("doneCatch", (istrue)=>{
-            if(istrue)
-              { showFileList();}
-          })
-      });
 
       $("#build").click(()=>{
+        function changePath(path, renew, isReNew){
+          var originPath = path;
+          var splitPath = originPath.split("/");
+          if(isReNew){
+            splitPath.pop();
+          }
+          splitPath.push(renew);
+          return  splitPath.join("/");
+        }
 
-
-          var file ={};
-
-          file.name = $("#filename").val();
-          file.context = $("#editor").text();
-          socket.emit("build", file);
-          console.log("done");
+          var opts ={
+            parentPath : changePath($path.text(), "", true),
+            path : $path.text(),
+            name : $fileName.text(),
+            context : editor.getValue()
+          };
+          console.log(opts);
+          socket.emit("build", opts, (data)=>{
+            if(data){
+              console.log("done");
+            }
+          });
       });
-			  $("#filelist").on("click", "button", (e)=> {
-					var filename = e.target.id;
-					$("#filename").val(filename);
-					socket.emit("fileRead", filename);
-				});
 
-				socket.on("fileLoad", (data)=>{
-          // var tmp = data.replace(/\n/g,"<br class='line'/>");
-          // console.log(tmp);
-          console.log(data);
-          // $("#editor").append(data);
-          editor.setValue(data);
 
-				});
 });

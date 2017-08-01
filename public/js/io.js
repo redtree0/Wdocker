@@ -1,4 +1,4 @@
-
+"use strict";
   // socket.io 서버에 접속한다
 
 var clientsocket = (function clientsocket(io, $body) {
@@ -30,32 +30,39 @@ var clientsocket = (function clientsocket(io, $body) {
   };
 
   clientsocket.prototype.socketTableEvent = function(eventName, opts, callback){
-
+    console.log("socketEvent");
+    console.log(arguments);
     var state = null;
-    if(opts.hasOwnProperty("table") && opts.hasOwnProperty("lists")){
+    var tmp = null;
+
+    if(arguments.length ===2 ){
+      callback = opts;
+      opts = null;
+    }
+    if(opts.hasOwnProperty("container")){
+      state = false;
+    } else if (opts.hasOwnProperty("table") && opts.hasOwnProperty("lists")){
           state = true;
-    }else if(opts.hasOwnProperty("container")){
-          state = false;
-    } else {
-      return false;
     }
       var table = opts.table;
       var checkedRowLists = opts.lists;
-      if(hasValue(checkedRowLists)){
-          var socket =  this.socket;
+
+        console.log("in socket");
           (this.$body).spinStart();
           if(state){
-            socket.emit(eventName, opts.lists, (data)=>{
-              opts.table.checkedRowLists.splice(0, checkedRowLists.length);
-              callback(table, data, (this.$body).spinStop());
-            });
+            tmp = opts.lists;
           }else {
-            socket.emit(eventName, opts, (data)=>{
-              opts.table.checkedRowLists.splice(0, checkedRowLists.length);
-              callback(table, data, (this.$body).spinStop());
-            });
+            console.log("condition");
+
+            var tmp = opts;
           }
-        }
+          var socket =  this.socket;
+          console.log(tmp);
+          delete tmp.table;
+          socket.emit(eventName, tmp, (data)=>{
+            table.checkedRowLists = [];
+            callback(table, data, (this.$body).spinStop());
+          });
     };
 
     clientsocket.prototype.completeEvent = function(){
@@ -67,19 +74,36 @@ var clientsocket = (function clientsocket(io, $body) {
       var $body = this.$body;
       if(arguments.length === 3) {
         callback = table;
+        table = null;
       }
+      console.log(settings);
       if(!settings) {
-        alert("more need arguments");
+        alert("socket Event more need arguments");
       } else {
         $body.spinStart();
         socket.emit(eventName, settings, (data)=>{
           console.log(arguments);
           // callback(table, data, (this.$body).spinStop());
-          callback(table, data, (this.$body).spinStop());
+          if(arguments.length === 3){
+            callback(data, (this.$body).spinStop());
+          }else {
+            callback(table, data, (this.$body).spinStop());
+          }
         });
 
       }
 
     };
+      clientsocket.prototype.sendEvent = function (eventName, data) {
+        console.log(eventName);
+        console.log(data);
+        var socket =  this.socket;
 
+        socket.emit(eventName, data);
+      };
+
+      clientsocket.prototype.listen = function (eventName, callback) {
+        var socket =  this.socket;
+        socket.on(eventName, callback);
+      };
 module.exports = clientsocket;

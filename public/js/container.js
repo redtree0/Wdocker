@@ -176,6 +176,7 @@ $(function(){
   }
 
     $(".start").click((e)=>{
+      console.log(opts);
       client.socketTableEvent("StartContainer", opts, completeEvent);
     });
 

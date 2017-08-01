@@ -76,17 +76,18 @@ var columns = [{
   }
 
   function networkSettings(name, driver, internal) {
-
+    console.log(arguments);
     var config = require("./config");
 
-    if(hasValue(name, internal)) {
+    if(!hasValue(name, internal)) {
       return false;
     }
-    if(driver == "driver") {
+    if(driver === "driver") {
+      console.log("a");
       return false;
     }
 
-    config.setNetwork({"Name" : name, "driver" : driver, "internal" : internal});
+    config.setNetwork({"Name" : name, "Driver" : driver, "internal" : internal});
 
     return  config.getNetwork();
   }
@@ -96,6 +97,8 @@ $(function(){
   var Socket = require("./io");
   var client = new Socket(socket, $('body'));
   var spin = require("./spinner");
+  var dialog = require("./dialog");
+
   var checklist =[];
   var $network = $(".jsonTable");
   var $detail = $(".detail");
@@ -126,7 +129,6 @@ $(function(){
   $form.hide();
   $(".plus").click((e)=>{
     e.preventDefault();
-    var dialog = require("./dialog");
     var popup = new dialog("네트워크 생성", $form.show(), $("body"));
 
     initDropdownArray(["bridge", "overlay", "macvlan"], $("#driver_list") , $("#driver"));
@@ -138,7 +140,7 @@ $(function(){
                   var internal = $("#internal").prop('checked');
 
                   var opts = networkSettings(name, driver, internal);
-
+                  console.log(opts);
                     client.socketEvent("CreateNetwork", opts,  networkTable, completeEvent);
 
                 }
@@ -150,7 +152,7 @@ $(function(){
 
 
   var completeEvent = function(table, data, callback){
-    if(hasValue(table, data)){
+    // if(hasValue(table, data)){
       table.reload();
 
       var finished = new dialog("네트워크", data.msg + data.statusCode, $("body"));
@@ -158,25 +160,37 @@ $(function(){
       finished.show();
 
       callback;
-    }
+    // }
   }
 
-  var opts = {
-    "table" : networkTable,
-    "lists" : networkTable.checkedRowLists
-  }
+
   $("#remove").click(()=>{
+    var opts = {
+      "table" : networkTable,
+      "lists" : networkTable.checkedRowLists
+    }
     client.socketTableEvent("RemoveNetwork", opts, completeEvent);
   });
-  $("#connect").click(()=>{
-    if( $('#container').text().trim() != "Containers") {
-      opts.container = $('#container').text().trim();
-      client.socketTableEvent("ConnectNetwork", opts, completeEvent);
-    }
+  $("#connect").click((e)=>{
+    e.preventDefault();
+      if( $('#container').text().trim() != "Containers") {
+        var opts = {
+          "table" : networkTable,
+          "lists" : networkTable.checkedRowLists,
+          "container" : $('#container').text().trim()
+        };
+        console.log(opts);
 
-
+        // opts.container = $('#container').text().trim();
+        // console.log(opts);
+        client.socketTableEvent("ConnectNetwork", opts, completeEvent);
+      }
   });
   $("#disconnect").click(()=>{
+    var opts = {
+      "table" : networkTable,
+      "lists" : networkTable.checkedRowLists
+    }
     if( $('#container').text().trim() != "Containers") {
         opts.container = $('#container').text().trim();
         client.socketTableEvent("DisconnectNetwork", opts, completeEvent);

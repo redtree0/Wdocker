@@ -77,7 +77,7 @@ var config = (function(){
   var setNetwork = function(filter) {
     var opts = network;
     opts.Name = filter.Name;
-    opts.driver = filter.driver;
+    opts.Driver = filter.Driver;
     opts.internal = filter.internal;
   }
 
@@ -175,7 +175,7 @@ var config = (function(){
     getImage : getImage,
     setImage : setImage,
     getVolume : getVolume,
-    setVolume : setVolume 
+    setVolume : setVolume
   };
 
 })();

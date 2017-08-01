@@ -80,29 +80,29 @@ module.exports = function(app){//함수로 만들어 객체 app을 전달받음
 
   });
 
-  app.route('/myapp/dockerfile/data.json').get ( (req, res) => {
-    var fs = require('fs');
-    var path = require('path');
-    var test = [];
-    var jsonPath = path.join(__dirname);
-    var dirPath = path.dirname(jsonPath)
-    var dockerfilePath = path.join(dirPath, "dockerfile");
-    console.log(jsonPath);
-    console.log(dirPath);
-    fs.readdir(dockerfilePath, "utf8", function(err, file) {
-      console.log(file);
-      for (var i in file) {
-          var readFilePath = path.join(dockerfilePath, file[i]);
-          test.push(path.parse(readFilePath));
-      }
-
-
-      res.setHeader("Content-Type", "application/json");
-
-       res.json(test);
-    })
-
-  });
+  // app.route('/myapp/dockerfile/data.json').get ( (req, res) => {
+  //   var fs = require('fs');
+  //   var path = require('path');
+  //   var test = [];
+  //   var jsonPath = path.join(__dirname);
+  //   var dirPath = path.dirname(jsonPath)
+  //   var dockerfilePath = path.join(dirPath, "dockerfile");
+  //   console.log(jsonPath);
+  //   console.log(dirPath);
+  //   fs.readdir(dockerfilePath, "utf8", function(err, file) {
+  //     console.log(file);
+  //     for (var i in file) {
+  //         var readFilePath = path.join(dockerfilePath, file[i]);
+  //         test.push(path.parse(readFilePath));
+  //     }
+  //
+  //
+  //     res.setHeader("Content-Type", "application/json");
+  //
+  //      res.json(test);
+  //   })
+  //
+  // });
 
   app.route('/myapp/stats/data.json').get ( (req, res) => {
     const os = require('os');

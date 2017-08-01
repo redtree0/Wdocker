@@ -48,7 +48,13 @@ function hasValue (){
   // console.log(arguments);
   for(var i in arg) {
     // console.log(arg[i]);
-    if (arg[i] === "" || typeof arg[i] === null || arg[i] === null || typeof arg[i] === undefined ){
+    // console.log(typeof arg[i]);
+    // console.log(arg[i] === null);
+    // console.log(typeof arg[i] === undefined);
+    // console.log(typeof arg[i] === null);
+    // console.log(arg[i] === "");
+    if (arg[i] === "" || typeof arg[i] === null || arg[i] === null || typeof arg[i] === undefined  ||  arg[i] === undefined){
+      console.log("c");
       return false;
     }
   }

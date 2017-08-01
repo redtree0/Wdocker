@@ -9,7 +9,7 @@ var SocketIo = require('socket.io');
 var app = express();
 
 
-var socketEvents  = require('./socket');
+var socketEvents  = require('./event');
 //var mongo = require('./mongo');
 
 app.use(bodyParser.json());

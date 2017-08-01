@@ -7,6 +7,8 @@ module.exports = {
     network : './public/js/network.js',
     image : './public/js/image.js',
     volume : './public/js/volume.js',
+    dockerfile : './public/js/dockerfile.js',
+    terminal : './public/js/terminal.js',
     table : './public/js/table.js'
   },
   output: {
