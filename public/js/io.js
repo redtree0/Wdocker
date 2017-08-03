@@ -4,7 +4,6 @@
 var clientsocket = (function clientsocket(io, $body) {
   this.socket = io;
   this.$body = $body;
-  console.log(io);
 });
 
   clientsocket.prototype.login = function(callback) {
@@ -29,81 +28,85 @@ var clientsocket = (function clientsocket(io, $body) {
     });
   };
 
-  clientsocket.prototype.socketTableEvent = function(eventName, opts, callback){
-    console.log("socketEvent");
-    console.log(arguments);
-    var state = null;
-    var tmp = null;
+  /** @method  - socketTableEvent
+   *  @description 소켓
+   *  @param {String} eventName - 소켓 이벤트 명
+   *  @param {Object} table - 테이블 객체
+   *  @param {Object} opts - json data
+   *  @param {Function} callback - 콜백 함수
+   *  @return {Object} opts -
+   */
+  clientsocket.prototype.sendEventTable = function(eventName, table, opts, callback){
+          var data = null;
+          var checkedRowLists = table.checkedRowLists;
+          var self = this;
 
-    if(arguments.length ===2 ){
-      callback = opts;
-      opts = null;
-    }
-    if(opts.hasOwnProperty("container")){
-      state = false;
-    } else if (opts.hasOwnProperty("table") && opts.hasOwnProperty("lists")){
-          state = true;
-    }
-      var table = opts.table;
-      var checkedRowLists = opts.lists;
-
-        console.log("in socket");
-          (this.$body).spinStart();
-          if(state){
-            tmp = opts.lists;
-          }else {
-            console.log("condition");
-
-            var tmp = opts;
+          // (self.$body).spinStart(); /// 화면 로딩 시작
+          if(arguments.length === 2) {
+            opts = null;
+            callback = null;
+            data = checkedRowLists;
+          } else if( (arguments.length === 3) && (typeof opts === "function") ){
+            callback = opts;
+            opts = null;
+            data = checkedRowLists;
+          } else if( (arguments.length === 3) && (typeof opts === "object") ){
+            // opts.lists = checkedRowLists;
+            data = opts;
+          } else if (arguments.length === 4 ){
+            data = opts;
+          } else {
+            return;
           }
-          var socket =  this.socket;
-          console.log(tmp);
-          delete tmp.table;
-          socket.emit(eventName, tmp, (data)=>{
-            table.checkedRowLists = [];
-            callback(table, data, (this.$body).spinStop());
-          });
+          console.log(data);
+          self.spinnerEvent(eventName, data, callback);
+          table.reload();
     };
 
     clientsocket.prototype.completeEvent = function(){
 
     };
 
-    clientsocket.prototype.socketEvent = function(eventName, settings, table, callback){
-      var socket =  this.socket;
-      var $body = this.$body;
-      if(arguments.length === 3) {
-        callback = table;
-        table = null;
-      }
-      console.log(settings);
-      if(!settings) {
-        alert("socket Event more need arguments");
+
+    /** @method  - socketTableEvent
+     *  @description 소켓 테이블
+     *  @param {String} eventName - 소켓 이벤트 명
+     *  @param {Object} opts - json data
+     *  @param {Function} callback - 콜백 함수
+     *  @return {Object} opts -
+     */
+    clientsocket.prototype.spinnerEvent = function(eventName, opts, callback){
+      var self = this;
+      var data = null;
+
+      if(arguments.length <= 1) {
+        return ;
       } else {
-        $body.spinStart();
-        socket.emit(eventName, settings, (data)=>{
-          console.log(arguments);
-          // callback(table, data, (this.$body).spinStop());
-          if(arguments.length === 3){
-            callback(data, (this.$body).spinStop());
-          }else {
-            callback(table, data, (this.$body).spinStop());
-          }
-        });
-
+        data = opts;
       }
 
+      if(data) {
+        self.$body.spinStart();
+        return self.sendEvent(eventName, data, (data)=>{
+          self.completeEvent(data);
+          (self.$body).spinStop();
+          callback;
+        });
+      }
     };
-      clientsocket.prototype.sendEvent = function (eventName, data) {
-        console.log(eventName);
-        console.log(data);
+
+
+    clientsocket.prototype.sendEvent = function (eventName, data, callback) {
+        console.log("do event %s , data %s", eventName, data);
         var socket =  this.socket;
 
-        socket.emit(eventName, data);
-      };
+        return socket.emit(eventName, data, callback);
+    };
 
-      clientsocket.prototype.listen = function (eventName, callback) {
+    clientsocket.prototype.listen = function (eventName, callback) {
         var socket =  this.socket;
-        socket.on(eventName, callback);
-      };
+        return socket.on(eventName, callback);
+    };
+
+
 module.exports = clientsocket;

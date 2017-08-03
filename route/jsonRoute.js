@@ -1,110 +1,112 @@
-module.exports = function(app){//함수로 만들어 객체 app을 전달받음
+
   var express = require('express');
-  var app = express();
+  var router = express.Router();
 
   var docker = require('../docker')();
+  var p = require("../p");
 
-  function promiseTojson(callback, res, opts){
-    callback.then( (resultJson) => {
-      res.setHeader("Content-Type", "application/json");
-      if(opts) {
-        var resdata = resultJson[opts];
-      }else {
-          var resdata  = resultJson;
-      }
-      if( resdata === null ){
-          res.json(false);
-      }
-      res.json(resdata);
-    });
-  }
+  // function promiseTojson(callback, res, opts){
+  //   callback.then( (resultJson) => {
+  //     res.setHeader("Content-Type", "application/json");
+  //
+  //     if(opts) {
+  //       var resdata = resultJson[opts];
+  //     }else {
+  //         var resdata  = resultJson;
+  //     }
+  //     if( resdata === null ){
+  //         res.json(false);
+  //     }
+  //     res.json(resdata);
+  //   });
+  // }
+  router.use(function timeLog(req, res, next) {
+    console.log('Time: ', Date.now());
+    res.setHeader("Content-Type", "application/json");
 
-  app.route('/myapp/network/data.json').get( (req, res) => {
-    promiseTojson(docker.listNetworks({}), res);
+    next();
   });
 
-  app.route('/myapp/container/data.json').get( (req, res) => {
-      promiseTojson(docker.listContainers({all: true}), res);
-  })
-  app.route('/myapp/image/data.json').get( (req, res) => {
-      promiseTojson(docker.listImages(), res);
+
+
+  function resCallback(res, opts, json){
+    var data = null;
+
+    if(arguments.length === 2) {
+        json = opts;
+        opts = null;
+        data = json;
+    }else {
+       data = json[opts];
+    }
+
+    if( data === null ){
+          data = false;
+    }
+    res.json(data);
+  };
+  router.get( '/container/data.json' , (req, res) => {
+        p.container.getAllLists({all: true}, resCallback.bind(null, res));
   });
-  app.route('/myapp/volume/data.json').get( (req, res) => {
-      promiseTojson(docker.listVolumes(), res, "Volumes");
+
+  router.get( '/network/data.json' , (req, res) => {
+        p.network.getAllLists({}, resCallback.bind(null, res));
   });
-  app.route('/myapp/node/data.json').get( (req, res) => {
+
+  router.get( '/image/data.json' , (req, res) => {
+        p.image.getAllLists({}, resCallback.bind(null, res));
+  });
+  router.get( '/volume/data.json' , (req, res) => {
+      p.volume.getAllLists({}, resCallback.bind(null, res, "Volumes"));
+  });
+  router.get( '/swarm/data.json' , (req, res) => {
+    // p.swarm.getAllLists(null, resCallback.bind(null, res));
+    docker.swarmInspect().then(resCallback.bind(null, res));
+    // promiseTojson(docker.swarmInspect(), res);
+  });
+
+  router.get( '/node/data.json' , (req, res) => {
       promiseTojson(docker.listNodes(), res);
   });
-  app.route('/myapp/service/data.json').get( (req, res) => {
+  router.get( '/service/data.json' , (req, res) => {
     promiseTojson(docker.listServices({}), res);
   });
 
-  app.route('/myapp/swarm/data.json').get( (req, res) => {
-    promiseTojson(docker.swarmInspect(), res);
-  });
 
-  app.route('/myapp/container/stats/:id').get( (req, res) => {
-    // promiseTojson(docker.swarmInspect(), res);
+  router.get( '/container/stats/:id' , (req, res) => {
     var id = req.params.id;
     var p = require("../p");
-    var promise = (p.container.stats(id, (data)=>{res.json(data);}));
+    var promise = p.container.stats(id, resCallback.bind(null, res));
+    // promise.then( (data)=>{res.json(data)});
 
   });
 
-  app.route('/myapp/container/top/:id').get( (req, res) => {
-    // promiseTojson(docker.swarmInspect(), res);
+  router.get( '/container/top/:id' , (req, res) => {
     var id = req.params.id;
     var p = require("../p");
-    var promise = (p.container.top(id, (data)=>{res.json(data.msg);}));
-    // res.setHeader("Content-Type", "application/json");
-
+    var promise = p.container.top(id, resCallback.bind(null, res));
+    // promise.then( (data)=>{res.json(data);});
   });
 
-  app.route('/myapp/container/logs/:id').get( (req, res) => {
+  router.get( '/container/logs/:id' , (req, res) => {
     // promiseTojson(docker.swarmInspect(), res);
     var id = req.params.id;
-    var p = require("../p");
     var promise = (p.container.logs(id, (data)=>{res.json(data.msg);}));
     // console.log(id);
 
   });
 
-  app.route('/myapp/network/:id').get( (req, res) => {
-    // promiseTojson(docker.swarmInspect(), res);
+  router.get( '/network/:id' , (req, res) => {
     var id = req.params.id;
-    var p = require("../p");
     var filters = { "filters" : {
             id : [id]}
           };
-    var promise = (p.network.list(filters, (data)=>{res.json(data.msg[0]);}));
+    var promise = (p.network.list(filters));
+    promise.then( (data)=>{ var json = data[0];  res.json(json);});
 
   });
 
-  // app.route('/myapp/dockerfile/data.json').get ( (req, res) => {
-  //   var fs = require('fs');
-  //   var path = require('path');
-  //   var test = [];
-  //   var jsonPath = path.join(__dirname);
-  //   var dirPath = path.dirname(jsonPath)
-  //   var dockerfilePath = path.join(dirPath, "dockerfile");
-  //   console.log(jsonPath);
-  //   console.log(dirPath);
-  //   fs.readdir(dockerfilePath, "utf8", function(err, file) {
-  //     console.log(file);
-  //     for (var i in file) {
-  //         var readFilePath = path.join(dockerfilePath, file[i]);
-  //         test.push(path.parse(readFilePath));
-  //     }
-  //
-  //
-  //     res.setHeader("Content-Type", "application/json");
-  //
-  //      res.json(test);
-  //   })
-  //
-  // });
-
-  app.route('/myapp/stats/data.json').get ( (req, res) => {
+  router.get( '/stats/data.json' , (req, res) => {
     const os = require('os');
     //console.log(os);
     var data = {};
@@ -128,7 +130,7 @@ module.exports = function(app){//함수로 만들어 객체 app을 전달받음
     res.json(data);
   });
 
-  app.route('/myapp/stats/cpus.json').get ( (req, res) => {
+  router.get ('/stats/cpus.json', (req, res) => {
     var os = require('os');
     var cpus = os.cpus();
     var cpulist = [];
@@ -150,6 +152,4 @@ module.exports = function(app){//함수로 만들어 객체 app을 전달받음
 
     res.json(cpulist);
   });
-
-  return app;
-}
+module.exports = router;

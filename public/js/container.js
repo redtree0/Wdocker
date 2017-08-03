@@ -3,7 +3,7 @@
 
 // console.log(socket);
 // var a = new t(socket);
-var columns = [{
+const columns = [{
       checkbox: true,
       title: 'Check'
   },{
@@ -35,7 +35,7 @@ var columns = [{
       title: '생성일'
   }, {
       field: 'Ports',
-      title: 'Ports(hiden)'
+      title: '포트'
   }, {
       field: 'Labels',
       title: '라벨'
@@ -50,13 +50,13 @@ var columns = [{
       title: '상황'
   }, {
       field: 'HostConfig',
-      title: 'HostConfig(hiden)'
+      title: 'HostConfig'
   }, {
       field: 'NetworkingSettings',
-      title: 'NetworkingSettings(hiden)'
+      title: 'NetworkingSettings'
   }, {
       field: 'Mounts',
-      title: 'Mounts(hiden)'
+      title: 'Mounts'
   }];
 
 
@@ -88,10 +88,8 @@ $(function(){
     var portlists= [];
 
     var containerTable = new table($container, columns);
-    function detailFormatter() {
 
-    };
-    containerTable.initUrlTable('/myapp/container/data.json', detailFormatter);
+    containerTable.initUrlTable('/myapp/container/data.json', true);
     containerTable.hideColumns(["Id", "ImageID", "Ports", "Mounts", "HostConfig", "NetworkingSettings"]);
     containerTable.checkAllEvents();
     containerTable.clickRow($detail);
@@ -126,7 +124,7 @@ $(function(){
                       var name = $name.val();
                       var command = $command.val();
                       var opts = containerSettings(image, name, command, portlists);
-                      client.socketEvent("CreateContainer", opts, containerTable, completeEvent);
+                      client.sendEventTable("CreateContainer", containerTable, opts);
                   });
 
       popup.show();
@@ -158,46 +156,39 @@ $(function(){
 
 
 
-  var completeEvent = function(table, data, callback){
-    if(hasValue(table, data)){
-      table.reload();
-
+  client.completeEvent = function(data, callback){
+    if(hasValue(data)){
       var finished = new dialog("컨테이너", data.msg + data.statusCode, $("body"));
       finished.setDefaultButton('Close[Enker]', 'btn-primary create');
       finished.show();
-
+      containerTable.reload();
       callback;
     }
   }
 
-  var opts = {
-    "table" : containerTable,
-    "lists" : containerTable.checkedRowLists
-  }
 
     $(".start").click((e)=>{
-      console.log(opts);
-      client.socketTableEvent("StartContainer", opts, completeEvent);
+      client.sendEventTable("StartContainer", containerTable);
     });
 
     $(".stop").click((e)=>{
-        client.socketTableEvent("StopContainer", opts, completeEvent);
+        client.sendEventTable("StopContainer", containerTable);
     });
 
     $(".remove").click((e)=>{
-        client.socketTableEvent("RemoveContainer", opts, completeEvent);
+        client.sendEventTable("RemoveContainer", containerTable);
     });
 
     $(".kill").click((e)=>{
-        client.socketTableEvent("KillContainer", opts, completeEvent);
+        client.sendEventTable("KillContainer", containerTable);
     });
 
     $(".pause").click((e)=>{
-        client.socketTableEvent("PauseContainer", opts, completeEvent);
+        client.sendEventTable("PauseContainer", containerTable);
     });
 
     $(".unpause").click((e)=>{
-        client.socketTableEvent("UnpauseContainer", opts, completeEvent);
+        client.sendEventTable("UnpauseContainer", containerTable);
     });
 
 

@@ -8,7 +8,9 @@ module.exports = {
     image : './public/js/image.js',
     volume : './public/js/volume.js',
     dockerfile : './public/js/dockerfile.js',
+    settings : './public/js/settings.js',
     terminal : './public/js/terminal.js',
+    swarm : './public/js/swarm.js',
     table : './public/js/table.js'
   },
   output: {

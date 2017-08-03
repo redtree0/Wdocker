@@ -1,8 +1,6 @@
 "use strict";
 
 $(function(){
-  var socket = io();
-  var preindex = 0;
   var filePath = null;
   var $path = $("#path");
   var $fileName = $("#filename");
@@ -11,6 +9,8 @@ $(function(){
   var Socket = require("./io");
   var client = new Socket(socket, $('body'));
   var spin = require("./spinner");
+  var dialog = require("./dialog");
+
   var $jstree = $("#jstree");
 
   var editor = CodeMirror.fromTextArea(document.getElementById("editor"), {
@@ -223,6 +223,8 @@ function jstreeRefresh($jstree, newTree){
 
 
       $("#build").click(()=>{
+        var $imageTag = $("#imageTag");
+
         function changePath(path, renew, isReNew){
           var originPath = path;
           var splitPath = originPath.split("/");
@@ -237,14 +239,28 @@ function jstreeRefresh($jstree, newTree){
             parentPath : changePath($path.text(), "", true),
             path : $path.text(),
             name : $fileName.text(),
-            context : editor.getValue()
+            context : editor.getValue(),
+            imageTag : $imageTag.val()
           };
-          console.log(opts);
-          socket.emit("build", opts, (data)=>{
+
+          client.socketEvent("build", opts, (data, callback)=>{
             if(data){
               console.log("done");
             }
+
+            callback;
           });
+          var $building = $("#building");
+          var popup = new dialog("이미지 생성", $building , $("body"));
+          // popup.appendButton('Search', 'btn-primary create',
+          client.listen("buildingImage", (data)=>{
+            console.log(data);
+            $building.append(data.stream + "<br />");
+            if(data === true) {
+              popup.close(5000);
+            }
+          })
+          popup.show();
       });
 
 

@@ -165,7 +165,7 @@ var config = (function(){
                   ]
             }
     };
-
+    
 
   return {
     getContainer : getContainer,

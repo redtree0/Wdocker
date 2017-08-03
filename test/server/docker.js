@@ -56,3 +56,31 @@ describe("docker 테스트", ()=>{
     })
   });
 });
+
+
+
+
+
+describe("eth0 IP get", ()=>{
+  describe("파라미터 1개 type이 object가 아닐때", ()=>{
+    it("false 리턴 함" , ()=>{
+      var os = require('os');
+      var ifaces = os.networkInterfaces();
+      var result = '';
+      for (var dev in ifaces) {
+          var alias = 0;
+          if(dev === "eth0"){
+
+            ifaces[dev].forEach(function(details) {
+              if (details.family == 'IPv4' && details.internal === false) {
+                result = details.address;
+                ++alias;
+              }
+            });
+          }
+      }
+
+      console.log(result);
+    })
+  });
+});

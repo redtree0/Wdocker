@@ -11,10 +11,11 @@ var app = express();
 
 var socketEvents  = require('./event');
 //var mongo = require('./mongo');
+var staticPath = '/myapp';
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use('/myapp', express.static(path.join(__dirname, 'public')));
+app.use(staticPath, express.static(path.join(__dirname, 'public')));
 
 
 app.set('view engine', 'ejs');
@@ -25,10 +26,14 @@ app.route('/')
   .get( (req, res) => { res.redirect('/myapp/index'); }
 );
 
-var route = require('./route/droute.js')(app);
-var json = require("./route/jsonRoute.js")(app);
-app.use('', route);
-app.use('', json);
+var route = require('./route/droute.js');
+var json = require("./route/jsonRoute.js");
+
+var dockerDB = require("./mongo.js");
+var db = require("./route/dbRoute.js")( dockerDB);
+app.use(staticPath, route);
+app.use(staticPath, json);
+app.use(staticPath, db);
 
 
 const port = 3000;

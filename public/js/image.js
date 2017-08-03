@@ -72,10 +72,8 @@
         var imageTable = new table($image, columns);
         var searchTable = new table($(".dataTable"), searchcolumns);
 
-        function detailFormatter() {
 
-        };
-        imageTable.initUrlTable('/myapp/image/data.json', detailFormatter);
+        imageTable.initUrlTable('/myapp/image/data.json', false);
         // imageTable.hideColumns(["Id", "ImageID", "Ports", "Mounts", "HostConfig", "NetworkingSettings"]);
         imageTable.checkAllEvents();
         // imageTable.clickRow($detail);
@@ -89,19 +87,24 @@
         $(".download").click((e)=> {
           e.preventDefault();
 
-          // socket.emit("pullImages", searchlist);
-          var opts = {
-            "table" : searchTable,
-            "lists" : searchTable.checkedRowLists
+
+        client.completeEvent = function(data, callback){
+             if(hasValue(data)){
+
+                  var finished = new dialog("이미지", JSON.stringify(data), $("body"));
+                  finished.setDefaultButton('Close[Enker]', 'btn-primary create');
+                  finished.show();
+                  callback;
+              }
           }
-          client.socketTableEvent("PullImages", opts, completeEvent);
+          client.sendEventTable("PullImages", searchTable);
           var $progress = $(".progress-bar");
           $progress.css("width", '0%');
           var popup = new dialog("이미지 다운 중", $msgdiag.show(), $("body"));
           var $status = $("#status");
-          socket.on("progress", (event)=> {
+          client.listen("progress", (event)=> {
 
-
+            console.log(event);
             if((event.status)){
               $status.text(event.status);
             }
@@ -113,7 +116,7 @@
                 // $msgdiag.text(percentage);
                 var $progress = $(".progress");
                 if(percentage != NaN) {
-                  console.log(percentage);
+                  // console.log(percentage);
                   $progress.css("width", Math.round(percentage)+ '%');
                 }
 
@@ -131,15 +134,12 @@
 
 
 
-          var completeEvent = function(table, data, callback){
-            if(hasValue(table, data)){
-              table.reload();
-              console.log(arguments);
-              // $(".results").show();
 
-              // table.load(data.msg);
-              // table.checkAllEvents();
-              // $(".results").show();
+
+        $(".remove").click((e)=> {
+          client.completeEvent = function(data, callback){
+            if(hasValue(data)){
+
               var finished = new dialog("이미지", JSON.stringify(data), $("body"));
               finished.setDefaultButton('Close[Enker]', 'btn-primary create');
               finished.show();
@@ -147,13 +147,7 @@
             }
           }
 
-
-        $(".remove").click((e)=> {
-          var opts = {
-            "table" : imageTable,
-            "lists" : imageTable.checkedRowLists
-          }
-          client.socketTableEvent("RemoveImages", opts, completeEvent);
+          client.sendEventTable("RemoveImages", imageTable);
         });
 
 
@@ -187,15 +181,16 @@
                         var is_official = $('#is_official').prop('checked').toString();
                         var stars = $("#stars").val();
                         var opts = imageSettings(term, limit, is_automated, is_official, stars);
-                        function searchTableLoad(table, data, callback){
-                          if(hasValue(table, data)){
-                            table.load(data.msg);
-                            table.checkAllEvents();
-                            $(".results").show();
-                            callback;
+
+                        client.completeEvent =  function (data, callback){
+                            if(hasValue(data)){
+                              searchTable.load(data.msg);
+                              searchTable.checkAllEvents();
+                              $(".results").show();
+                              callback;
+                            }
                           }
-                        }
-                        client.socketEvent("SearchImages", opts, searchTable, searchTableLoad);
+                        client.sendEventTable("SearchImages", searchTable, opts);
 
                       });
 

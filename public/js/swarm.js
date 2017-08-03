@@ -1,6 +1,58 @@
-var socket = io();
+"use strict";
+const columns = [{
+      checkbox: true,
+      title: 'Check'
+  },{
+      field: 'ip',
+      title: 'IP',
+      sortable : true,
+      halign : "center",
+      align : "center"
+  }, {
+      field: 'port',
+      title: 'Port',
+      sortable : true,
+      halign : "center",
+      align : "center"
+  },{
+      field: 'type',
+      title: 'Swarm Type',
+      halign : "center",
+      align : "center",
+      width : "5%",
+      formatter : function (){
+
+      return   "<label class='checkbox-inline'><input type='checkbox' id='swarmtype' checked data-toggle='toggle' data-on='manager' data-off='worker' data-onstyle='success' data-offstyle='danger'></input></label>" ;
+      }
+  }, {
+      field: 'join',
+      title: 'Swarm Join',
+      halign : "center",
+      align : "center",
+      width : "5%",
+      formatter : function (){
+        return "<button type='button' class='btn btn-primary join'>join</button>"
+      }
+  }, {
+      field: 'leave',
+      title: 'Swarm Leave',
+      halign : "center",
+      align : "center",
+      width : "5%",
+      formatter : function (){
+        return "<button type='button' class='btn btn-danger leave'>leave</button>"
+
+      }
+  }
+  ];
 
 $(function(){
+    var socket = io();
+    var Socket = require("./io");
+    var client = new Socket(socket, $('body'));
+    var spin = require("./spinner");
+    var table = require("./table.js");
+    var dialog = require("./dialog.js");
     var $ip = $("#host");
     var $port = $("#port");
     var $user = $("#user");
@@ -8,23 +60,60 @@ $(function(){
     var $privateKey = $("privateKey");
     var $list = $(".addlist");
     var $token = $("#tokenType");
+    var $settings = $(".jsonTable");
+    var settingsTable = new table($settings, columns);
+    var swarmToken ={
+      manager : null,
+      worker : null
+    }
 
+    settingsTable.initUrlTable('/myapp/settings/data.json', false);
+    settingsTable.checkAllEvents();
+    $settings.on("click-cell.bs.table", function (e, field, value, row, $element) {
+
+      if ($element.children('button').prop('tagName') === 'BUTTON') {
+        // $(':checkbox', $element).trigger('click');
+        console.log("clicked");
+      }
+    });
+    // settingsTable.clickRow($detail);
+    settingsTable.clickRowAddColor("danger");
   $('.ip_address').mask('0ZZ.0ZZ.0ZZ.0ZZ', { translation: { 'Z': { pattern: /[0-9]/, optional: true } } });
 
 
   $("#swarmInit").submit(()=>{
     var $swarmPort = $("#swarmPort");
 
-    socket.emit("swarmInit" ,$swarmPort.val());
+    client.sendEvent("swarmInit" ,$swarmPort.val(), ()=>{});
   });
 
   $("#swarmLeave").submit((e)=>{
     e.preventDefault();
     var $force = $("#force").prop('checked') ? false : true;
     console.log($force);
-    socket.emit("swarmLeave" , $force);
+    client.sendEvent("swarmLeave" , $force, ()=>{});
   });
 
+
+  $(".leave").click((e)=>{
+    e.preventDefault();
+
+      console.log("clicked");
+  });
+  $(".join").click((e)=>{
+    if(swarmToken){
+      var opts = {
+        lists : settingsTable.checkedRowLists,
+        token : swarmToken
+      }
+      if($("#swarmtype").prop('checked')){
+        opts.type = "manager"
+      }else {
+        opts.type = "worker"
+      }
+      client.sendEvent("swarmJoin" , opts, ()=>{});
+    }
+  });
   var sshlist = [];
 
 
@@ -74,12 +163,15 @@ $(function(){
 
       var indexCol = "col-md-2";
       var dataCol = "col-md-10";
-      var swarmToken = (json[json.length -1]);
+
+      swarmToken.manager = json.JoinTokens.Manager;
+      swarmToken.worker = json.JoinTokens.Worker;
+
       $(".token").append(addNewRow("manager"));
       $("#manager").append(createElement("<button/>", indexCol + " btn btn-primary", "Manager", "Manager"));
-      $("#manager").append(addRowText(dataCol, swarmToken.Manager, "managerToken"));
+      $("#manager").append(addRowText(dataCol, json.JoinTokens.Manager, "managerToken"));
       $(".token").append(addNewRow("worker"));
       $("#worker").append(createElement("<button/>", indexCol + " btn btn-default", "Worker", "Worker"));
-      $("#worker").append(addRowText(dataCol, swarmToken.Worker, "workerToken"));
+      $("#worker").append(addRowText(dataCol, json.JoinTokens.Worker, "workerToken"));
     });
 });

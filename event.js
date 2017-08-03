@@ -37,7 +37,8 @@ var eventLists = function(io){
         volume(server);
         dockerfile(server);
 				terminal(server);
-
+				settings(server);
+				swarm(server);
   }
 
   var container = function(server){
@@ -75,7 +76,7 @@ var eventLists = function(io){
 
 
 var network = function(server){
-	console.log("do");
+
     server.listen("ConnectNetwork", function(data, fn){
           p.network.connect(data, fn);
     });
@@ -99,10 +100,11 @@ var image = function(server){
    });
 
    server.listen("PullImages", function(data, fn) {
+		 			console.log(data);
          p.image.create(data,
          function(err, stream) {
-
-           if (err) return fn(err);
+					 console.log(stream);
+           if (err) return console.log(err);
 					 var docker = require("./docker")();
 					 console.log(server);
            docker.modem.followProgress(stream, onFinished, onProgress);
@@ -113,6 +115,7 @@ var image = function(server){
 
             }
             function onProgress(event) {
+							   console.log(event);
                  server.sendEvent("progress", event);
              }
          });
@@ -212,9 +215,26 @@ var dockerfile = function(server) {
 
   server.listen("build", function(data, fn){
     console.log(data);
-    p.image.build(data);
-    fn(true);
+    p.image.build(data, function(err, stream) {
+			if(err) return fn(err);
+					// console.log(stream);
+					// 	var docker = require("./docker")();
 
+						var docker = require("./docker")();
+						// console.log(server);
+						docker.modem.followProgress(stream, onFinished, onProgress);
+
+						 function onFinished(err, output) {
+							 console.log("onFinished");
+							 server.sendEvent("buildingImage", true);
+
+						 }
+						 function onProgress(event) {
+							 console.log(event);
+									server.sendEvent("buildingImage", event);
+							}
+  				});
+    	fn(true);
   });
 
 
@@ -314,7 +334,7 @@ var dockerfile = function(server) {
 	          // tree = dirTree(home, { exclude:/^\./ , extensions:/\W/ } ); file only
 	        } else if (data  != null){
 	          console.log(PATH.join(data));
-	          tree = dirTree(data, { exclude:/^\./ , extensions:/\W/ } );
+	          tree = dirTree(data, { exclude:/^\./ } );
 	        }
 	        var lists = jstreeList(tree, null);
 	        // console.log(lists);
@@ -361,7 +381,72 @@ var terminal = function (server) {
 
 }
 
+var settings = function(server){
+	server.listen('PING', function(data, fn) {
 
+			p.settings.ping(data, (err, data)=> {
+				fn({err : err, data: data});
+			});
+
+	});
+
+	server.listen('DELETE', function(data, fn) {
+
+			p.settings.delete(data, fn);
+
+	});
+}
+
+
+
+var swarm = function(server){
+
+	function getServerIp() {
+			var os = require("os");
+			var ifaces = os.networkInterfaces();
+			var result = '';
+			for (var dev in ifaces) {
+					var alias = 0;
+					if(dev === "eth0"){
+						ifaces[dev].forEach(function(details) {
+							if (details.family == 'IPv4' && details.internal === false) {
+								result = details.address;
+								++alias;
+							}
+						});
+					}
+			}
+
+			return result;
+	}
+
+
+	server.listen("swarmInit", function(data , fn){
+		if(typeof data === "number"){
+			var data = port
+		}else {
+			data = "2377"
+		}
+	  var ip = getServerIp();
+	  var opts = {
+			"AdvertiseAddr" : ip,
+	    "ListenAddr" :   "0.0.0.0:"+ data,
+	    "ForceNewCluster" : true
+	  };
+	  p.swarm.create(opts, fn);
+	});
+
+	server.listen("swarmLeave", function(data, fn){
+		var opts = {force : data};
+		p.swarm.leave(opts, fn);
+	});
+
+	server.listen("swarmJoin", function(data, fn){
+		// var opts = {force : data};
+		console.log(data);
+		p.swarm.join(data, fn);
+	});
+}
 
 // var node = function(server){
 //   server.listen("StartNode", function(node){

@@ -11,6 +11,10 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.15.2",
-    "inline-console": "^1.0.15"
+    "inline-console": "^1.0.15",
+    "system": "^1.3.0"
+  },
+  "devDependencies": {
+    "webpack": "^3.3.0"
   }
 }

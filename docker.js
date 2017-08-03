@@ -24,9 +24,9 @@ module.exports = function(opts) {
     // opts 가 object 인지 확인
     if(typeof opts === "object") {
       // opts 가 object 이면 json key 값 host, port 확인
-      if("host" in opts && "port" in opts) {
+      // if("host" in opts && "port" in opts) {
         state = true;
-      }
+      // }
     }
       // opt가 object가 아닌 다른 타입인지 확인 아닐 경우 false 반환
       else if(typeof opts !== "object") {

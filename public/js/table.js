@@ -1,5 +1,4 @@
 'use strict';
-
 var table = (function Table($table, columns){
   this.$table = $table;
   this.columns = columns;
@@ -7,22 +6,24 @@ var table = (function Table($table, columns){
     columns : this.columns,
     silent: true,
     search : true,
-    detailView : true,
-    pageSize : 5
+    detailView : false,
+    pageSize : 5,
+    showRefresh : true,
+    showColumns : true
   }
+  $.extend($.fn.bootstrapTable.defaults, $.fn.bootstrapTable.locales['ko-KR']);
   this.checkedRowLists = new Array();
 });
 
 table.prototype.initUrlTable = function (urljson, detailformat) {
-  function detailFormatter(index, row) {
 
-  }
   var init = this.opts;
   init.url = urljson;
-  if(detailformat) {
-    init.detailFormatter = detailFormatter
+  if(typeof detailformat === "function" || detailformat === true) {
+
+    init.detailView = true;
+    init.detailFormatter = detailformat;
   }
-  console.log(init);
   (this.$table).bootstrapTable(init);
 }
 
@@ -40,8 +41,12 @@ table.prototype.reset = function () {
 }
 
 table.prototype.reload = function () {
+  var self = this;
+  if(self.checkedRowLists.length > 0) {
+    (self.checkedRowLists).splice(0, (self.checkedRowLists).length);
+  }
       setTimeout(()=> {
-        (this.$table).bootstrapTable('refresh');
+        (self.$table).bootstrapTable('refresh');
     }, 1500);
 }
 
@@ -77,7 +82,13 @@ table.prototype.hideColumns = function (fields) {
     (this.$table).bootstrapTable("hideColumn", fields[i]);
   }
 }
-
+table.prototype.doubleClickRow = function () {
+  (this.$table).on('dbl-click-row.bs.table', function (e, row, $element, field) {
+    if (e.target.type !== 'checkbox') {
+        $(':checkbox', $element).trigger('click');
+      }
+  });
+}
 table.prototype.checkAllRow = function () {
   var checkedRowLists = this.checkedRowLists;
 
@@ -135,6 +146,7 @@ table.prototype.checkAllEvents = function () {
   this.uncheckAllRow();
   this.checkOneRow();
   this.uncheckOneRow();
+  this.doubleClickRow();
 }
 
 table.prototype.clickRowAddColor = function(color) {
@@ -164,6 +176,7 @@ table.prototype.expandRow = function (info, callback) {
                 detail += "<p> " + i +" : </p><p>" + JSON.stringify(data[i]) + "</p>";
               }
             }
+            console.log(detail);
             resolve(detail);
 
           });
@@ -172,15 +185,19 @@ table.prototype.expandRow = function (info, callback) {
 
     var promises = [];
     for (var i in info) {
+      console.log(info[i]);
       promises.push(expendPromiseData(info[i].url, row, info[i].keys));
     }
     Promise.all(promises).then(function(value) {
+      console.log(value);
       $detail.html(value);
     }, function(reason) {
       console.log(reason);
     });
   });
 }
+
+
 
 module.exports = table;
 

@@ -2,98 +2,68 @@
 "use strict";
 
 
-module.exports = function(app){//함수로 만들어 객체 app을 전달받음
   var express = require('express');
-  var app = express();
+  var router = express.Router();
   var file = 'index';
   //var data = [];
   var p = require('../promise');
   var docker = require('../docker')();
 
-  app.route('/myapp/index')
-      .get( (req, res) => {
-              res.render(file);
-      })
-      .post( (req, res, next) => {
-      //  console.log(req.body);
-      //  console.log(JSON.stringify(req.body));
-        data.list = req.body.message;
-        //res.send(req.body);
-        res.render(file, data);
-      });
 
-    function promiseTojson(callback, res){
-        callback.then( (resultJson) => {
-          res.setHeader("Content-Type", "application/json");
-          res.json(resultJson);
-        });
-      }
+  router.use(function timeLog(req, res, next) {
+    console.log('Time: ', Date.now());
+    res.setHeader("Content-Type", "text/html");
 
-function getPromise(callback) {
-  return new Promise(function (resolve, reject) {
-
-      callback.then( (val) => {
-         console.log(val);
-         resolve(val);
-        });
+    next();
   });
-}
-function convertStringToBoolean(json){
-  for( var i in json) {
-    if(json[i] == "true") {
-      var attr = i;
-      json[attr] =  true;
-    } else   if(json[i] == "false") {
-      var attr = i;
-      json[attr] =  false;
-    }
-  }
-}
 
-app.route('/myapp/container')
-        .get( (req, res) => {
-          res.render("container.ejs");
-        })
-
-
-  app.route('/myapp/network')
-          .get( (req, res) => {
-            res.render("network.ejs");
-          });
-
-  app.route('/myapp/image')
-    .get( (req, res) => {
-      res.render("image.ejs");
-    });
-
- app.route('/myapp/volume')
-    .get( (req, res) => {
-           res.render("volume.ejs");
-    });
-    app.route('/myapp/swarm')
-       .get( (req, res) => {
-              res.render("swarm.ejs");
-       });
-
-  app.route('/myapp/node')
-    .get( (req, res) => {
-      res.render("node.ejs");
+  router.get('/index', (req, res) => {
+        res.render(file);
   });
-app.route('/myapp/test').get ( (req, res) => {
-  res.render("test.ejs");
-});
 
-app.route('/myapp/graph').get ( (req, res) => {
-  res.render("graph.ejs");
-});
-app.route('/myapp/dockerfile').get ( (req, res) => {
-  res.render("dockerfile.ejs");
-});
-app.route('/myapp/service').get ( (req, res) => {
-  res.render("service.ejs");
-});
+  router.get('/container', (req, res) => {
+        res.render("container.ejs");
+  });
 
 
+  router.get('/network', (req, res) => {
+        res.render("network.ejs");
+  });
 
-	   return app;	//라우터를 리턴
-};
+  router.get('/image', (req, res) => {
+        res.render("image.ejs");
+  });
+
+  router.get('/volume', (req, res) => {
+        res.render("volume.ejs");
+  });
+
+  router.get('/swarm' , (req, res) => {
+        res.render("swarm.ejs");
+  });
+
+  router.get('/node', (req, res) => {
+        res.render("node.ejs");
+  });
+
+  router.get('/test' , (req, res) => {
+        res.render("test.ejs");
+  });
+
+  router.get('/graph', (req, res) => {
+        res.render("graph.ejs");
+  });
+
+  router.get('/dockerfile' ,  (req, res) => {
+        res.render("dockerfile.ejs");
+  });
+
+  router.get('/service' ,  (req, res) => {
+        res.render("service.ejs");
+  });
+
+  router.get('/settings' , (req, res) => {
+        res.render("settings.ejs");
+  });
+
+module.exports = router;
