@@ -15,7 +15,7 @@ var table = (function Table($table, columns){
   this.checkedRowLists = new Array();
 });
 
-table.prototype.initUrlTable = function (urljson, detailformat) {
+table.prototype.initUrlTable = function (urljson, detailformat, callback) {
 
   var init = this.opts;
   init.url = urljson;
@@ -25,6 +25,7 @@ table.prototype.initUrlTable = function (urljson, detailformat) {
     init.detailFormatter = detailformat;
   }
   (this.$table).bootstrapTable(init);
+  return callback;
 }
 
 table.prototype.initDataTable = function (datajson) {

@@ -39,6 +39,7 @@ var eventLists = function(io){
 				terminal(server);
 				settings(server);
 				swarm(server);
+				node(server);
   }
 
   var container = function(server){
@@ -446,7 +447,35 @@ var swarm = function(server){
 		console.log(data);
 		p.swarm.join(data, fn);
 	});
+
+	server.listen("throwNode", function(data, fn){
+		// var opts = {force : data};
+		// console.log(data);
+		p.swarm.throwNode(data, fn);
+	});
 }
+
+var node = function(server){
+	server.listen("StartNode", function(data, fn){
+		// var opts = {force : data};
+		// console.log(data);
+		// p.swarm.throwNode(data, fn);
+	});
+
+	server.listen("StopNode", function(data, fn){
+		// var opts = {force : data};
+		// console.log(data);
+		// p.swarm.throwNode(data, fn);
+	});
+
+	server.listen("RemoveNode", function(data, fn){
+		p.node.remove(data, fn);
+	});
+
+	server.listen("UpdateNode", function(data, fn){
+		p.node.update(data, fn);
+	});
+};
 
 // var node = function(server){
 //   server.listen("StartNode", function(node){
@@ -530,7 +559,7 @@ var swarm = function(server){
 //     });
 //   });
 // }
-
+//
 
 
 

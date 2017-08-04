@@ -62,11 +62,13 @@
   router.get( '/swarm/data.json' , (req, res) => {
     // p.swarm.getAllLists(null, resCallback.bind(null, res));
     docker.swarmInspect().then(resCallback.bind(null, res));
+    // p.swarm.getAllLists({}, resCallback.bind(null, res));
+
     // promiseTojson(docker.swarmInspect(), res);
   });
 
   router.get( '/node/data.json' , (req, res) => {
-      promiseTojson(docker.listNodes(), res);
+      p.node.getAllLists({}, resCallback.bind(null, res));
   });
   router.get( '/service/data.json' , (req, res) => {
     promiseTojson(docker.listServices({}), res);

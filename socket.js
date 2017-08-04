@@ -55,40 +55,8 @@ serversocket.prototype.sendEvent = function(eventName, data, callback) {
 
 
 module.exports = serversocket;
-//
 
-// socket.on("sshConnection", function(data){
-//       var privateKey = fs.readFileSync('../../.ssh/id_rsa', "utf8");
-//       var opts = data;
-//       opts.key = privateKey;
-//       // console.log(opts);
-//        console.log(opts);
-//
-//       var ssh = require('./ssh')(opts);
-//       var cmd = "docker"
-//       // var args = {
-//       //   "token_manager" : "swarm join-token -q manager",
-//       //   "token_worker" : "swarm join-token -q worker",
-//       //   "join_manager" : "swarm join --token " + token + " " + getServerIp() + ":2377",
-//       //   "join_worker" : "swarm join --token " + token + " " + getServerIp() + ":2377"
-//       // }
-//       var join = "swarm join --token " + opts.token +" " +  "192.168.0.108" + ":2377"
-//
-//
-//       ssh.exec(cmd, {
-//             args : [join],
-//             out: function(stdout) {
-//               console.log(stdout);
-//               ssh.end();
-//             },
-//             err : (err) =>{
-//               console.log(err);
-//               ssh.end();
-//             }
-//         }).start();
-//
-//
-// });
+
 //
 // socket.on("CreateService", function(data){
 //   console.log(data);
