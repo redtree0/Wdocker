@@ -60,40 +60,72 @@ const columns = [{
   }];
 
 
-
-function containerSettings (image, name, cmd, portArray){
-  var config = require("./config");
-  // var opts = settings.container;
-    if(image == "Images"){
-      return false;
-    }
-    if (hasValue(name, cmd)) {
-      config.setContainer({"Image" : image, "name" : name, "Cmd" : cmd},
-          portArray);
-   };
-  return  config.getContainer();
-}
-
-
 $(function(){
-  var socket = io();
-  var Socket = require("./io");
-  var client = new Socket(socket, $('body'));
-    var spin = require("./spinner");
-    var table = require("./table.js");
-    var dialog = require("./dialog.js");
-    var $container = $(".jsonTable");
+
     var $detail = $(".detail");
-    var $list = $(".portlists");
-    var portlists= [];
 
-    var containerTable = new table($container, columns);
+    var $all = {
+      $portlists : $(".portlists"),
+      $imageMenu : $("#imageMenu"),
+      $image : $('#image'),
+      $name : $("#name"),
+      $command : $("#command"),
+      getSettingValue : function() {
+        return {
+          Image : this.$image.text().trim(),
+          name : this.$name.val(),
+          Cmd : this.$command.val()
+        }
+      },
+      settingMethod : {
+        get : "getContainer",
+        set : "setContainer"
+      },
+      checkValue : function (json){
+        if(this.$image.text().trim() === "Images"){
+          return false;
+        };
 
-    containerTable.initUrlTable('/myapp/container/data.json', true);
-    containerTable.hideColumns(["Id", "ImageID", "Ports", "Mounts", "HostConfig", "NetworkingSettings"]);
-    containerTable.checkAllEvents();
+        for(var i in json){
+          if(json[i] === null || json[i] === undefined){
+            return false;
+          }
+        }
+      }
+      ,
+      $plus : $(".plus"),
+      $connect : $(".connect"),
+      $form : $("#hiddenForm"),
+      $portAdd : $(".portAdd"),
+      $connectMenu : $("#connectMenu"),
+      $connectButton : $("#connectButton"),
+      $whoisConnected : $(".whoisConnected"),
+      $connect : $(".connect"),
+      $jsonTable : $(".jsonTable"),
+      hideColumns : ["Id", "ImageID", "Ports", "Mounts", "HostConfig", "NetworkingSettings"],
+      completeEvent : function(data, callback){
+        if(hasValue(data)){
+          var dialog = require("./dialog.js");
+
+          var finished = new dialog("컨테이너", data.msg + data.statusCode, $("body"));
+          finished.setDefaultButton('Close[Enker]', 'btn-primary create');
+          // $("body").spinStop();
+          finished.show();
+          // containerTable.reload();
+          callback;
+        }
+      }
+    }
+    initDropdown('/myapp/image/data.json', $all.$imageMenu, $all.$image, "RepoTags", 0);
+
+
+
+    var view = require("./view.js");
+    view.init($all, columns, "container");
+    var containerTable = view.getMainTable();
+    // // containerTable.checkAllEvents();
+    // // containerTable.clickRowAddColor("danger");
     containerTable.clickRow($detail);
-    containerTable.clickRowAddColor("danger");
      var expandinfo = [{
        url : "/myapp/container/top/",
        keys : ["Titles", "Processes"]
@@ -103,93 +135,29 @@ $(function(){
      }];
      containerTable.expandRow(expandinfo);
 
-
-     var $form = $("#CreateContainer");
-     $form.hide();
-     clickDeleteList($list, portlists);
+  //   $(".start").click((e)=>{
+  //     client.sendEventTable("StartContainer", containerTable);
+  //   });
   //
-    $(".plus").click((e)=>{
-      e.preventDefault();
-      var $image =$('#image');
-      var $name = $("#name");
-      var $command = $("#command");
-      var dialog = require("./dialog");
-      var popup = new dialog("컨테이너 생성", $form.show(), $("body"));
-
-      initDropdown('/myapp/image/data.json', $(".dropdown-menu"), $image, "RepoTags", 0);
-      popup.appendButton('Create', 'btn-primary create',
-                  function(dialogItself){
-
-                      var image = $image.text().trim();
-                      var name = $name.val();
-                      var command = $command.val();
-                      var opts = containerSettings(image, name, command, portlists);
-                      client.sendEventTable("CreateContainer", containerTable, opts);
-                  });
-
-      popup.show();
-
-    });
-
-
+  //   $(".stop").click((e)=>{
+  //       client.sendEventTable("StopContainer", containerTable);
+  //   });
   //
+  //   $(".remove").click((e)=>{
+  //       client.sendEventTable("RemoveContainer", containerTable);
+  //   });
   //
-    $(".portAdd").click((e)=>{
-        e.preventDefault();
-        var $protocol = $("#protocol");
-        var $containerPort = $("#containerPort");
-        var $hostPort = $("#hostPort");
-
-        var $array = [$containerPort, $hostPort, $protocol];
-        var state = true;
-        for (var i in $array) {
-          if(!(hasValue($array[i].val()))){
-            state = false;
-          }
-        }
-        if(state) {
-          insertArray(portlists, $array);
-          createList ( $list, portlists );
-        }
-    });
+  //   $(".kill").click((e)=>{
+  //       client.sendEventTable("KillContainer", containerTable);
+  //   });
   //
-
-
-
-  client.completeEvent = function(data, callback){
-    if(hasValue(data)){
-      var finished = new dialog("컨테이너", data.msg + data.statusCode, $("body"));
-      finished.setDefaultButton('Close[Enker]', 'btn-primary create');
-      finished.show();
-      containerTable.reload();
-      callback;
-    }
-  }
-
-
-    $(".start").click((e)=>{
-      client.sendEventTable("StartContainer", containerTable);
-    });
-
-    $(".stop").click((e)=>{
-        client.sendEventTable("StopContainer", containerTable);
-    });
-
-    $(".remove").click((e)=>{
-        client.sendEventTable("RemoveContainer", containerTable);
-    });
-
-    $(".kill").click((e)=>{
-        client.sendEventTable("KillContainer", containerTable);
-    });
-
-    $(".pause").click((e)=>{
-        client.sendEventTable("PauseContainer", containerTable);
-    });
-
-    $(".unpause").click((e)=>{
-        client.sendEventTable("UnpauseContainer", containerTable);
-    });
+  //   $(".pause").click((e)=>{
+  //       client.sendEventTable("PauseContainer", containerTable);
+  //   });
+  //
+  //   $(".unpause").click((e)=>{
+  //       client.sendEventTable("UnpauseContainer", containerTable);
+  //   });
 
 
 });

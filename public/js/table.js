@@ -10,9 +10,9 @@ var table = (function Table($table, columns){
     pageSize : 5,
     showRefresh : true,
     showColumns : true
-  }
-  $.extend($.fn.bootstrapTable.defaults, $.fn.bootstrapTable.locales['ko-KR']);
+  };
   this.checkedRowLists = new Array();
+  $.extend($.fn.bootstrapTable.defaults, $.fn.bootstrapTable.locales['ko-KR']);
 });
 
 table.prototype.initUrlTable = function (urljson, detailformat, callback) {
@@ -95,9 +95,7 @@ table.prototype.checkAllRow = function () {
 
   (this.$table).on('check-all.bs.table', function (r,e) {
       e.forEach((data, index, array) => {
-
         if(checkedRowLists.includes(array[index])){
-
         }else {
           checkedRowLists.push(data);
         }
@@ -143,6 +141,7 @@ table.prototype.uncheckOneRow = function () {
 }
 
 table.prototype.checkAllEvents = function () {
+  console.log("done");
   this.checkAllRow();
   this.uncheckAllRow();
   this.checkOneRow();

@@ -71,7 +71,7 @@
       p.node.getAllLists({}, resCallback.bind(null, res));
   });
   router.get( '/service/data.json' , (req, res) => {
-    promiseTojson(docker.listServices({}), res);
+    p.service.getAllLists({}, resCallback.bind(null, res));
   });
 
 

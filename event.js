@@ -7,11 +7,13 @@ var Socket = require("./socket");
 // var path = require('path');
 // var os = require('os');
 var p = require('./p');
+var mongo = require("./mongoController");
+
 const eventName = {
 	STARTCONTAINER : 'StartContainer',
 	STOPCONTAINER: 'StopContainer'
 }
-
+var defaultDocker = require("./docker")();
 
 var eventLists = function(io){
   io.on('connection', onConnect);
@@ -40,6 +42,7 @@ var eventLists = function(io){
 				settings(server);
 				swarm(server);
 				node(server);
+				service(server);
   }
 
   var container = function(server){
@@ -327,15 +330,27 @@ var dockerfile = function(server) {
 	        const PATH = require('path');
 	        const dirTree = require('directory-tree');
 	        var tree = null;
-	        console.log("path %s", data);
-	        if (data == ""){
-	           var home = '/home/pirate/dockerfile/';
-	          //  var home = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
-	          tree = dirTree(home, { exclude:/^\./  } );
+					var home = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
+					var workspace = path.join(home, "dockerfile");
+
+					if(fs.existsSync(workspace)){
+					}else {
+						fs.mkdir(workspace, function(err) {
+							// fn(true);
+						});
+					}
+	        if (data === ""){
+
+	          tree = dirTree(workspace, { exclude:/^\./  } );
 	          // tree = dirTree(home, { exclude:/^\./ , extensions:/\W/ } ); file only
-	        } else if (data  != null){
-	          console.log(PATH.join(data));
-	          tree = dirTree(data, { exclude:/^\./ } );
+	        } else if (data  !== null){
+
+						if( (data) === home){
+							tree = dirTree(workspace, { exclude:/^\./ } );
+						}else {
+							tree = dirTree(data, { exclude:/^\./ } );
+						}
+						// console.log(path.dirname(data) === path.join(home));
 	        }
 	        var lists = jstreeList(tree, null);
 	        // console.log(lists);
@@ -396,6 +411,40 @@ var settings = function(server){
 			p.settings.delete(data, fn);
 
 	});
+
+	server.listen('ConnectDocker', function(data, fn) {
+		if(data.ip === "default") {
+			var docker = defaultDocker;
+			p[data.docker].docker = docker;
+		}else {
+			mongo.docker.find({"ip" : data.ip}, (result)=>{
+
+				var opts = {
+					"host" : result.ip,
+					"port" : result.port
+				}
+				var docker = p.settings.setDocker(opts);
+				p[data.docker].docker = docker;
+			});
+		}
+		fn(true);
+	});
+
+	server.listen('GetThisDocker', function(data, fn) {
+		var docker = (p[data.docker].getDocker()).modem;
+		var whoisDocker = null;
+		if(docker.socketPath !== undefined){
+					// console.log("default");
+					whoisDocker = "default";
+		}else if(docker.host !== undefined){
+			// console.log("remote");
+			whoisDocker = docker.host;
+		}
+		// console.log(docker.modem);
+		// // console.log(p[data.docker].getDocker().socketPath);
+		// // console.log(p[data.docker].getDocker().host);
+		fn(whoisDocker);
+	});
 }
 
 
@@ -424,9 +473,9 @@ var swarm = function(server){
 
 	server.listen("swarmInit", function(data , fn){
 		if(typeof data === "number"){
-			var data = port
+			var port = data;
 		}else {
-			data = "2377"
+			port = "2377"
 		}
 	  var ip = getServerIp();
 	  var opts = {
@@ -434,7 +483,26 @@ var swarm = function(server){
 	    "ListenAddr" :   "0.0.0.0:"+ data,
 	    "ForceNewCluster" : true
 	  };
-	  p.swarm.create(opts, fn);
+
+	  p.swarm.create(opts).then(()=>{
+			p.swarm.getToken().then((result)=>{
+				mongo.system.destroy();
+				mongo.system.save({ "swarmPort" : data,
+				"swarmIP" : ip,
+				"token" : {
+					worker : result.JoinTokens.Worker,
+					manager : result.JoinTokens.Manager
+				}
+			});
+		});
+
+	}).catch((err)=>{
+		console.log(err);
+	});
+		// token : {
+	  //   manager : String,
+	  //   worker : String
+	  // }
 	});
 
 	server.listen("swarmLeave", function(data, fn){
@@ -443,14 +511,10 @@ var swarm = function(server){
 	});
 
 	server.listen("swarmJoin", function(data, fn){
-		// var opts = {force : data};
-		console.log(data);
 		p.swarm.join(data, fn);
 	});
 
 	server.listen("throwNode", function(data, fn){
-		// var opts = {force : data};
-		// console.log(data);
 		p.swarm.throwNode(data, fn);
 	});
 }
@@ -459,7 +523,10 @@ var node = function(server){
 	server.listen("StartNode", function(data, fn){
 		// var opts = {force : data};
 		// console.log(data);
-		// p.swarm.throwNode(data, fn);
+		p.node.start(data);
+		// mongo.system.show();
+		// p.node.start(data, fn);
+		// mongo.system.find()
 	});
 
 	server.listen("StopNode", function(data, fn){
@@ -477,91 +544,21 @@ var node = function(server){
 	});
 };
 
-// var node = function(server){
-//   server.listen("StartNode", function(node){
-//     node.forEach((data)=>{
-//       var role = data.Spec.Role;
-//       var token = getSwarmToken();
-//       token.then((data)=>{
-//
-//         var joinToken = "";
-//         if(role =="worker") {
-//           joinToken = (data.JoinTokens.Worker);
-//         } else if (role == "manager") {
-//           joinToken = (data.JoinTokens.Manager);
-//         }
-//         // resolve(joinToken);
-//         var leave = "docker swarm leave;"
-//         var join = "docker swarm join --token " + joinToken +" " +  "192.168.0.108" + ":2377"
-//         console.log(join);
-//         // console.log(ssh);
-//         ssh.exec(leave, {
-//           args : [join],
-//           out: function(stdout) {
-//             console.log(stdout);
-//             ssh.end();
-//           },
-//           err : (err) =>{
-//             console.log(err);
-//             ssh.end();
-//           }
-//         }).start();
-//       });
-//       var node = docker.getNode(data.ID);
-//       node.remove().catch((err)=>{
-//         console.log(err);
-//       });
-//       // var hostname = os.hostname();
-//       // var node = docker.getNode(hostname);
-//       // node.inspect().then((data)=> {
-//       //   var addr = data.ManagerStatus.Addr;
-//       //   // console.log(data);
-//       // });
-//       var privateKey = fs.readFileSync('../../.ssh/id_rsa', "utf8");
-//       var opts = {
-//         "host" : data.Status.Addr,
-//         "user" : "pirate",
-//         "port" : "22",
-//         "key" : privateKey
-//       }  ;
-//       // opts.key = privateKey;
-//       var ssh = require('./ssh')(opts);
-//
-//
-//     });
-//   });
-//
-//   server.listen("RemoveNode", function(data){
-//     data.forEach((data)=>{
-//       var node = docker.getNode(data.ID);
-//       node.remove({force: true}).catch((err)=>{
-//         console.log(err);
-//       });
-//     });
-//   });
-//
-//   server.listen("UpdateNode", function(node, json){
-//
-//     node.forEach((data)=>{
-//       var node = docker.getNode(data.ID);
-//       var opts = {
-//         "id" : data.ID,
-//         "version" : data.Version.Index,
-//         "Role" : json.Role,
-//         "Availability" : json.Availability
-//       };
-//
-//       // console.log(data);
-//       console.log(opts);
-//       node.update(opts).catch((err)=>{
-//         console.log(err);
-//       });
-//     });
-//   });
-// }
-//
+var service = function(server){
 
+	server.listen("CreateService", function(data, fn){
+		p.service.create(data, fn);
+	});
 
+	server.listen("RemoveService", function(data, fn){
+		console.log(data);
+		console.log("111111111111111111111111");
+		console.log(JSON.stringify(fn));
+		console.log("111111111111111111111111");
+
+		p.service.remove(data, fn);
+	});
+}
 
 
 

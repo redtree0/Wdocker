@@ -29,11 +29,11 @@ app.route('/')
 var route = require('./route/droute.js');
 var json = require("./route/jsonRoute.js");
 
-var dockerDB = require("./mongo.js");
-var db = require("./route/dbRoute.js")( dockerDB);
+var dbLists = require("./mongo.js");
+var dbRoute = require("./route/dbRoute.js")( dbLists );
 app.use(staticPath, route);
 app.use(staticPath, json);
-app.use(staticPath, db);
+app.use(staticPath, dbRoute);
 
 
 const port = 3000;

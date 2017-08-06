@@ -1,21 +1,7 @@
+'use strict';
 
-function serviceSettings ($serviceName, $image, $command, portlist, $healthCheck){
-  var opts = serviceDefaultSettings();
-  if(!(hasValue($serviceName.val(), $image.text().trim()))){
-    alert("t");
-    return false;
-  }
-  // console.log(typeof $publishedPort.val());;
-  opts.Name = $serviceName.val()
-  opts.TaskTemplate.ContainerSpec.Image = $image.text().trim();
-  opts.TaskTemplate.ContainerSpec.Command = [$command.val()];
-  // opts.TaskTemplate.ContainerSpec.HealthCheck.Test = [$healthCheck.val()];
-  opts.EndpointSpec.Ports = portlist;
 
-  return opts;
-}
-
-var columns = [{
+const columns = [{
       checkbox: true,
       title: 'Check'
   },{
@@ -42,42 +28,95 @@ var columns = [{
   }];
 
 $(function(){
-  var socket = io();
-  var checklist = [];
-  var $service = $(".jsonTable");
-  var $serviceName = $("#serviceName");
-  var $image = $("#image");
-  var $command = $("#command");
-  var $publishedPort = $("#publishedPort");
-  var $targetPort = $("#targetPort");
-  var $healthCheck = $("#healthCheck");
-  var $publishedPort = $("#publishedPort");
-  var $targetPort = $("#targetPort");
-  var $protocol = $("#protocol");
-  initDropdown('/myapp/images/data.json', $(".dropdown-menu"), $('#image'), "RepoTags", 0);
-  initUrlTable($service, columns, "/myapp/service/data.json" );
-  checkTableEvent($service, checklist);
-  clickRowAddColor($service, "danger");
+    var socket = io();
+    var Socket = require("./io");
+    var client = new Socket(socket, $('body'));
+    var spin = require("./spinner");
+    var table = require("./table.js");
+    var dialog = require("./dialog.js");
+    var $service = $(".jsonTable");
+
+    var serviceTable = new table($service, columns);
+
+    serviceTable.initUrlTable('/myapp/service/data.json', false);
+    serviceTable.checkAllEvents();
+    serviceTable.clickRowAddColor("danger");
+    var $form = $("#CreateService");
+    $form.hide();
+
+  // initDropdown('/myapp/images/data.json', $(".dropdown-menu"), $('#image'), "RepoTags", 0);
 
 
-  $(".create").click(()=>{
+  function serviceSettings (image, serviceName, command, portlists){
 
-      var opts = serviceSettings($serviceName, $image, $command, portlist, $healthCheck);
-      console.log(portlist);
-      formSubmit($("#CreateService"), opts, socket, ()=> { reloadTable($service); dialogShow("title", "message")});
+    var config = require("./config");
+    // var opts = settings.container;
+      if(image === "Images"){
+        return false;
+      }
+      if (hasValue(serviceName, command)) {
+        config.setService({"Image" : image, "Name" : serviceName, "Command" : command},
+            portlists);
+     };
+     console.log(config.getService());
+    return  config.getService();
+
+  }
+
+  $(".plus").click((e)=>{
+    e.preventDefault();
+    var $serviceName = $("#serviceName");
+    var $image = $("#image");
+    var $command = $("#command");
+    var $healthCheck = $("#healthCheck");
+
+    var popup = new dialog("서비스 생성", $form.show(), $("body"));
+
+    initDropdown('/myapp/image/data.json', $(".dropdown-menu"), $image, "RepoTags", 0);
+    popup.appendButton('Create', 'btn-primary create',
+                function(dialogItself){
+                    var serviceName = $serviceName.val() ;
+                    var image = $image.text().trim();
+                    var command = $command.val();
+                    // var healthCheck = $healthCheck.prop("checked");
+
+                    var opts = serviceSettings(image, serviceName, command, portlists);
+                    client.sendEventTable("CreateService", serviceTable, opts);
+                });
+    popup.show();
+
   });
 
-    $(".remove").click(()=>{
-        socket.emit("RemoveService", checklist);
-        reloadTable($service);
-        dialogShow("title", "message");
+  client.completeEvent = function(data, callback){
+    if(hasValue(data)){
+      var finished = new dialog("서비스", data.msg + data.statusCode, $("body"));
+      finished.setDefaultButton('Close[Enker]', 'btn-primary create');
+      finished.show();
+      serviceTable.reload();
+      callback;
+    }
+  };
+
+    $(".remove").click((e)=>{
+      e.preventDefault();
+      // console.log("remove get data");
+      // // console.log(serviceTable.checkedRowLists.push({"d" : "d"}));
+      // console.log(serviceTable.checkedRowLists);
+      // console.log(JSON.stringify(serviceTable.checkedRowLists));
+      // console.log(serviceTable);
+        client.sendEventTable("RemoveService", serviceTable, ()=>{});
     });
 
-    var id = 0;
-    var portlist = [];
-    $(".add").click((e)=>{
+
+    var portlists = [];
+    var $list = $(".portlists");
+    $(".portAdd").click((e)=>{
         e.preventDefault();
-        var $array = [$publishedPort, $targetPort, $protocol];
+        var $publishedPort = $("#publishedPort");
+        var $targetPort = $("#targetPort");
+        var $protocol = $("#protocol");
+
+        var $array = [$publishedPort,  $targetPort, $protocol];
         var state = true;
         for (var i in $array) {
           if(!(hasValue($array[i].val()))){
@@ -85,11 +124,10 @@ $(function(){
           }
         }
         if(state) {
-          addlist($array, $(".addlist") , id++, portlist);
-
+          insertArray(portlists, $array);
+          createList ( $list, portlists );
         }
     });
-
 
     clickDeleteList($(".addlist"));
 

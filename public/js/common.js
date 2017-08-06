@@ -11,6 +11,7 @@ function initDropdown(jsonUrl, $li, $button, attr, index, callback) {
   if (arguments.length == 6) {
     var hasIndex = true;
   }
+  $li.children().remove();
   $.getJSON(jsonUrl, function(json, textStatus) {
       json.forEach ( (data) => {
         var value = data[attr];
@@ -18,6 +19,7 @@ function initDropdown(jsonUrl, $li, $button, attr, index, callback) {
         if( hasIndex ) {
           value = (data[attr])[index];
         }
+        console.log(value);
 
         $("<li><a>" +  value + "</a><li/>").appendTo($li);
       });

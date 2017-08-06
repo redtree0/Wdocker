@@ -157,7 +157,7 @@ $(function(){
 
 
 
-  $(".init").submit((e)=>{
+  $(".init").click((e)=>{
     e.preventDefault();
     var $swarmPort = $("#swarmPort");
     client.sendEvent("swarmInit" ,$swarmPort.val(), ()=>{});
@@ -165,7 +165,11 @@ $(function(){
 
   $(".leave").click((e)=>{
     e.preventDefault();
-    client.sendEvent("swarmLeave" , opts, ()=>{});
+    client.sendEvent("swarmLeave" , true, ()=>{});
+  });
+
+  $(".start").click((e)=>{
+      client.sendEventTable("StartNode", nodeTable);
   });
 
   $(".delete").click((e)=>{

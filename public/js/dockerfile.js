@@ -218,7 +218,7 @@ function jstreeRefresh($jstree, newTree){
             path : $path.text(),
             context : editor.getValue()
           }
-          client.socketEvent("UpdateFile", opts, completeEvent);
+          client.sendEvent("UpdateFile", opts, completeEvent);
       });
 
 
@@ -243,7 +243,7 @@ function jstreeRefresh($jstree, newTree){
             imageTag : $imageTag.val()
           };
 
-          client.socketEvent("build", opts, (data, callback)=>{
+          client.sendEvent("build", opts, (data, callback)=>{
             if(data){
               console.log("done");
             }

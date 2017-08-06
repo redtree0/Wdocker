@@ -53,6 +53,12 @@ serversocket.prototype.sendEvent = function(eventName, data, callback) {
     socket.emit(eventName, data, callback);
 }
 
+serversocket.prototype.errTransmit = function(eventName, data, callback) {
+    var socket =  this.socket;
+    socket.emit("errTransmit", data, callback);
+}
+
+
 
 module.exports = serversocket;
 

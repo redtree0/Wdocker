@@ -59,8 +59,8 @@ var clientsocket = (function clientsocket(io, $body) {
             return;
           }
           console.log(data);
-          self.spinnerEvent(eventName, data, callback);
-          table.reload();
+          self.spinnerEvent(eventName, data, table.reload());
+          callback;
     };
 
     clientsocket.prototype.completeEvent = function(){
@@ -87,10 +87,13 @@ var clientsocket = (function clientsocket(io, $body) {
 
       if(data) {
         self.$body.spinStart();
-        return self.sendEvent(eventName, data, (data)=>{
-          self.completeEvent(data);
+        self.sendEvent(eventName, data, (data)=>{
+          console.log("getData");
+          console.log(self.$body);
+
           (self.$body).spinStop();
-          callback;
+          self.completeEvent(data, callback);
+          // callback;
         });
       }
     };

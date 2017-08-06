@@ -25,5 +25,20 @@ var docker = new Schema({
   // password : String
 });
 
+var system = new Schema({
+  swarmIP : String,
+  swarmPort : String,
+  token : {
+    manager : String,
+    worker : String
+  }
+  // ,user : String,
+  // password : String
+});
 
-module.exports = mongoose.model('docker', docker);
+
+
+module.exports = {
+  "docker" : mongoose.model('docker', docker),
+  "system" : mongoose.model('system', system)
+} ;

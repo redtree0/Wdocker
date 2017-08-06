@@ -4,13 +4,14 @@
     this.docker = docker;
     this.getInfo = null;
     this.getLists = null;
-    this.remoteDocket = null;
+    this.remoteDocker = null;
+    this.attr = null;
   };
 
 
   p.prototype.successCallback = function (callback, data){
-      console.log("successed");
-      console.log(data);
+      // console.log("successed");
+      // console.log(data);
       var result = {
         "state" : true,
         "msg" : data
@@ -29,19 +30,29 @@
     }
 
     p.prototype.get = function (data, opts, method) {
+      var self = this;
+      var hasOpts = true;
       if(arguments.length === 2) {
         method = opts;
         opts = null;
+        var hasOpts = false;
       }
       var list = [];
-      console.log("p get ");
-      console.log(data);
-      console.log(method);
+      var args = null;
+
       for(var i in data) {
-        var dockerInfo = docker[this.getInfo](data[i].Id);
-        list.push( new Promise(function (resolve, reject) {
-          resolve(dockerInfo[method](opts) );
-        }));
+
+        var dockerInfo = self.docker[self.getInfo](data[i][(self.attr)]);
+
+        if(hasOpts){
+          list.push( new Promise(function (resolve, reject) {
+            resolve(dockerInfo[method](opts) );
+          }));
+        }else {
+          list.push( new Promise(function (resolve, reject) {
+            resolve(dockerInfo[method]() );
+          }));
+        }
       };
       return list;
     };
@@ -67,13 +78,29 @@
   };
 
   p.prototype.getAllLists = function (opts, callback){
-    var dockerInfo = docker[this.getLists](opts);
+    var self = this;
+    var dockerInfo = self.docker[self.getLists](opts);
     console.log("getlists");
     console.log(this.getLists);
     return new Promise(function(resolve, reject){
       resolve(dockerInfo);
     }).then(callback);
 
+  };
+
+  p.prototype.setRemoteDocker = function (data, callback) {
+    this.remoteDocker = require("./docker")(data);
+    // return this.remoteDocker;
+  }
+
+  p.prototype.setDocker = function (data, callback) {
+    // this.docker = require("./docker")(data);
+    return require("./docker")(data);
+  }
+
+  p.prototype.getDocker = function (data, callback) {
+    // this.docker = require("./docker")(data);
+    return this.docker;
   }
 
   var docker = require("./docker")();
@@ -84,6 +111,7 @@
 
    container.getInfo = "getContainer";
    container.getLists = "listContainers";
+   container.attr = "Id";
 
    container.create = function (data, callback) {
      var self = this;
@@ -146,6 +174,7 @@
    var network = Object.create(test);
    network.getInfo = "getNetwork";
    network.getLists = "listNetworks";
+   network.attr = "Id"
 
    network.get = function ( data, opts, callback) {
        if(arguments.length === 2) {
@@ -153,9 +182,11 @@
          opts = null;
        }
        var list = [];
+       var self = this;
 
        for(var i in data) {
-         var dockerInfo = docker[this.getInfo](data[i].Id);
+
+         var dockerInfo = docker[self.getInfo](data[i][self.attr]);
          if(opts !== null && opts.EndpointConfig){
            opts.EndpointConfig.NetworkID = data[i].Id;
          }
@@ -206,6 +237,7 @@
   var image = Object.create(test);
   image.getInfo = "getImage";
   image.getLists = "listImages";
+  image.attr = "Id";
 
   image.search =  function (filters, callback) {
         var self = this;
@@ -254,22 +286,7 @@
     var volume = Object.create(test);
     volume.getInfo = "getVolume";
     volume.getLists = "listVolumes";
-
-    volume.get = function (data, opts, method) {
-        if(arguments.length === 2) {
-          method = opts;
-          opts = null;
-        }
-        var list = [];
-
-        for(var i in data) {
-          var dockerInfo = docker[this.getInfo](data[i].Name);
-          list.push( new Promise(function (resolve, reject) {
-            resolve(dockerInfo[method](opts) );
-          }));
-        };
-        return list;
-      };
+    volume.attr = "Name";
 
 
     volume.create =  function (data, callback) {
@@ -316,10 +333,9 @@
       // var lists = self.get(data);
       var lists = data;
       for (var i in lists) {
-        var dockerDB = require("./mongo.js");
+        var dbLists = require("./mongo.js");
 
-        var db = new dockerDB();
-        dockerDB.remove({ _id: lists[i]._id }, function(err, output){
+        dbLists.docker.remove({ _id: lists[i]._id }, function(err, output){
             if(err) {
               console.log(err);
             }
@@ -329,63 +345,74 @@
       }
     };
 
+    settings.connectDocker = function (data, callback) {
+        var self = this;
+        return self.setRemoteDocker(data);
+    };
+
     var swarm = Object.create(test);
     // swarm.getInfo = "getVolume";
     swarm.getLists = "swarmInspect";
 
     swarm.create = function (data, callback) {
       var self = this;
-      self.docker.swarmInit(data).then(self.successCallback.bind(null, callback) , self.failureCallback.bind(null, callback));
+      return self.docker.swarmInit(data);
+      // self.docker.swarmInit(data).then(self.successCallback.bind(null, callback) , self.failureCallback.bind(null, callback));
     };
 
     swarm.leave = function (data, callback){
       var self = this;
+      console.log("swarm leave");
        self.docker.swarmLeave({force : data}).then(self.successCallback.bind(null, callback) , self.failureCallback.bind(null, callback));
     };
 
     swarm.getToken = function (data, callback) {
       var self= this;
+      // return self.docker.swarmInspect();
       return new Promise(function (resolve, reject) {
           resolve(self.docker.swarmInspect());
       });
     };
 
-    swarm.setRemoteDocker = function (data, callback) {
-      this.remoteDocker = require("./docker")(data);
-    }
 
     swarm.join = function (data, callback){
       var self = this;
-      var promise = [];
-      promise.push(self.getToken());
-      Promise.all(promise).then((token)=>{
         // console.log(data);
         // console.log(data.lists.pop());
         var hostconfig = {
           host : data.host,
           port : data.port
         }
-        self.setRemoteDocker(hostconfig);
-
-        var datatoken = token.pop(); /// token array로 와서 pop함
-        var opts = {
-          "AdvertiseAddr": hostconfig.host,
-          "ListenAddr": "0.0.0.0:2377",
-          "RemoteAddrs": ["192.168.0.108"],
-          "JoinToken": "",
-        }
-        console.log(datatoken);
-        console.log(data.type);
+        var state = null;
         if(data.type === "worker"){
-          opts.JoinToken = (datatoken.JoinTokens.Worker);
+          state = true;
         }else if(data.type === "manager"){
-          opts.JoinToken = (datatoken.JoinTokens.Manager);
+          state = false;
         }
-        self.remoteDocker.swarmJoin(opts).then( (err, data)=>{
-          console.log(err);
-          console.log(data);
+        self.setRemoteDocker(hostconfig);
+        var mongo = require("./mongoController");
+
+        mongo.system.show((result)=>{
+            var opts = {
+              "AdvertiseAddr": hostconfig.host,
+              "ListenAddr": "0.0.0.0:"+result[0].swarmPort,
+              "RemoteAddrs": [result[0].swarmIP + ":" + result[0].swarmPort],
+              "JoinToken": ""
+            }
+            if(state){
+              opts.JoinToken = (result[0].token.worker);
+            }else {
+              opts.JoinToken = (result[0].token.manager);
+            }
+            console.log(opts);
+            console.log(self.remoteDocker);
+            self.remoteDocker.swarmJoin(opts).then( (err, data)=>{
+              console.log("swarm Join");
+              console.log(err);
+              console.log(data);
+            });
         });
-      });
+
     };
 
    swarm.throwNode = function (data, callback){
@@ -406,28 +433,55 @@
     var node = Object.create(test);
     node.getInfo = "getNode";
     node.getLists = "listNodes";
+    node.attr = "ID"
 
-    node.get = function (data, opts, method) {
-      if(arguments.length === 2) {
-        method = opts;
-        opts = null;
-      }
-      var list = [];
-      console.log("p get ");
-      console.log(data);
-      console.log(method);
-      for(var i in data) {
-        var dockerInfo = docker[this.getInfo](data[i].ID);
-        list.push( new Promise(function (resolve, reject) {
-          resolve(dockerInfo[method](opts) );
-        }));
-      };
-      return list;
-    };
     node.start = function (data, callback){
       var self = this;
-      self.node.remove(data, callback);
-      // this.doTask(data, callback, {force: true},"remove");
+
+      var host = data[0].Status.Addr;
+      var role = data[0].Spec.Role;
+
+       var mongo = require("./mongoController");
+
+       mongo.docker.find({ip : host}, (result)=>{
+         var hostconfig = {
+           "host" : result.ip,
+           "port" : result.port
+         };
+         self.setRemoteDocker(hostconfig);
+         console.log(self.remoteDocker);
+          self.remoteDocker.swarmLeave({"force" : true}).then( ()=>{
+
+            mongo.system.show((result)=>{
+              console.log("result");
+              console.log(result);
+
+              var opts = {
+                "AdvertiseAddr": hostconfig.host,
+                "ListenAddr": "0.0.0.0:"+ result[0].swarmPort,
+                "RemoteAddrs": [result[0].swarmIP + ":" + result[0].swarmPort],
+                "JoinToken": ""
+              }
+              if(role === "worker"){
+                opts.JoinToken = (result[0].token.worker);
+              }else {
+                opts.JoinToken = (result[0].token.manager);
+              }
+              //      console.log(opts);
+              //      console.log(self.remoteDocker);
+              self.remoteDocker.swarmJoin(opts).then( (err, data)=>{
+                console.log("swarm Join");
+                console.log(err);
+                console.log(data);
+              });
+            });
+
+
+          });
+
+       });
+
+
     };
 
     node.remove = function (data, callback){
@@ -454,6 +508,28 @@
       }
     }
 
+    var service = Object.create(test);
+    service.getInfo = "getService";
+    service.getLists = "listServices";
+    service.attr = "ID";
+
+    service.create = function(data, callback){
+      var self = this;
+      (self.docker).createService(data).then(self.successCallback.bind(null, callback) , self.failureCallback.bind(null, callback));
+    };
+
+    service.remove = function(data, callback){
+        this.doTask(data, callback, "remove");
+    };
+
+    service.inspect = function(data, callback){
+        this.doTask(data, callback, "inspect");
+    };
+
+
+
+
+
    var lists = {
      "container" : container,
      "network" : network,
@@ -461,7 +537,8 @@
      "volume" : volume,
      "settings" : settings,
      "swarm" : swarm,
-     "node" : node
+     "node" : node,
+     "service" : service
    }
 
 module.exports = lists;

@@ -11,6 +11,7 @@ module.exports = {
     settings : './public/js/settings.js',
     terminal : './public/js/terminal.js',
     swarm : './public/js/swarm.js',
+    service : './public/js/service.js',
     table : './public/js/table.js'
   },
   output: {

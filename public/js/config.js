@@ -128,11 +128,12 @@ var config = (function(){
               "Image" : "",
               "Command" : [],
               "HealthCheck" : {
-                "Test" : [],
-                "Interval" : 30000000 ,
-                "Timeout" : 300000000 , //  1000000 = 1ms
-                "Retries" : 3,
-                "StartPeriod" : 10000000
+                "Test" : ["NONE"]
+                // ,
+                // "Interval" : 30000000 ,
+                // "Timeout" : 300000000 , //  1000000 = 1ms
+                // "Retries" : 3,
+                // "StartPeriod" : 10000000
               }
             }
           },
@@ -157,15 +158,42 @@ var config = (function(){
           },
           "EndpointSpec": {
                 "Ports": [
-                      {
-                      "Protocol": "tcp",
-                      "PublishedPort": null,
-                      "TargetPort": null
-                      }
+                      // {
+                      // "Protocol": "tcp",
+                      // "PublishedPort": null,
+                      // "TargetPort": null
+                      // }
                   ]
             }
     };
-    
+
+
+    var getService = function(){
+      console.log("getService");
+      console.log(service);
+
+      return service;
+    };
+
+    var setService = function (filter, portlists){
+      var opts = service;
+      opts.Name = filter.Name;
+      opts.TaskTemplate.ContainerSpec.Image = filter.Image;
+      opts.TaskTemplate.ContainerSpec.Command = [filter.Command];
+
+      for ( var i in portlists) {
+        var portinfo = {
+          "Protocol": portlists[i].protocol,
+          "PublishedPort": parseInt(portlists[i].publishedPort),
+          "TargetPort": parseInt(portlists[i].targetPort)
+        }
+        opts.EndpointSpec.Ports.push(portinfo);
+      }
+      service = opts;
+      console.log("setService");
+      console.log(opts);
+    };
+
 
   return {
     getContainer : getContainer,
@@ -175,7 +203,9 @@ var config = (function(){
     getImage : getImage,
     setImage : setImage,
     getVolume : getVolume,
-    setVolume : setVolume
+    setVolume : setVolume,
+    getService : getService,
+    setService : setService
   };
 
 })();
