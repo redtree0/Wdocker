@@ -28,6 +28,7 @@ function initDropdown(jsonUrl, $li, $button, attr, index, callback) {
 }
 
 function initDropdownArray(args, $li, $button, callback ){
+  $li.children().remove();
   for (var index in args) {
       $("<li><a>" + args[index] + "</a><li/>").appendTo($li);
   }
@@ -77,9 +78,6 @@ function createButton( buttonid , action, color, icon){
         if( $arrays[i].val() == "on" ||  $arrays[i].val() == "off") {
           val = ( $arrays[i].prop('checked') ? "tcp" : "udp");
         }
-        if($arrays[i].attr("id") == "tokenType" && ($arrays[i].val() == "on" ||  $arrays[i].val() == "off")) {
-          val = ( $arrays[i].prop('checked') ? "Manager" : "Worker");
-        }
         json[$arrays[i].attr("id")] = val;
       }
       lists.push(json);
@@ -92,9 +90,9 @@ function createList ( $list, array ) {
         var rowid = "#row"+ index;
         var $row = createElement("<div/>", "row", "", "row"+ index);
         var $deletebutton = createButton(index, "delete", "btn-danger", "glyphicon-remove");
-        var $connectbutton = createButton(index, "connection", "btn-success", "glyphicon-log-in");
-
-        $list.append(createRow($row, array[index],  [$deletebutton, $connectbutton]));
+        // var $connectbutton = createButton(index, "connection", "btn-success", "glyphicon-log-in");
+        // [$deletebutton, $connectbutton]
+        $list.append(createRow($row, array[index],  [$deletebutton]));
     }
 
 }
@@ -115,20 +113,20 @@ function createList ( $list, array ) {
 
   }
 
-function clickDeleteList($list, dataLists){
-      $list.on('click', 'button', function(e){
-      e.preventDefault();
-
-      var id = "#row" + $(this).attr("id");
-          if($(this).hasClass("delete")) {
-            $(id).fadeOut("slow");
-
-            dataLists.splice($(this).attr("id"), 1);
-
-            createList ( $list, dataLists);
-          }
-    });
-}
+// function clickDeleteList($list, dataLists){
+//       $list.on('click', 'button', function(e){
+//       e.preventDefault();
+//
+//       var id = "#row" + $(this).attr("id");
+//           if($(this).hasClass("delete")) {
+//             $(id).fadeOut("slow");
+//
+//             dataLists.splice($(this).attr("id"), 1);
+//
+//             createList ( $list, dataLists);
+//           }
+//     });
+// }
 
 
 function createElement( _element, _class,  _text, _id, _type){

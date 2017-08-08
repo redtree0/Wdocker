@@ -17,11 +17,11 @@
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
           <div class="row placeholders">
             <% include ./partials/connectDocker %>
-            
+
             <div class="col-md-6" >
             </div>
             <div id="bgrp" class="btn-group" role="group">
-              <button  onclick=" return false;"  type="button" class="btn btn-info btn-lg plus">
+              <button  onclick=" return false;"  type="button" class="btn btn-info btn-lg newForm">
                 <span class="glyphicon glyphicon-plus"></span> Plus
               </button>
                 <button id="remove" class="btn btn-danger btn-lg">
@@ -31,10 +31,10 @@
 
 
             <div class="btn-group">
-              <button id="container" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+              <button id="containerDropDown" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                  Containers <span class="caret"></span>
               </button>
-              <ul class="dropdown-menu" id="container_list">
+              <ul class="dropdown-menu" id="containerMenu">
               </ul>
             </div>
             <div id="network" class="btn-group" role="group">
@@ -52,7 +52,7 @@
               </div>
           </div>
 
-          <form class="form-horizontal" id="CreateNetwork">
+          <form class="form-horizontal" id="hiddenForm">
             <div class="form-group">
               <label for="name" class="col-sm-2 control-label">Network Name: </label>
               <div class="col-sm-10">
@@ -63,10 +63,10 @@
               <label for="driver" class="col-sm-2 control-label">Network Driver: </label>
 
               <div class="btn-group" >
-                <button id="driver" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                <button id="driverDropDown" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                   driver <span class="caret"></span>
                 </button>
-                <ul class="dropdown-menu" id="driver_list">
+                <ul class="dropdown-menu" id="driverMenu">
                 </ul>
               </div>
             </div>

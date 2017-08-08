@@ -120,11 +120,12 @@ table.prototype.uncheckAllRow = function () {
 }
 
 table.prototype.checkOneRow = function () {
-  var checkedRowLists = this.checkedRowLists;
-  (this.$table).on('check.bs.table', function (element, row) {
+  var self = this;
+  var checkedRowLists = self.checkedRowLists;
+  (self.$table).on('check.bs.table', function (element, row) {
         checkedRowLists.push(row);
     });
-    this.checkedRowLists = checkedRowLists;
+    self.checkedRowLists = checkedRowLists;
 }
 
 table.prototype.uncheckOneRow = function () {

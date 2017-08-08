@@ -61,70 +61,115 @@ const columns = [{
 
 
 $(function(){
-
-    var $detail = $(".detail");
-
-    var $all = {
-      $portlists : $(".portlists"),
-      $imageMenu : $("#imageMenu"),
-      $image : $('#image'),
-      $name : $("#name"),
-      $command : $("#command"),
-      getSettingValue : function() {
-        return {
-          Image : this.$image.text().trim(),
-          name : this.$name.val(),
-          Cmd : this.$command.val()
-        }
-      },
-      settingMethod : {
-        get : "getContainer",
-        set : "setContainer"
-      },
-      checkValue : function (json){
-        if(this.$image.text().trim() === "Images"){
-          return false;
-        };
-
-        for(var i in json){
-          if(json[i] === null || json[i] === undefined){
-            return false;
-          }
-        }
-      }
-      ,
-      $plus : $(".plus"),
-      $connect : $(".connect"),
-      $form : $("#hiddenForm"),
-      $portAdd : $(".portAdd"),
-      $connectMenu : $("#connectMenu"),
-      $connectButton : $("#connectButton"),
-      $whoisConnected : $(".whoisConnected"),
-      $connect : $(".connect"),
-      $jsonTable : $(".jsonTable"),
-      hideColumns : ["Id", "ImageID", "Ports", "Mounts", "HostConfig", "NetworkingSettings"],
-      completeEvent : function(data, callback){
-        if(hasValue(data)){
-          var dialog = require("./dialog.js");
-
-          var finished = new dialog("컨테이너", data.msg + data.statusCode, $("body"));
-          finished.setDefaultButton('Close[Enker]', 'btn-primary create');
-          // $("body").spinStop();
-          finished.show();
-          // containerTable.reload();
-          callback;
-        }
-      }
+  var $all = {};
+  $all.init = function(){};
+  $all.form = {};
+  $all.form.data = {
+    $imageMenu : $("#imageMenu"),
+    $image : $('#imageDropDown'),
+    $name : $("#name"),
+    $command : $("#command")
+  };
+  $all.form.$newForm =  $(".newForm");
+  $all.form.formName = "컨테이너 생성";
+  $all.form.$form = $("#hiddenForm");
+  $all.form.formEvent = "CreateContainer";
+  $all.form.portlists = [];
+  $all.form.$portAdd = $(".portAdd");
+  $all.form.$portlists = $(".portlists");
+  $all.form.dropDown = {
+    $dropDown : $('#imageDropDown'),
+    default : "Images"
+  };
+  $all.form.settingMethod = {
+    get : "getContainer",
+    set : "setContainer"
+  };
+  $all.form.getSettingValue = function() {
+    var self = this.data ;
+    return {
+      Image : self.$image.text().trim(),
+      name : self.$name.val(),
+      Cmd : self.$command.val()
     }
-    initDropdown('/myapp/image/data.json', $all.$imageMenu, $all.$image, "RepoTags", 0);
+  }
 
+  $all.form.initDropdown = function(){
+    var self = this;
+    var jsonUrl = '/myapp/image/data.json';
+    var $contextMenu =   self.data.$imageMenu;
+    var $dropDown =   self.data.$image;
+    var attr = "RepoTags";
+    var index = 0;
+    return initDropdown(jsonUrl, $contextMenu, $dropDown, attr, index);
+  }
+  $all.connect = {};
+  $all.connect.dockerinfo = "container";
+  $all.table = {};
+  $all.table.$jsonTable = $(".jsonTable");
+  $all.table.hideColumns = ["Id", "ImageID", "Ports", "Mounts", "HostConfig", "NetworkingSettings"];
+  $all.table.columns = columns;
+  $all.table.jsonUrl = '/myapp/container/data.json';
+  $all.event = {};
+  function clickDefault(client, eventName, table){
+    return function(){
+      client.sendEventTable(eventName, table);
+    };
+  }
+  $all.event.create = {
+      $button : $(".create"),
+      eventName : "CreateContainer",
+      clickEvent : clickDefault
+  };
+  $all.event.start = {
+      $button : $(".start"),
+      eventName : "StartContainer",
+      clickEvent : clickDefault
+  };
+  $all.event.stop = {
+      $button : $(".stop"),
+      eventName : "StopContainer",
+      clickEvent : clickDefault
+  };
+  $all.event.remove = {
+      $button : $(".remove"),
+      eventName : "RemoveContainer",
+      clickEvent : clickDefault
+  };
+  $all.event.kill = {
+      $button : $(".kill"),
+      eventName : "KillContainer",
+      clickEvent : clickDefault
+  };
+  $all.event.pause = {
+      $button : $(".pause"),
+      eventName : "PauseContainer",
+      clickEvent : clickDefault
+  };
+  $all.event.unpause = {
+      $button : $(".unpause"),
+      eventName : "UnpauseContainer",
+      clickEvent : clickDefault
+  };
+  $all.completeEvent = function(data, callback){
+    console.log(arguments);
+    if(hasValue(data)){
+      var dialog = require("./dialog.js");
 
+      var finished = new dialog("컨테이너", data.msg + data.statusCode, $("body"));
+      finished.setDefaultButton('Close[Enker]', 'btn-primary create');
+      finished.show();
 
-    var view = require("./view.js");
-    view.init($all, columns, "container");
-    var containerTable = view.getMainTable();
-    // // containerTable.checkAllEvents();
-    // // containerTable.clickRowAddColor("danger");
+      callback;
+    }
+  };
+
+    var main = require("./main.js");
+    main.init($all);
+    var containerTable = main.getMainTable();
+
+    var $detail = $("#detail");
+
     containerTable.clickRow($detail);
      var expandinfo = [{
        url : "/myapp/container/top/",
@@ -134,30 +179,6 @@ $(function(){
        keys : ["id", "name", "memory_stats", "networks", "cpu_stats", "Ports"]
      }];
      containerTable.expandRow(expandinfo);
-
-  //   $(".start").click((e)=>{
-  //     client.sendEventTable("StartContainer", containerTable);
-  //   });
-  //
-  //   $(".stop").click((e)=>{
-  //       client.sendEventTable("StopContainer", containerTable);
-  //   });
-  //
-  //   $(".remove").click((e)=>{
-  //       client.sendEventTable("RemoveContainer", containerTable);
-  //   });
-  //
-  //   $(".kill").click((e)=>{
-  //       client.sendEventTable("KillContainer", containerTable);
-  //   });
-  //
-  //   $(".pause").click((e)=>{
-  //       client.sendEventTable("PauseContainer", containerTable);
-  //   });
-  //
-  //   $(".unpause").click((e)=>{
-  //       client.sendEventTable("UnpauseContainer", containerTable);
-  //   });
 
 
 });

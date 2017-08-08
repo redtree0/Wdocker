@@ -36,12 +36,12 @@ var clientsocket = (function clientsocket(io, $body) {
    *  @param {Function} callback - 콜백 함수
    *  @return {Object} opts -
    */
-  clientsocket.prototype.sendEventTable = function(eventName, table, opts, callback){
+   (function() {
+   this.sendEventTable = function(eventName, table, opts, callback){
           var data = null;
           var checkedRowLists = table.checkedRowLists;
           var self = this;
 
-          // (self.$body).spinStart(); /// 화면 로딩 시작
           if(arguments.length === 2) {
             opts = null;
             callback = null;
@@ -51,65 +51,42 @@ var clientsocket = (function clientsocket(io, $body) {
             opts = null;
             data = checkedRowLists;
           } else if( (arguments.length === 3) && (typeof opts === "object") ){
-            // opts.lists = checkedRowLists;
             data = opts;
           } else if (arguments.length === 4 ){
             data = opts;
           } else {
             return;
           }
-          console.log(data);
-          self.spinnerEvent(eventName, data, table.reload());
-          callback;
+
+          self.$body.spinStart();
+
+          return self.sendEvent(eventName, data, (data)=>{
+            console.log("getData");
+            (self.$body).spinStop();
+            table.reload();
+            self.completeEvent(data, callback);
+            // callback;
+          });
+
     };
 
-    clientsocket.prototype.completeEvent = function(){
+    this.completeEvent = function(){
 
-    };
-
-
-    /** @method  - socketTableEvent
-     *  @description 소켓 테이블
-     *  @param {String} eventName - 소켓 이벤트 명
-     *  @param {Object} opts - json data
-     *  @param {Function} callback - 콜백 함수
-     *  @return {Object} opts -
-     */
-    clientsocket.prototype.spinnerEvent = function(eventName, opts, callback){
-      var self = this;
-      var data = null;
-
-      if(arguments.length <= 1) {
-        return ;
-      } else {
-        data = opts;
-      }
-
-      if(data) {
-        self.$body.spinStart();
-        self.sendEvent(eventName, data, (data)=>{
-          console.log("getData");
-          console.log(self.$body);
-
-          (self.$body).spinStop();
-          self.completeEvent(data, callback);
-          // callback;
-        });
-      }
     };
 
 
-    clientsocket.prototype.sendEvent = function (eventName, data, callback) {
+    this.sendEvent = function (eventName, data, callback) {
         console.log("do event %s , data %s", eventName, data);
         var socket =  this.socket;
 
         return socket.emit(eventName, data, callback);
     };
 
-    clientsocket.prototype.listen = function (eventName, callback) {
-        var socket =  this.socket;
-        return socket.on(eventName, callback);
+    this.listen = function (eventName, callback) {
+      var socket =  this.socket;
+      return socket.on(eventName, callback);
     };
+}).call(clientsocket.prototype);
 
 
 module.exports = clientsocket;

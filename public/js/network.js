@@ -1,6 +1,6 @@
 // network.js
 "use strict";
-var columns = [{
+const columns = [{
       checkbox: true,
       title: 'Check'
   },{
@@ -66,119 +66,154 @@ var columns = [{
   }];
 
 
-  function clickDropdown(id) {
-    $("#container_list").on("click", "li a", function(event){
-          $('#container').text($(this).text());
-          checkAddColor('networklist', $(this).text(), "success");
-      });
+  // function clickDropdown(id) {
+  //   $("#container_list").on("click", "li a", function(event){
+  //         $('#container').text($(this).text());
+  //         checkAddColor('networklist', $(this).text(), "success");
+  //     });
+  //
+  //
+  // }
 
-
-  }
-
-  function networkSettings(name, driver, internal) {
-    console.log(arguments);
-    var config = require("./config");
-
-    if(!hasValue(name, internal)) {
-      return false;
-    }
-    if(driver === "driver") {
-      console.log("a");
-      return false;
-    }
-
-    config.setNetwork({"Name" : name, "Driver" : driver, "internal" : internal});
-
-    return  config.getNetwork();
-  }
+  // function networkSettings(name, driver, internal) {
+  //   console.log(arguments);
+  //   var config = require("./config");
+  //
+  //   if(!hasValue(name, internal)) {
+  //     return false;
+  //   }
+  //   if(driver === "driver") {
+  //     console.log("a");
+  //     return false;
+  //   }
+  //
+  //   config.setNetwork({"Name" : name, "Driver" : driver, "internal" : internal});
+  //
+  //   return  config.getNetwork();
+  // }
 
 $(function(){
-  var socket = io();
-  var Socket = require("./io");
-  var client = new Socket(socket, $('body'));
-  var spin = require("./spinner");
-  var dialog = require("./dialog");
 
-  var $network = $(".jsonTable");
-  var $detail = $(".detail");
+  var $all = {};
+  $all.init = function(){
+    var self = this;
+    var jsonUrl = '/myapp/container/data.json';
+    var $contextMenu = $("#containerMenu")  ;
+    var $dropDown =   $("#containerDropDown");
+    var attr = "Names";
+    // var index = 0;
+    return initDropdown(jsonUrl, $contextMenu, $dropDown, attr);
+  };
+  $all.form = {};
+  $all.form.data = {
+    $name : $("#name"),
+    $driverMenu : $("#driverMenu"),
+    $driver : $('#driverDropDown'),
+    $internal : $("#internal"),
+    $container : $("#containerDropDown"),
+    $containerMenu : $("#containerMenu")
+  };
+  $all.form.formName = "네트워크 생성";
+  $all.form.formEvent = "CreateNetwork";
+  $all.form.$newForm =  $(".newForm");
+  $all.form.$form = $("#hiddenForm");
+  $all.form.portlists = [];
+  $all.form.$portAdd = $(".portAdd");
+  $all.form.$portlists = $(".portlists");
+  $all.form.dropDown =  {
+    $dropDown : $('#driverDropDown'),
+    default : "driver"
+  };
+  $all.form.settingMethod = {
+    get : "getNetwork",
+    set : "setNetwork"
+  };
+  $all.form.getSettingValue = function() {
+    var self = this.data ;
 
-  var table = require("./table.js");
-
-  var networkTable = new table($network, columns);
-
-  networkTable.initUrlTable('/myapp/network/data.json', true);
-  networkTable.hideColumns(["EnableIPv6", "Labels", "IPAM", "Containers", "Options", "Created", "Id"]);
-  networkTable.checkAllEvents();
-  networkTable.clickRow($detail);
-  networkTable.clickRowAddColor("danger");
-
-
-  var expandinfo = [{
-    url : "/myapp/network/",
-    keys : ["Containers", "Name", "Id", "Driver"]
-  }];
-  networkTable.expandRow(expandinfo);
-// initDropdown("/myapp/container/data.json", $('#container_list'), $("#container"), "Names", checkAddColor);
-  initDropdown("/myapp/container/data.json", $('#container_list'), $("#container"), "Names");
-
-
-  var $form = $("#CreateNetwork");
-  $form.hide();
-  $(".plus").click((e)=>{
-    e.preventDefault();
-    var popup = new dialog("네트워크 생성", $form.show(), $("body"));
-
-    initDropdownArray(["bridge", "overlay", "macvlan"], $("#driver_list") , $("#driver"));
-    popup.appendButton('Create', 'btn-primary create',
-                function(dialogItself){
-
-                  var name = $("#name").val();
-                  var driver = $('#driver').text().trim();
-                  var internal = $("#internal").prop('checked');
-
-                  var opts = networkSettings(name, driver, internal);
-                  console.log(opts);
-                    client.sendEventTable("CreateNetwork",  networkTable,  opts);
-
-                }
-    );
-
-    popup.show();
-
-  })
-
-
-  client.completeEvent = function(data, callback){
-    if(hasValue(data)){
-      var finished = new dialog("네트워크", data.msg + data.statusCode, $("body"));
-      finished.setDefaultButton('Close[Enker]', 'btn-primary create');
-      finished.show();
-      finished.close(5000);
-      callback;
+    return {
+      Name : self.$name.val(),
+      Driver : self.$driver.text().trim(),
+      internal : self.$internal.prop('checked')
     }
   }
 
+  $all.form.initDropdown = function(){
+    var self = this;
+    var data = ["bridge", "overlay", "macvlan"];
+    var $contextMenu =   self.data.$driverMenu;
+    var $dropDown =   self.data.$driver;
 
-  $("#remove").click(()=>{
-        client.sendEventTable("RemoveNetwork", networkTable);
-  });
-  $("#connect").click((e)=>{
-      if( $('#container').text().trim() !== "Containers") {
-        var opts = {
-          "container" : $('#container').text().trim()
-        };
-        client.sendEventTable("ConnectNetwork", networkTable, opts);
-      }
-  });
-  $("#disconnect").click(()=>{
-
-    if( $('#container').text().trim() !== "Containers") {
-        var opts = {
-          "container" : $('#container').text().trim()
-        };
-        client.sendEventTable("DisconnectNetwork", networkTable, opts);
+    return initDropdownArray(data, $contextMenu, $dropDown);
+  }
+  $all.connect = {};
+  $all.connect.dockerinfo = "network";
+  $all.table = {};
+  $all.table.$jsonTable = $(".jsonTable");
+  $all.table.hideColumns = ["EnableIPv6", "Labels", "IPAM", "Containers", "Options", "Created", "Id"];
+  $all.table.columns = columns;
+  $all.table.jsonUrl = '/myapp/network/data.json';
+  $all.event = {};
+  function clickDefault(client, eventName, table){
+    return function(){
+      client.sendEventTable(eventName, table);
+    };
+  }
+  $all.event.remove = {
+    $button : $("#remove"),
+    eventName : "RemoveNetwork",
+    clickEvent : clickDefault
+  };
+  $all.event.connect = {
+    $button : $("#connect"),
+    eventName : "ConnectNetwork",
+    clickEvent : function(client, eventName, table){
+      return function(){
+        if($("#containerDropDown").text().trim() === "Containers") {
+          return false;
+        }else {
+          client.sendEventTable(eventName, table);
+        }
+      };
     }
-  });
+  };
+  $all.event.disconnect = {
+    $button : $("#disconnect"),
+    eventName : "DisconnectNetwork",
+    clickEvent : function(client, eventName, table){
+      return function(){
+        if($("#containerDropDown").text().trim() === "Containers") {
+          return false;
+        }else {
+          client.sendEventTable(eventName, table);
+        }
+      };
+    }
+  };
+  $all.completeEvent = function(data, callback){
+    console.log(arguments);
+    if(hasValue(data)){
+        var dialog = require("./dialog.js");
+
+         var finished = new dialog("네트워크", data.msg + data.statusCode, $("body"));
+         finished.setDefaultButton('Close[Enker]', 'btn-primary create');
+         finished.show();
+         finished.close(5000);
+         callback;
+       }
+  };
+
+  var main = require("./main.js");
+  main.init($all);
+  var networkTable = main.getMainTable();
+    var $detail = $("#detail");
+      networkTable.clickRow($detail);
+
+  var expandinfo = [{
+     url : "/myapp/network/",
+     keys : ["Containers", "Name", "Id", "Driver"]
+   }];
+   networkTable.expandRow(expandinfo);
 
 
 });
