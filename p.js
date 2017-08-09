@@ -272,12 +272,12 @@
       }
 
       console.log(dirPath);
-
+      console.log(imageTag);
         (self.docker).buildImage( {
               context :  dirPath,
               src : [fileName]
             }, {
-                t: imageTag
+                "t" : imageTag.toString()
               }, callback);
 
   };

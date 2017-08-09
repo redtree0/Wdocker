@@ -21,7 +21,7 @@
               <div class="row placeholders">
 
                   <% include ./partials/connectDocker %>
-                  
+
                  <table   data-pagination="true"  class="table table-striped jsonTable">
                  </table>
                   <!-- <table class="table table-striped">
@@ -34,7 +34,7 @@
                     </thead>
                   </table> -->
                   <div id="bgrp" class="btn-group" role="group">
-                    <button  onclick=" return false;"  type="button" class="btn btn-info btn-lg plus">
+                    <button  onclick=" return false;"  type="button" class="btn btn-info btn-lg newForm">
                       <span class="glyphicon glyphicon-plus"></span> Plus
                     </button>
                       <button  class="btn btn-danger btn-lg remove">
@@ -54,7 +54,7 @@
                           </div>
                     </div> -->
                     </div>
-                    <form class="form-horizontal" id="CreateVolume">
+                    <form class="form-horizontal" id="hiddenForm">
                       <div class="form-group">
                         <label for="name" class="col-sm-2 control-label">Volume Name: </label>
                         <div class="col-sm-10">
@@ -65,10 +65,10 @@
                         <label for="driver" class="col-sm-2 control-label">Volume Driver: </label>
 
                         <div class="btn-group" >
-                          <button id="driver" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                          <button id="driverDropdown" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                             driver <span class="caret"></span>
                           </button>
-                          <ul class="dropdown-menu" id="driver_list">
+                          <ul class="dropdown-menu" id="driverMenu">
                           </ul>
                         </div>
                       </div>

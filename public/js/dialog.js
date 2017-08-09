@@ -17,7 +17,8 @@ function makeBootstrapDialog(title, message, button){
   return new BootstrapDialog({
     title: title,
     message: message,
-    buttons: button
+    buttons: button,
+    autodestroy : false
   });
 };
 

@@ -149,10 +149,13 @@ $(function(){
   $all.connect = {};
   $all.connect.dockerinfo = "network";
   $all.table = {};
-  $all.table.$jsonTable = $(".jsonTable");
-  $all.table.hideColumns = ["EnableIPv6", "Labels", "IPAM", "Containers", "Options", "Created", "Id"];
-  $all.table.columns = columns;
-  $all.table.jsonUrl = '/myapp/network/data.json';
+  $all.table.main = {
+      "$table" : $(".jsonTable"),
+      "hideColumns" : ["EnableIPv6", "Labels", "IPAM", "Containers", "Options", "Created", "Id"],
+      "columns" : columns,
+      "jsonUrl" : '/myapp/network/data.json'
+    };
+
   $all.event = {};
   function clickDefault(client, eventName, table){
     return function(){

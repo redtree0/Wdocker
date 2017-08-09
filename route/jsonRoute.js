@@ -52,6 +52,12 @@
   router.get( '/network/data.json' , (req, res) => {
         p.network.getAllLists({}, resCallback.bind(null, res));
   });
+  // 
+  // router.get( '/network/data/:id' , (req, res) => {
+  //       var id = req.params.id;
+  //
+  //       p.network.getAllLists({"Id" : id}, resCallback.bind(null, res));
+  // });
 
   router.get( '/image/data.json' , (req, res) => {
         p.image.getAllLists({}, resCallback.bind(null, res));
@@ -72,6 +78,11 @@
   });
   router.get( '/service/data.json' , (req, res) => {
     p.service.getAllLists({}, resCallback.bind(null, res));
+  });
+
+  router.get( '/service/data/:id' , (req, res) => {
+    var id = req.params.id;
+    p.service.getAllLists({id : id}, resCallback.bind(null, res));
   });
 
 

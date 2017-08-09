@@ -13,10 +13,18 @@ $(function(){
 
   var $jstree = $("#jstree");
 
+  var $all = {};
+  $all.connect = {};
+  $all.connect.dockerinfo = "image";
+
+  var main = require("./main.js");
+  main.init($all);
+
   var editor = CodeMirror.fromTextArea(document.getElementById("editor"), {
     lineNumbers: true,
     mode: "dockerfile"
   });
+
 
 
 function reportMenu ($node) {
@@ -133,7 +141,7 @@ function reportMenu ($node) {
   var lists = [];
   lists = initJstree(lists);
   function initJstree(lists){
-    socket.emit("dirtree", "", (data)=>{
+    client.sendEvent("dirtree", "", (data)=>{
               lists = data;
               console.log(JSON.stringify(lists));
               $('#jstree').jstree({
@@ -183,11 +191,11 @@ function jstreeRefresh($jstree, newTree){
         var path = node.path;
         var type = node.type;
         if(type === "file"){
-          socket.emit("ReadFile", path, (data)=>{
+          client.sendEvent("ReadFile", path, (data)=>{
               editor.setValue(data);
           });
         }else if (type === "directory") {
-          socket.emit("dirtree", path , (data)=>{
+          client.sendEvent("dirtree", path , (data)=>{
               var lists = data;
                $('#jstree').jstree(true).settings.core.data = lists;
                $('#jstree').jstree(true).refresh();

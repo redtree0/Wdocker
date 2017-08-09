@@ -126,36 +126,43 @@ var config = (function(){
           "TaskTemplate" : {
             "ContainerSpec" : {
               "Image" : "",
-              "Command" : [],
-              "HealthCheck" : {
-                "Test" : ["NONE"]
-                // ,
-                // "Interval" : 30000000 ,
-                // "Timeout" : 300000000 , //  1000000 = 1ms
-                // "Retries" : 3,
-                // "StartPeriod" : 10000000
-              }
-            }
+              "Command" : []
+              // ,"HealthCheck" : {
+              //   "Test" : ["NONE"]
+              //   // ,
+              //   // "Interval" : 30000000 ,
+              //   // "Timeout" : 300000000 , //  1000000 = 1ms
+              //   // "Retries" : 3,
+              //   // "StartPeriod" : 10000000
+              // }
+            } ,
+             "Resources": {
+            "Limits": {},
+            "Reservations": {}
+            },
+             "RestartPolicy": {},
+                "Placement": {},
+                "Networks" : []
           },
           "Mode": {
               "Replicated": {
-                "Replicas": 4
+                "Replicas": 1
               }
           },
-          "UpdateConfig": {
-                "Parallelism": 2,
-                "Delay": 1000000000,
-                "FailureAction": "pause",
-                "Monitor": 15000000000,
-                "MaxFailureRatio": 0.15
-          },
-          "RollbackConfig": {
-                "Parallelism": 1,
-                "Delay": 1000000000,
-                "FailureAction": "pause",
-                "Monitor": 15000000000,
-                "MaxFailureRatio": 0.15
-          },
+          // "UpdateConfig": {
+          //       "Parallelism": 2,
+          //       "Delay": 1000000000,
+          //       "FailureAction": "pause",
+          //       "Monitor": 15000000000,
+          //       "MaxFailureRatio": 0.15
+          // },
+          // "RollbackConfig": {
+          //       "Parallelism": 1,
+          //       "Delay": 1000000000,
+          //       "FailureAction": "pause",
+          //       "Monitor": 15000000000,
+          //       "MaxFailureRatio": 0.15
+          // },
           "EndpointSpec": {
                 "Ports": [
                       // {
@@ -180,12 +187,14 @@ var config = (function(){
       opts.Name = filter.Name;
       opts.TaskTemplate.ContainerSpec.Image = filter.Image;
       opts.TaskTemplate.ContainerSpec.Command = [filter.Command];
+      opts.Mode.Replicated.Replicas = filter.Replicas;
+      opts.TaskTemplate.Networks = [ {"Target" : filter.Network }] ;
 
       for ( var i in portlists) {
         var portinfo = {
           "Protocol": portlists[i].protocol,
-          "PublishedPort": parseInt(portlists[i].publishedPort),
-          "TargetPort": parseInt(portlists[i].targetPort)
+          "PublishedPort": parseInt(portlists[i].hostPort),
+          "TargetPort": parseInt(portlists[i].containerPort)
         }
         opts.EndpointSpec.Ports.push(portinfo);
       }

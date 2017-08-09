@@ -33,73 +33,77 @@ var columns = [
 
 
 $(function(){
-  var socket = io();
-  var Socket = require("./io");
-  var client = new Socket(socket, $('body'));
-  var spin = require("./spinner");
-
-  var table = require("./table.js");
-  var dialog = require("./dialog.js");
-
-  var $volume = $(".jsonTable");
-  var volumeTable = new table($volume, columns);
-
-  volumeTable.initUrlTable('/myapp/volume/data.json', false);
-  volumeTable.checkAllEvents();
-  volumeTable.clickRowAddColor("danger");
-  var $form = $("#CreateVolume");
-    $form.hide();
-  //
-
-  function volumeSettings( name, driver ){
-    var config = require("./config");
-      if(driver == "Images"){
-        return false;
-      }
-      if (hasValue(name)) {
-        config.setVolume({"Name" : name, "Driver" : driver});
-     };
-     return config.getVolume();
-  }
-   $(".plus").click((e)=>{
-     e.preventDefault();
-     var $name = $("#name");
-     var $driver = $("#driver");
-     initDropdownArray(["local"], $("#driver_list"), $("#driver"));
 
 
-     var popup = new dialog("볼륨 생성", $form.show(), $("body"));
-
-       popup.appendButton('Create', 'btn-primary create',
-                 function(dialogItself){
-                    var name = $name.val();
-                    var driver = $driver.text().trim();
-                     var opts = volumeSettings(name, driver);
-                     client.sendEventTable("CreateVolume", volumeTable, opts);
-
-                 });
-      popup.show();
-
-    });
-
-
-  client.completeEvent = function (data, callback){
-     if(hasValue(data)){
-
-       var finished = new dialog("볼륨", data.msg + data.statusCode, $("body"));
-       finished.setDefaultButton('Close[Enker]', 'btn-primary create');
-       finished.show();
-
-       callback;
-     }
-  }
-
-  $(".remove").click((e)=>{
-    if(hasValue(volumeTable.checkedRowLists)){
-      console.log(volumeTable.checkedRowLists);
-      client.sendEventTable("RemoveVolume", volumeTable);
+  var $all = {};
+  $all.init = function(){};
+  $all.form = {};
+  $all.form.data = {
+    $driver : $("#driverDropdown"),
+    $driverMenu : $("#driverMenu"),
+    $name : $("#name")
+  };
+  $all.form.$newForm =  $(".newForm");
+  $all.form.formName = "볼륨 생성";
+  $all.form.$form = $("#hiddenForm");
+  $all.form.formEvent = "CreateVolume";
+  $all.form.settingMethod = {
+    get : "getVolume",
+    set : "setVolume"
+  };
+  $all.form.getSettingValue = function() {
+    var self = this.data ;
+    return {
+      "Name" : self.$name.val(),
+      "Driver" : self.$driver.text().trim()
     }
-  });
+  };
+   $all.form.dropDown =  {
+     $dropDown : $('#driverDropDown'),
+     default : "driver"
+   };
+  $all.form.initDropdown = function(){
+    var self = this;
+    var data = ["local"];
+    var $contextMenu =   self.data.$driverMenu;
+    var $dropDown =   self.data.$driver;
 
+    return initDropdownArray(data, $contextMenu, $dropDown);
+  }
+  $all.connect = {};
+  $all.connect.dockerinfo = "volume";
+  $all.table = {};
+  $all.table.main = {
+    $table : $(".jsonTable"),
+    columns : columns,
+    jsonUrl : '/myapp/volume/data.json',
+  };
+  $all.event = {};
+  function clickDefault(client, eventName, table){
+    return function(){
+      client.sendEventTable(eventName, table);
+    };
+  }
+
+  $all.event.remove = {
+      $button : $(".remove"),
+      eventName : "RemoveVolume",
+      clickEvent : clickDefault
+  };
+
+  $all.completeEvent = function(data, callback){
+      if(hasValue(data)){
+          var dialog = require("./dialog.js");
+
+           var finished = new dialog("볼륨", data.msg + data.statusCode, $("body"));
+           finished.setDefaultButton('Close[Enker]', 'btn-primary create');
+           finished.show();
+
+           callback;
+         }
+  };
+
+    var main = require("./main.js");
+    main.init($all);
 
 });

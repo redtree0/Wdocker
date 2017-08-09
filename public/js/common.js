@@ -1,30 +1,38 @@
-function initDropdown(jsonUrl, $li, $button, attr, index, callback) {
+// "use strict";
+
+function initDropdown(jsonUrl, $li, $button, opts) {
   var hasIndex = false;
-  if ( arguments.length == 5) {
-    var callback = index;
-    if ( typeof index == "function") {
-      hasIndex = false;
-    } else {
-      hasIndex = true;
+
+  // attr, index, selected
+  if(opts.hasOwnProperty("attr")){
+
+    if(opts.hasOwnProperty("index")){
+        hasIndex = true;
     }
   }
-  if (arguments.length == 6) {
-    var hasIndex = true;
-  }
+
   $li.children().remove();
   $.getJSON(jsonUrl, function(json, textStatus) {
       json.forEach ( (data) => {
-        var value = data[attr];
-
+        // console.log(data);
+        var value = null;
         if( hasIndex ) {
-          value = (data[attr])[index];
+          value = (data[opts.attr])[opts.index];
+          // console.log("t");
+        }else {
+           value = data[opts.attr];
+          //  console.log("F");
         }
-        console.log(value);
 
+
+        if(opts.hasOwnProperty("selected") && value === opts.selected){
+          $button.text(value);
+        }
+        // console.log(value);
         $("<li><a>" +  value + "</a><li/>").appendTo($li);
       });
   });
-  changeTextDropdown($li, $button, callback);
+  changeTextDropdown($li, $button);
 }
 
 function initDropdownArray(args, $li, $button, callback ){
@@ -81,12 +89,14 @@ function createButton( buttonid , action, color, icon){
         json[$arrays[i].attr("id")] = val;
       }
       lists.push(json);
-
+      console.log(lists);
     }
 
 function createList ( $list, array ) {
     $list.children().remove();
+    // console.log("createlists");
     for(var index in array) {
+        // console.log(array[index]);
         var rowid = "#row"+ index;
         var $row = createElement("<div/>", "row", "", "row"+ index);
         var $deletebutton = createButton(index, "delete", "btn-danger", "glyphicon-remove");
@@ -99,6 +109,7 @@ function createList ( $list, array ) {
 
   function createRow($row, array, $buttons){
     var data = array;
+    // console.log("createrow");
 
     for (var index in data ) {
 
@@ -113,20 +124,21 @@ function createList ( $list, array ) {
 
   }
 
-// function clickDeleteList($list, dataLists){
-//       $list.on('click', 'button', function(e){
-//       e.preventDefault();
-//
-//       var id = "#row" + $(this).attr("id");
-//           if($(this).hasClass("delete")) {
-//             $(id).fadeOut("slow");
-//
-//             dataLists.splice($(this).attr("id"), 1);
-//
-//             createList ( $list, dataLists);
-//           }
-//     });
-// }
+function clickDeleteList($list, dataLists){
+      $list.on('click', 'button', function(e){
+      e.preventDefault();
+      // console.log("click");
+
+      var id = "#row" + $(this).attr("id");
+          if($(this).hasClass("delete")) {
+            $(id).fadeOut("slow");
+
+            dataLists.splice($(this).attr("id"), 1);
+
+            createList ( $list, dataLists);
+          }
+    });
+}
 
 
 function createElement( _element, _class,  _text, _id, _type){

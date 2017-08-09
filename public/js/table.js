@@ -52,6 +52,7 @@ table.prototype.reload = function () {
 }
 
 table.prototype.load = function (data) {
+  console.log(data);
   (this.$table).bootstrapTable('load', data);
 }
 
@@ -77,6 +78,30 @@ table.prototype.clickRow = function ($detail) {
 
     });
 }
+
+// table.prototype.clickUpdate = function ($detail) {
+//     function addNewRow( _id ){
+//         return $('<div/>', { class: "row", id : _id });
+//     }
+//     function addRowText( _class,  _text){
+//       return $('<div/>', { class: _class, text: _text });
+//     }
+//
+    // (this.$table).on('click-row.bs.table', function (r, e, f){
+    //   var data = e;
+    //   for(var i in data){
+    //     console.log(i);
+    //     console.log(data[i]);
+    //     if(typeof data[i] === "object"){
+    //
+    //       if(data[i].hasOwnProperty("TaskTemplate")){
+    //         console.log(data[i].TaskTemplate.ContainerSpec.Command);
+    //       }
+    //     }
+    //   }
+//     });
+// }
+
 
 table.prototype.hideColumns = function (fields) {
   for(var i in fields) {

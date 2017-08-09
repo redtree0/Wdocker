@@ -106,10 +106,13 @@ $(function(){
   $all.connect = {};
   $all.connect.dockerinfo = "container";
   $all.table = {};
-  $all.table.$jsonTable = $(".jsonTable");
-  $all.table.hideColumns = ["Id", "ImageID", "Ports", "Mounts", "HostConfig", "NetworkingSettings"];
-  $all.table.columns = columns;
-  $all.table.jsonUrl = '/myapp/container/data.json';
+  $all.table.main = {
+    $table : $(".jsonTable"),
+    hideColumns : ["Id", "ImageID", "Ports", "Mounts", "HostConfig", "NetworkingSettings"],
+    columns : columns,
+    jsonUrl : '/myapp/container/data.json',
+  };
+
   $all.event = {};
   function clickDefault(client, eventName, table){
     return function(){

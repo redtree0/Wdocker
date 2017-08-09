@@ -413,7 +413,26 @@ var settings = function(server){
 	});
 
 	server.listen('ConnectDocker', function(data, fn) {
-		if(data.ip === "default") {
+		function getServerIp() {
+				var os = require("os");
+				var ifaces = os.networkInterfaces();
+				var result = '';
+				for (var dev in ifaces) {
+						var alias = 0;
+						if(dev === "eth0"){
+							ifaces[dev].forEach(function(details) {
+								if (details.family == 'IPv4' && details.internal === false) {
+									result = details.address;
+									++alias;
+								}
+							});
+						}
+				}
+
+				return result;
+		}
+		console.log(getServerIp());
+		if(data.ip === getServerIp()) {
 			var docker = defaultDocker;
 			p[data.docker].docker = docker;
 		}else {
@@ -551,12 +570,12 @@ var service = function(server){
 	});
 
 	server.listen("RemoveService", function(data, fn){
-		console.log(data);
-		console.log("111111111111111111111111");
-		console.log(JSON.stringify(fn));
-		console.log("111111111111111111111111");
-
 		p.service.remove(data, fn);
+	});
+
+	server.listen("UpdateService", function(data, fn){
+		// p.service.remove(data, fn);
+		console.log(data);
 	});
 }
 
