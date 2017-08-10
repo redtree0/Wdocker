@@ -12,6 +12,7 @@ module.exports = {
     terminal : './public/js/terminal.js',
     swarm : './public/js/swarm.js',
     service : './public/js/service.js',
+    task : './public/js/task.js',
     table : './public/js/table.js'
   },
   output: {

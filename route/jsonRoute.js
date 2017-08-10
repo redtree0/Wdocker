@@ -52,7 +52,7 @@
   router.get( '/network/data.json' , (req, res) => {
         p.network.getAllLists({}, resCallback.bind(null, res));
   });
-  // 
+  //
   // router.get( '/network/data/:id' , (req, res) => {
   //       var id = req.params.id;
   //
@@ -73,6 +73,10 @@
     // promiseTojson(docker.swarmInspect(), res);
   });
 
+  router.get( '/task/data.json' , (req, res) => {
+    p.task.getAllLists({}, resCallback.bind(null, res));
+  });
+  
   router.get( '/node/data.json' , (req, res) => {
       p.node.getAllLists({}, resCallback.bind(null, res));
   });

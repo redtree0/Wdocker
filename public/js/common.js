@@ -79,7 +79,11 @@ function createButton( buttonid , action, color, icon){
 }
 
     function insertArray(lists, $arrays){
-
+      if(!Array.isArray(lists)){
+        return false;
+      }else if(!Array.isArray($arrays)){
+        return false;
+      }
       var json = {};
       for ( var i in  $arrays) {
         var val = $arrays[i].val();
@@ -88,8 +92,16 @@ function createButton( buttonid , action, color, icon){
         }
         json[$arrays[i].attr("id")] = val;
       }
-      lists.push(json);
-      console.log(lists);
+      var isOther = true;
+      for (var i in lists){
+        if(JSON.stringify(lists[i]) ===  JSON.stringify(json)) {
+          isOther = false;
+        }
+      }
+      if(isOther){
+        lists.push(json);
+      }
+      // console.log(lists);
     }
 
 function createList ( $list, array ) {
@@ -143,4 +155,23 @@ function clickDeleteList($list, dataLists){
 
 function createElement( _element, _class,  _text, _id, _type){
   return $(_element, { class: _class, text: _text , id: _id, type: _type});
+}
+
+function initPortLists($portlists, portlists, $portAdd, $dataLists){
+  createList($portlists, portlists);
+  clickDeleteList($portlists, portlists);
+  $portAdd.click((e)=>{
+    e.preventDefault();
+
+    var state = true;
+    for (var i in $dataLists) {
+      if(!(hasValue($dataLists[i].val()))){
+        state = false;
+      }
+    }
+    if(state) {
+      insertArray(portlists, $dataLists);
+      createList ( $portlists, portlists );
+    }
+  });
 }

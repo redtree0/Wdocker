@@ -75,22 +75,6 @@ const columns = [{
   //
   // }
 
-  // function networkSettings(name, driver, internal) {
-  //   console.log(arguments);
-  //   var config = require("./config");
-  //
-  //   if(!hasValue(name, internal)) {
-  //     return false;
-  //   }
-  //   if(driver === "driver") {
-  //     console.log("a");
-  //     return false;
-  //   }
-  //
-  //   config.setNetwork({"Name" : name, "Driver" : driver, "internal" : internal});
-  //
-  //   return  config.getNetwork();
-  // }
 
 $(function(){
 
@@ -102,10 +86,25 @@ $(function(){
     var $dropDown =   $("#containerDropDown");
     var attr = "Names";
     // var index = 0;
-    return initDropdown(jsonUrl, $contextMenu, $dropDown, attr);
+    return initDropdown(jsonUrl, $contextMenu, $dropDown, {attr : attr});
   };
   $all.form = {};
-  $all.form.data = {
+  $all.form.$form = $("#hiddenForm");
+  $all.form.settingMethod = {
+    get : "getNetwork",
+    set : "setNetwork"
+  };
+  $all.form.getSettingValue = function(self) {
+    var self = self.data ;
+
+    return {
+      Name : self.$name.val(),
+      Driver : self.$driver.text().trim(),
+      internal : self.$internal.prop('checked')
+    }
+  };
+  $all.form.create = {};
+  $all.form.create.data = {
     $name : $("#name"),
     $driverMenu : $("#driverMenu"),
     $driver : $('#driverDropDown'),
@@ -113,36 +112,22 @@ $(function(){
     $container : $("#containerDropDown"),
     $containerMenu : $("#containerMenu")
   };
-  $all.form.formName = "네트워크 생성";
-  $all.form.formEvent = "CreateNetwork";
-  $all.form.$newForm =  $(".newForm");
-  $all.form.$form = $("#hiddenForm");
-  $all.form.portlists = [];
-  $all.form.$portAdd = $(".portAdd");
-  $all.form.$portlists = $(".portlists");
-  $all.form.dropDown =  {
+  $all.form.create.formName = "네트워크 생성";
+  $all.form.create.formEvent = "CreateNetwork";
+  $all.form.create.$newForm =  $(".newForm");
+  $all.form.create.portlists = [];
+  $all.form.create.$portAdd = $(".portAdd");
+  $all.form.create.$portlists = $(".portlists");
+  $all.form.create.dropDown =  {
     $dropDown : $('#driverDropDown'),
     default : "driver"
   };
-  $all.form.settingMethod = {
-    get : "getNetwork",
-    set : "setNetwork"
-  };
-  $all.form.getSettingValue = function() {
-    var self = this.data ;
 
-    return {
-      Name : self.$name.val(),
-      Driver : self.$driver.text().trim(),
-      internal : self.$internal.prop('checked')
-    }
-  }
-
-  $all.form.initDropdown = function(){
-    var self = this;
+  $all.form.create.initDropdown = function(self){
+    var self = self.data;
     var data = ["bridge", "overlay", "macvlan"];
-    var $contextMenu =   self.data.$driverMenu;
-    var $dropDown =   self.data.$driver;
+    var $contextMenu =   self.$driverMenu;
+    var $dropDown =   self.$driver;
 
     return initDropdownArray(data, $contextMenu, $dropDown);
   }

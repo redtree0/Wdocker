@@ -93,22 +93,47 @@ $(function(){
   }
 
   $all.form.update = {};
-  $all.form.update.data = {
-    $imageMenu : $("#imageMenu"),
-    $image : $('#imageDropDownNew'),
-    $networkMenu : $("#networkMenu"),
-    $network : $('#networkDropDownNew'),
-    $name : $("#serviceNameNew"),
-    $command : $("#commandNew"),
-    $replicas : $("#replicasNew")
+  $all.form.update.getSelector = function (){
+    return {
+
+      $imageMenu : $("#imageMenu"),
+      $image : $('#imageDropDownNew'),
+      $networkMenu : $("#networkMenu"),
+      $network : $('#networkDropDownNew'),
+      $name : $("#serviceNameNew"),
+      $command : $("#commandNew"),
+      $replicas : $("#replicasNew"),
+      $portAdd : $("#portAddNew"),
+      $portlists : $("#portlistsNew"),
+      $protocol :  $("#protocolNew"),
+      $containerPort : $("#containerPortNew"),
+      $hostPort : $("#hostPortNew")
+    }
   };
   $all.form.update.$form = $("#detail");
   $all.form.update.formEvent = "UpdateService";
-  $all.form.update.portlists = [];
-  $all.form.update.$portAdd = $("#portAddNew");
-  $all.form.update.$portlists = $("#portlistsNew");
+  $all.form.update.initForm = function(self, row){
+
+      var data = row;
+
+      var self = self.getSelector();
+
+      self.$name.val(data.Spec.Name);
+      self.$command.val(data.Spec.TaskTemplate.ContainerSpec.Command);
+      self.$replicas.val(data.Spec.Mode.Replicated.Replicas);
 
 
+      $.getJSON("/myapp/network/" + data.Spec.TaskTemplate.Networks["0"].Target, function(data){
+        initDropdown("/myapp/network/data.json", self.$networkMenu, self.$network,
+        {"attr" : "Name", "selected" : data.Name});
+      });
+      initDropdown("/myapp/image/data.json", self.$imageMenu, self.$image ,
+      {"attr" :  "RepoTags", "index" :  0, "selected" :  data.Spec.TaskTemplate.ContainerSpec.Image.split("@")[0]});
+
+      var portlistsNew = data.Spec.EndpointSpec.Ports.filter((val)=>{   delete val.PublishMode;  return val; });
+      var $dataLists =  [self.$protocol, self.$containerPort, self.$hostPort ];
+      initPortLists(self.$portlists, portlistsNew, self.$portAdd,  $dataLists  );
+  }
 
   $all.connect = {};
   $all.connect.dockerinfo = "service";

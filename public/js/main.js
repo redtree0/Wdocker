@@ -20,17 +20,16 @@ var main = (function(){
             settings.$body = $("body");
             settings.client = client;
             if(settings.hasOwnProperty("table")){
-
+              console.log("do");
               settings.mainTable = new table(settings.table.main.$table, settings.table.main.columns);
               if(settings.table.hasOwnProperty("sub")){
                 settings.subTable = new table(settings.table.sub.$table, settings.table.sub.columns);
-                console.log(settings.subTable);
               }
             }
 
-            client.completeEvent = settings.completeEvent;
-
-
+            if(settings.hasOwnProperty("completeEvent")){
+              client.completeEvent = settings.completeEvent;
+            }
 
             settings.clickDropdown = function ($dropdown, defaultVal) {
                   if( ($dropdown.text()).trim() === defaultVal ){
@@ -52,17 +51,20 @@ var main = (function(){
               settings.init();
             }
             if(settings.hasOwnProperty("table")){
-              self.tableInit();
+              console.log("do");
+              self.initTable();
             }
             if(settings.hasOwnProperty("form")){
               self.hideForm();
               self.showForm();
               if(settings.form.create.hasOwnProperty("$portlists")){
-                self.addPort();
-                self.deletePort();
+                self.initPortLists();
               }
               if(settings.hasOwnProperty("event")){
                 self.socketButtonEvent();
+              }
+              if(settings.form.hasOwnProperty("update")){
+                    self.initUpdate();
               }
             }
             if(settings.hasOwnProperty("connect")){
@@ -73,9 +75,7 @@ var main = (function(){
 
               self.connectDocker();
             }
-            if(settings.form.hasOwnProperty("update")){
-                  self.updateFrom();
-            }
+
 
             // self.buttonEvent();
         },
@@ -91,7 +91,7 @@ var main = (function(){
         getDialog : function (){
           return dialog;
         },
-        updateFrom : function (){
+        initUpdate : function (){
           var self = settings.form.update;
 
           var clone = settings.form.$form.clone().attr("id", "updateForm");
@@ -109,74 +109,28 @@ var main = (function(){
 
           clone.append($("<button/>").addClass("btn btn-primary").attr("id", "update").text("Update"));
           self.$form.append(clone);
-          // clone.show();
-          // function setSettings (json, portArray){
-          //     var config = require("./config");
-          //
-          //     config[self.settingMethod.set](json, portArray);
-          //     return  config[self.settingMethod.get]();
-          // }
-          // var opts = setSettings(self.getSettingValue(self), self.portlists);
-          settings.mainTable.$table.on('click-row.bs.table', function (r, e, f){
 
-            // var portlists = [];
+          settings.mainTable.$table.on('click-row.bs.table', function (e, row, $element, field){
             clone.show();
-            // $detail.children().show();
-            var data = e;
 
-            $("#serviceNameNew").val(data.Spec.Name);
-            $("#commandNew").val(data.Spec.TaskTemplate.ContainerSpec.Command);
-            $("#replicasNew").val(data.Spec.Mode.Replicated.Replicas);
-
-            var portlistsNew = data.Spec.EndpointSpec.Ports.filter((val)=>{   delete val.PublishMode;  return val; });
-
-            $.getJSON("/myapp/network/" + data.Spec.TaskTemplate.Networks["0"].Target, function(data){
-                initDropdown("/myapp/network/data.json", $("#networkMenu"),  $("#networkDropDownNew"),
-                {"attr" : "Name", "selected" : data.Name});
-            });
-            initDropdown("/myapp/image/data.json", $("#imageMenu"), $("#imageDropDownNew") ,
-                {"attr" :  "RepoTags", "index" :  0, "selected" :  data.Spec.TaskTemplate.ContainerSpec.Image.split("@")[0]});
-            var $portlistsNew = $("#portlistsNew");
-            createList($portlistsNew, portlistsNew);
-            clickDeleteList($portlistsNew, portlistsNew);
-
-            $("#portAddNew").click((e)=>{
-              e.preventDefault();
-              var $protocol =  $("#protocolNew");
-              var $containerPort = $("#containerPortNew");
-              var $hostPort = $("#hostPortNew");
-
-              var $array = [$containerPort, $hostPort, $protocol];
-              var state = true;
-              for (var i in $array) {
-                if(!(hasValue($array[i].val()))){
-                  state = false;
-                }
-              }
-              if(state) {
-                // console.log(portlists);
-                insertArray(portlistsNew, $array);
-                createList ( $portlistsNew, portlistsNew );
-              }
-            });
+            self.initForm(self, row);
 
           });
-          // return dialog;
         },
-        tableInit: function(){
+        initTable: function(){
 
           var self = settings.table.main;
           var mainTable =  settings.mainTable;
-          console.log("do");
           mainTable.initUrlTable(self.jsonUrl, true);
-          mainTable.hideColumns(self.hideColumns);
+          if(self.hasOwnProperty("hideColumns")){
+            mainTable.hideColumns(self.hideColumns);
+          }
           mainTable.checkAllEvents();
           mainTable.clickRowAddColor("danger");
 
           if(settings.table.hasOwnProperty("sub")){
             var self = settings.table.sub;
             var subTable =  settings.subTable;
-            console.log("sub");
             subTable.initDataTable({});
             subTable.checkAllEvents();
           }
@@ -191,10 +145,10 @@ var main = (function(){
           self.$newForm.click((e)=>{
             e.preventDefault();
 
-            var popup = new dialog(self.formName, self.$form.show(), settings.$body);
+            var popup = new dialog(self.formName, settings.form.$form.show(), settings.$body);
 
             if(self.hasOwnProperty("initDropdown")){
-              self.initDropdown();
+              self.initDropdown(self);
             }
 
             popup.appendButton('Create', 'btn-primary create',
@@ -204,6 +158,7 @@ var main = (function(){
                 var config = require("./config");
 
                 config[settings.form.settingMethod.set](json, portArray);
+                console.log(config[settings.form.settingMethod.get]());
                 return  config[settings.form.settingMethod.get]();
               }
               // console.log(self.getSettingValue());
@@ -262,54 +217,23 @@ var main = (function(){
                  client.sendEvent("ConnectDocker",  data, (data)=>{console.log(data);});
                }
          });
-        }
-        , addPort : function(){
-          var self = settings.form.create;
-          console.log("init");
-          self.$portAdd.click((e)=>{
-              e.preventDefault();
-              console.log("clicke");
-              var $protocol = $("#protocol");
-              var $containerPort = $("#containerPort");
-              var $hostPort = $("#hostPort");
-
-              var $array = [$containerPort, $hostPort, $protocol];
-              var state = true;
-              for (var i in $array) {
-                if(!(hasValue($array[i].val()))){
-                  state = false;
-                }
-              }
-              if(state) {
-                insertArray(self.portlists, $array);
-                createList ( self.$portlists, self.portlists );
-              }
-          });
-        }, deletePort : function(){
-          var self = settings.form.create;
-          self.$portlists.on('click', 'button', function(e){
-          e.preventDefault();
-
-          var id = "#row" + $(this).attr("id");
-              if($(this).hasClass("delete")) {
-                $(id).fadeOut("slow");
-
-                self.portlists.splice($(this).attr("id"), 1);
-
-                createList ( self.$portlists, self.portlists);
-              }
-        });
-
-        }, socketButtonEvent : function (){
+       },
+       initPortLists : function(){
+         var self = settings.form.create;
+         var $protocol = $("#protocol");
+         var $containerPort = $("#containerPort");
+         var $hostPort = $("#hostPort");
+         var $dataLists = [$protocol, $containerPort, $hostPort];
+        //  var portlists = [];
+         initPortLists(self.$portlists, self.portlists, self.$portAdd,  $dataLists  );
+       },
+        socketButtonEvent : function (){
           var self = settings;
-
 
           for (var i in self.event) {
             console.log(self.event[i]);
             self.event[i].$button.click(
-                // clickCallback(self.event[i].eventName, self.mainTable)
               self.event[i].clickEvent(client, self.event[i].eventName, self.mainTable)
-              // client.sendEventTable(self.event[i].eventName, self.mainTable);
             );
           }
         }

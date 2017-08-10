@@ -64,45 +64,49 @@ $(function(){
   var $all = {};
   $all.init = function(){};
   $all.form = {};
-  $all.form.data = {
-    $imageMenu : $("#imageMenu"),
-    $image : $('#imageDropDown'),
-    $name : $("#name"),
-    $command : $("#command")
-  };
-  $all.form.$newForm =  $(".newForm");
-  $all.form.formName = "컨테이너 생성";
   $all.form.$form = $("#hiddenForm");
-  $all.form.formEvent = "CreateContainer";
-  $all.form.portlists = [];
-  $all.form.$portAdd = $(".portAdd");
-  $all.form.$portlists = $(".portlists");
-  $all.form.dropDown = {
-    $dropDown : $('#imageDropDown'),
-    default : "Images"
-  };
   $all.form.settingMethod = {
     get : "getContainer",
     set : "setContainer"
   };
-  $all.form.getSettingValue = function() {
-    var self = this.data ;
+  $all.form.getSettingValue = function(self) {
+    var self = self.data ;
     return {
       Image : self.$image.text().trim(),
       name : self.$name.val(),
       Cmd : self.$command.val()
     }
   }
+  $all.form.create = {};
+  $all.form.create.data = {
+    $imageMenu : $("#imageMenu"),
+    $image : $('#imageDropDown'),
+    $name : $("#name"),
+    $command : $("#command")
+  };
+  $all.form.create.$newForm =  $(".newForm");
+  $all.form.formName = "컨테이너 생성";
+  $all.form.create.formEvent = "CreateContainer";
+  $all.form.create.portlists = [];
+  $all.form.create.$portAdd = $(".portAdd");
+  $all.form.create.$portlists = $(".portlists");
+  $all.form.create.dropDown = {
+    $dropDown : $('#imageDropDown'),
+    default : "Images"
+  };
 
-  $all.form.initDropdown = function(){
-    var self = this;
+  $all.form.create.initDropdown = function(self){
+    console.log(self);
+    var self = self.data;
+    console.log(self);
     var jsonUrl = '/myapp/image/data.json';
-    var $contextMenu =   self.data.$imageMenu;
-    var $dropDown =   self.data.$image;
+    var $contextMenu =   self.$imageMenu;
+    var $dropDown =   self.$image;
     var attr = "RepoTags";
     var index = 0;
-    return initDropdown(jsonUrl, $contextMenu, $dropDown, attr, index);
+    return initDropdown(jsonUrl, $contextMenu, $dropDown, { attr : attr, index :  index} );
   }
+
   $all.connect = {};
   $all.connect.dockerinfo = "container";
   $all.table = {};
@@ -171,9 +175,9 @@ $(function(){
     main.init($all);
     var containerTable = main.getMainTable();
 
-    var $detail = $("#detail");
-
-    containerTable.clickRow($detail);
+    // var $detail = $("#detail");
+    //
+    // containerTable.clickRow($detail);
      var expandinfo = [{
        url : "/myapp/container/top/",
        keys : ["Titles", "Processes"]

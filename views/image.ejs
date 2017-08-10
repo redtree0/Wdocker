@@ -18,17 +18,24 @@
             <div class="row placeholders">
                 <% include ./partials/connectDocker %>
 
-                <div class="col-md-6" >
-                  <div id="bgrp" class="btn-group" role="group">
-                          <button  onclick=" return false;"  type="button" class="btn btn-info btn-lg newForm">
-                            <span class="glyphicon glyphicon-plus"></span> Plus
-                            </button>
-                            <button class="btn-danger btn btn-lg remove">Remove</button>
+                <div id="toolbar">
+                        <div  class="btn-group" role="group">
+                          <button  onclick=" return false;"  type="button" class="btn btn-default newForm">
+                            <span class="glyphicon glyphicon-plus"></span>
+                          </button>
+                          <button  onclick=" return false;"  type="button" class="btn btn-default  remove">
+                            <span class="glyphicon glyphicon-minus"></span></button>
+                        </div>
+                 </div>
+
+                 <div class="panel panel-success row">
+                     <div class="panel-heading">
+                         <h4 class ="text-left">Image 관리</h4>
+                     </div>
+                     <div class="panel-body">
+                        <table data-toolbar="#toolbar" class="table table-striped jsonTable"></table>
+                    </div>
                   </div>
-
-                </div>
-
-                  <table id="imagelist" class="table table-striped jsonTable"></table>
 
               </div>
           </div>

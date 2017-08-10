@@ -62,6 +62,11 @@
         res.render("service.ejs");
   });
 
+  router.get('/task' ,  (req, res) => {
+        res.render("task.ejs");
+  });
+
+
   router.get('/settings' , (req, res) => {
         res.render("settings.ejs");
   });

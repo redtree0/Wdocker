@@ -33,6 +33,7 @@ var config = (function(){
     opts.name = filter.name;
     opts.Cmd = [ filter.Cmd];
 
+    console.log(portArray);
     for ( var i in portArray) {
       var portinfo = portArray[i].containerPort +"/"+ portArray[i].protocol;
       opts.ExposedPorts[portinfo] = {};

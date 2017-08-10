@@ -1,6 +1,6 @@
 'use strict';
 
-var columns = [
+const columns = [
     {
         checkbox: true,
         title: 'Check'
@@ -38,35 +38,36 @@ $(function(){
   var $all = {};
   $all.init = function(){};
   $all.form = {};
-  $all.form.data = {
-    $driver : $("#driverDropdown"),
-    $driverMenu : $("#driverMenu"),
-    $name : $("#name")
-  };
-  $all.form.$newForm =  $(".newForm");
-  $all.form.formName = "볼륨 생성";
   $all.form.$form = $("#hiddenForm");
-  $all.form.formEvent = "CreateVolume";
   $all.form.settingMethod = {
     get : "getVolume",
     set : "setVolume"
   };
-  $all.form.getSettingValue = function() {
-    var self = this.data ;
+  $all.form.getSettingValue = function(self) {
+    var self = self.data ;
     return {
       "Name" : self.$name.val(),
       "Driver" : self.$driver.text().trim()
     }
   };
-   $all.form.dropDown =  {
+  $all.form.create = {};
+  $all.form.create.data = {
+    $driver : $("#driverDropdown"),
+    $driverMenu : $("#driverMenu"),
+    $name : $("#name")
+  };
+  $all.form.create.$newForm =  $(".newForm");
+  $all.form.create.formName = "볼륨 생성";
+  $all.form.create.formEvent = "CreateVolume";
+   $all.form.create.dropDown =  {
      $dropDown : $('#driverDropDown'),
      default : "driver"
    };
-  $all.form.initDropdown = function(){
-    var self = this;
+  $all.form.create.initDropdown = function(self){
+    var self = self.data;
     var data = ["local"];
-    var $contextMenu =   self.data.$driverMenu;
-    var $dropDown =   self.data.$driver;
+    var $contextMenu =   self.$driverMenu;
+    var $dropDown =   self.$driver;
 
     return initDropdownArray(data, $contextMenu, $dropDown);
   }

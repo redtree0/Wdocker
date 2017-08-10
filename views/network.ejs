@@ -18,35 +18,41 @@
           <div class="row placeholders">
             <% include ./partials/connectDocker %>
 
-            <div class="col-md-6" >
+
+            <div id="toolbar" class="btn-group" role="group">
+              <div  class="btn-group" role="group">
+                <button  onclick=" return false;"  type="button" class="btn btn-default newForm">
+                  <span class="glyphicon glyphicon-plus"></span>
+                </button>
+                <button  onclick=" return false;"  type="button" class="btn btn-default  remove">
+                  <span class="glyphicon glyphicon-minus"></span></button>
+              </div>
             </div>
-            <div id="bgrp" class="btn-group" role="group">
-              <button  onclick=" return false;"  type="button" class="btn btn-info btn-lg newForm">
-                <span class="glyphicon glyphicon-plus"></span> Plus
-              </button>
-                <button id="remove" class="btn btn-danger btn-lg">
-                  <span class="glyphicon glyphicon-remove"></span>
-                  Remove</button>
-            </div>
+              <div  class="btn-group dropdown">
+                  <button id="containerDropDown" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                    Containers <span class="caret"></span>
+                  </button>
+                  <ul class="dropdown-menu" id="containerMenu">
+                  </ul>
+              </div>
 
 
-            <div class="btn-group">
-              <button id="containerDropDown" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                 Containers <span class="caret"></span>
-              </button>
-              <ul class="dropdown-menu" id="containerMenu">
-              </ul>
-            </div>
-            <div id="network" class="btn-group" role="group">
-                    <button id="connect" type="button" class="btn btn-success btn-lg ctlbtn">
+            <div class="panel panel-success row">
+                <div class="panel-heading">
+                    <h4 class ="text-left">네트워크 관리</h4>
+                </div>
+                <div class="panel-body">
+
+                    <table data-toolbar="#toolbar"  data-pagination="true" class="table table-striped jsonTable"> </table>
+
+                    <button id="connect" type="button" class="btn btn-success ctlbtn">
                       <span class="glyphicon glyphicon-log-in"></span>
                       Connect</button>
-                    <button id="disconnect" type="button" class="btn btn-default btn-lg ctlbtn">
+                    <button id="disconnect" type="button" class="btn btn-default ctlbtn">
                       <span class="glyphicon glyphicon-log-out"></span>Disconnect</button>
-            </div>
+                </div>
 
-              <table id="networklist" class="table table-striped jsonTable">
-              </table>
+            </div>
 
               <div id="detail" class="row detail">
               </div>
@@ -61,13 +67,14 @@
             </div>
             <div class="form-group">
               <label for="driver" class="col-sm-2 control-label">Network Driver: </label>
-
-              <div class="btn-group" >
-                <button id="driverDropDown" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                  driver <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu" id="driverMenu">
-                </ul>
+              <div class="col-sm-10">
+                <div class="btn-group btn-block" >
+                  <button id="driverDropDown" type="button" class="btn btn-default dropdown-toggle btn-block" data-toggle="dropdown" aria-expanded="false">
+                    driver <span class="caret"></span>
+                  </button>
+                  <ul class="dropdown-menu" id="driverMenu">
+                  </ul>
+                </div>
               </div>
             </div>
             <div class="form-group">

@@ -1,7 +1,7 @@
 //images.js
 'use strict';
 
-  var columns = [{
+  const columns = [{
           checkbox: true,
           title: 'Check'
       },{
@@ -37,7 +37,7 @@
           field: 'VirtualSize',
           title: 'VirtualSize'
       }];
-      var searchcolumns = [{
+      const searchcolumns = [{
               checkbox: true,
               title: 'Check'
         },{
@@ -65,24 +65,7 @@ $(function(){
     $(".results").hide();
   };
   $all.form = {};
-  $all.form.data = {
-    $term : $("#term"),
-    $limit : $("#limit"),
-    $is_automated : $("#is_automated"),
-    $is_official : $("#is_official"),
-    $stars : $("#stars")
-  };
-  $all.form.$newForm =  $(".newForm");
-  $all.form.formName = "이미지 생성";
   $all.form.$form = $("#hiddenForm");
-  $all.form.formEvent = "SearchImages";
-  // $all.form.portlists = [];
-  // $all.form.$portAdd = $(".portAdd");
-  // $all.form.$portlists = $(".portlists");
-  // $all.form.dropDown = {
-  //   $dropDown : $('#imageDropDown'),
-  //   default : "Images"
-  // };
   $all.form.settingMethod = {
     get : "getImage",
     set : "setImage"
@@ -97,12 +80,27 @@ $(function(){
       "stars" :self.$stars.val()
     }
   };
-  $all.form.callback = function(data){
+
+  $all.form.create = {};
+  $all.form.create.data = {
+    $term : $("#term"),
+    $limit : $("#limit"),
+    $is_automated : $("#is_automated"),
+    $is_official : $("#is_official"),
+    $stars : $("#stars")
+  };
+
+  $all.form.create.$newForm =  $(".newForm");
+  $all.form.create.formName = "이미지 생성";
+  $all.form.create.formEvent = "SearchImages";
+  $all.form.create.callback = function(data){
             var row = data ;
             $all.table.sub.$table.bootstrapTable('load', data);
 
             $(".results").show();
   }
+
+
   $all.form.completeEvent = function(data, callback){
     console.log(arguments);
     if(hasValue(data)){
@@ -111,6 +109,7 @@ $(function(){
   };
   $all.connect = {};
   $all.connect.dockerinfo = "image";
+
   $all.table = {};
   $all.table.main = {
     $table : $(".jsonTable"),
@@ -121,8 +120,6 @@ $(function(){
   $all.table.sub = {
     $table : $(".dataTable"),
     columns : searchcolumns
-
-    // jsonUrl : '/myapp/image/data.json';
   }
   $all.event = {};
   function clickDefault(client, eventName, table){
@@ -175,30 +172,22 @@ $(function(){
           var popup = new dialog("이미지 다운 중", $msgdiag.show(), $("body"));
           var $status = $("#status");
           client.listen("progress", (event)=> {
-
-            console.log(event);
-            if((event.status)){
-              $status.text(event.status);
-            }
-            if((event.progressDetail)){
-              var download = event.progressDetail;
-              if(download.current && download.total){
-
-                var percentage = (download.current / download.total) * 100;
-                // $msgdiag.text(percentage);
-                var $progress = $(".progress");
-                if(percentage != NaN) {
-                  // console.log(percentage);
-                  $progress.css("width", Math.round(percentage)+ '%');
+                if((event.status)){
+                  $status.text(event.status);
                 }
-
-              }
-            }else if (event === true) {
-                popup.close(5000);
-                imageTable.reload();
-            }
-
-
+                if((event.progressDetail)){
+                  var download = event.progressDetail;
+                  if(download.current && download.total){
+                    var percentage = (download.current / download.total) * 100;
+                    var $progress = $(".progress");
+                    if(percentage != NaN) {
+                      $progress.css("width", Math.round(percentage)+ '%');
+                    }
+                  }
+                }else if (event === true) {
+                    popup.close(5000);
+                    imageTable.reload();
+                }
             });
 
             popup.show();

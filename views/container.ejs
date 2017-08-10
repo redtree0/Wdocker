@@ -18,86 +18,99 @@
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
           <div class="row placeholders">
 
-            <div>
               <% include ./partials/connectDocker %>
-
-              <h3 id="title">Containers List</h3>
-
-              <div id="bgrp" class="btn-group" role="group">
-                      <button  onclick=" return false;"  type="button" class="btn btn-info btn-lg newForm">
-                        <span class="glyphicon glyphicon-plus"></span> Plus
+              <div id="toolbar">
+                      <div  class="btn-group" role="group">
+                        <button  onclick=" return false;"  type="button" class="btn btn-default newForm">
+                          <span class="glyphicon glyphicon-plus"></span>
                         </button>
-                      <button  onclick=" return false;"  type="button" class="btn btn-primary btn-lg start">Start</button>
-                      <button  onclick=" return false;"  type="button" class="btn btn-default btn-lg stop">Stop</button>
-                      <button  onclick=" return false;"  type="button" class="btn btn-success btn-lg pause">Pause</button>
-                      <button  onclick=" return false;"  type="button" class="btn btn-info btn-lg unpause">Unpause</button>
-                      <button  onclick=" return false;"  type="button" class="btn btn-warning btn-lg remove">Remove</button>
-                      <button  onclick=" return false;"  type="button" class="btn btn-danger btn-lg kill">Kill</button>
+                        <button  onclick=" return false;"  type="button" class="btn btn-default  remove">
+                          <span class="glyphicon glyphicon-minus"></span></button>
+                      </div>
+                      <div  class="btn-group" role="group">
+
+                      <button  onclick=" return false;"  type="button" class="btn btn-primary  start">
+                        <span class="glyphicon glyphicon-play"></span>Start</button>
+                      <button  onclick=" return false;"  type="button" class="btn btn-default  stop">
+                        <span class="glyphicon glyphicon-stop">Stop</button>
+                      <button  onclick=" return false;"  type="button" class="btn btn-warning  pause">
+                          <span class="glyphicon glyphicon-pause"></span>Pause</button>
+
+                      <button  onclick=" return false;"  type="button" class="btn btn-success  unpause">
+                        <span class="glyphicon glyphicon-step-forward"></span>Unpause</button>
+                      <button  onclick=" return false;"  type="button" class="btn btn-danger  kill">
+                        <span class="glyphicon glyphicon-flash"></span>Kill</button>
+                      </div>
+
               </div>
-            </div>
 
-            <table id="ctable" data-pagination="true" class="table table-striped jsonTable">
-            </table>
-
-          <div class="row">
-            <div class="col-md-6">
-              <div class="row" id="detail">
+              <div class="panel panel-success row">
+                  <div class="panel-heading">
+                      <h4 class ="text-left">컨테이너 관리</h4>
+                  </div>
+                  <div class="panel-body">
+                      <table data-toolbar="#toolbar" data-pagination="true" class="table table-striped jsonTable"></table>
+                  </div>
               </div>
-            </div>
-            <div class="col-md-6" >
-                <form class="form-horizontal" id="hiddenForm" >
-                    <div class="form-group">
-                      <label for="name" class="col-sm-2 control-label">Container Name: </label>
-                      <div class="col-sm-10">
-                        <input type="text" class="form-control" id="name"  name="container[name]" placeholder="Name">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="row" id="detail">
+                </div>
+              </div>
+              <div class="col-md-6" >
+                  <form class="form-horizontal" id="hiddenForm" >
+                      <div class="form-group">
+                        <label for="name" class="col-sm-2 control-label">Container Name: </label>
+                        <div class="col-sm-10">
+                          <input type="text" class="form-control" id="name"  name="container[name]" placeholder="Name">
+                        </div>
                       </div>
-                    </div>
-                    <div class="form-group">
-                      <label for="image" class="col-sm-2 control-label">Images : </label>
-                      <div class="col-sm-10">
-                          <div class="btn-group  btn-block">
-                            <button id="imageDropDown" type="button" class="btn btn-default dropdown-toggle btn-block"  data-toggle="dropdown" aria-expanded="false">
-                               Images <span class="caret"></span>
-                            </button>
-                            <ul class="dropdown-menu col-xs-12" id="imageMenu">
-                            </ul>
-                          </div>
+                      <div class="form-group">
+                        <label for="image" class="col-sm-2 control-label">Images : </label>
+                        <div class="col-sm-10">
+                            <div class="btn-group  btn-block">
+                              <button id="imageDropDown" type="button" class="btn btn-default dropdown-toggle btn-block"  data-toggle="dropdown" aria-expanded="false">
+                                 Images <span class="caret"></span>
+                              </button>
+                              <ul class="dropdown-menu col-xs-12" id="imageMenu">
+                              </ul>
+                            </div>
+                        </div>
                       </div>
-                    </div>
-                    <div class="form-group">
-                      <label for="command" class="col-sm-2 control-label">Command: </label>
-                      <div class="col-sm-10">
-                        <input type="text" class="form-control" id="command" value="/bin/bash" >
+                      <div class="form-group">
+                        <label for="command" class="col-sm-2 control-label">Command: </label>
+                        <div class="col-sm-10">
+                          <input type="text" class="form-control" id="command" value="/bin/bash" >
+                        </div>
                       </div>
-                    </div>
-                    <div class="form-group">
-                      <label for="containerPort" class="col-sm-2 control-label">Container port : </label>
-                      <div class="col-sm-2">
-                        <input type="number" class="form-control"  min="1" max="65535" id="containerPort" >
+                      <div class="form-group">
+                        <label for="containerPort" class="col-sm-2 control-label">Container port : </label>
+                        <div class="col-sm-2">
+                          <input type="number" class="form-control"  min="1" max="65535" id="containerPort" >
+                        </div>
                       </div>
-                    </div>
-                    <div class="form-group">
-                      <label for="hostPort" class="col-sm-2 control-label">Host port : </label>
-                      <div class="col-sm-2">
-                        <input type="number" class="form-control" min="1" max="65535" id="hostPort" >
+                      <div class="form-group">
+                        <label for="hostPort" class="col-sm-2 control-label">Host port : </label>
+                        <div class="col-sm-2">
+                          <input type="number" class="form-control" min="1" max="65535" id="hostPort" >
+                        </div>
                       </div>
-                    </div>
-                    <div class="form-group">
-                      <label for="protocol" class="col-sm-2 control-label">protocal : </label>
-                      <div class="col-sm-2">
-                        <label class="checkbox-inline">
-                           <input type="checkbox" id="protocol" checked data-toggle="toggle" data-on="tcp"
-                           data-off="udp" data-onstyle="success" data-offstyle="primary"></input>
-                        </label>
-                      </div>
+                      <div class="form-group">
+                        <label for="protocol" class="col-sm-2 control-label">protocal : </label>
+                        <div class="col-sm-2">
+                          <label class="checkbox-inline">
+                             <input type="checkbox" id="protocol" checked data-toggle="toggle" data-on="tcp"
+                             data-off="udp" data-onstyle="success" data-offstyle="primary"></input>
+                          </label>
+                        </div>
 
-                        <button class="btn btn-primary portAdd">Add</button>
-                    </div>
-                    <div class="form-group">
-                      <div class = "portlists"></div>
-                    </div>
-                </form>
-            </div>
+                          <button class="btn btn-primary portAdd">Add</button>
+                      </div>
+                      <div class="form-group">
+                        <div class = "portlists"></div>
+                      </div>
+                  </form>
+              </div>
           </div>
           </div>
 

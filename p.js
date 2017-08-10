@@ -79,6 +79,7 @@
 
   p.prototype.getAllLists = function (opts, callback){
     var self = this;
+    console.log(self.getLists);
     var dockerInfo = self.docker[self.getLists](opts);
     console.log("getlists");
     console.log(this.getLists);
@@ -526,6 +527,10 @@
         this.doTask(data, callback, "inspect");
     };
 
+    var task = Object.create(test);
+    task.getInfo = "getTask";
+    task.getLists = "listTasks";
+
 
 
 
@@ -538,7 +543,8 @@
      "settings" : settings,
      "swarm" : swarm,
      "node" : node,
-     "service" : service
+     "service" : service,
+     "task" : task
    }
 
 module.exports = lists;

@@ -20,7 +20,28 @@ const columns = [{
 $(function(){
 
   $('.ip_address').mask('0ZZ.0ZZ.0ZZ.0ZZ', { translation: { 'Z': { pattern: /[0-9]/, optional: true } } });
-
+  var $all = {};
+  $all.init = function(){};
+  $all.form = {};
+  $all.table = {};
+  $all.table.main = {
+    $table : $(".jsonTable"),
+    columns : columns,
+    jsonUrl : '/myapp/settings/data.json',
+  };
+  $all.event = {};
+  function clickDefault(client, eventName, table){
+    return function(){
+      client.sendEventTable(eventName, table);
+    };
+  }
+  $all.event.remove = {
+      $button : $(".remove"),
+      eventName : "DELETE",
+      clickEvent : clickDefault
+  };
+  var main = require("./main.js");
+  main.init($all);
     var socket = io();
     var Socket = require("./io");
     var client = new Socket(socket, $('body'));
@@ -29,25 +50,7 @@ $(function(){
     var $settings = $(".jsonTable");
     var dialog = require("./dialog.js");
 
-    var settingsTable = new table($settings, columns);
 
-    settingsTable.initUrlTable('/myapp/settings/data.json', false);
-    settingsTable.checkAllEvents();
-    // settingsTable.clickRow($detail);
-    settingsTable.clickRowAddColor("danger");
-
-
-    // var opts = {
-    //   "lists" : settingsTable.checkedRowLists
-    // }
-
-
-
-
-    var opts = {
-      "table" : settingsTable,
-      "lists" : settingsTable.checkedRowLists
-    }
       $(".ping").click((e)=>{
         client.completeEvent = function (data, callback) {
           if(hasValue(data)){

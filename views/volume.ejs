@@ -4,9 +4,9 @@
 <head>
   <% include ./partials/head %>
   <!-- 스크립트 -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.2/themes/default/style.min.css" />
+  <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.2/themes/default/style.min.css" />
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.2/jstree.min.js"></script>
-  <link rel="stylesheet" href='/myapp/lib/jstree-bootstrap-theme/dist/themes/proton/style.min.css' />
+  <link rel="stylesheet" href='/myapp/lib/jstree-bootstrap-theme/dist/themes/proton/style.min.css' /> -->
   <script src='/myapp/js/bundle/volume.bundle.js'></script>
 </head>
 
@@ -22,38 +22,30 @@
 
                   <% include ./partials/connectDocker %>
 
-                 <table   data-pagination="true"  class="table table-striped jsonTable">
-                 </table>
-                  <!-- <table class="table table-striped">
-                    <thead>
-                      <tr>
-                        <td>#</td>
-                        <td>Volume</td>
-                        <td>Warnings</td>
-                      </tr>
-                    </thead>
-                  </table> -->
-                  <div id="bgrp" class="btn-group" role="group">
-                    <button  onclick=" return false;"  type="button" class="btn btn-info btn-lg newForm">
-                      <span class="glyphicon glyphicon-plus"></span> Plus
-                    </button>
-                      <button  class="btn btn-danger btn-lg remove">
-                        <span class="glyphicon glyphicon-remove"></span>
-                        Remove</button>
-                  </div>
-                  <div class="col-md-4">
-                        <div id="filelist">
-                        </div>
+                  <div id="toolbar">
+                    <div  class="btn-group" role="group">
+                      <button  onclick=" return false;"  type="button" class="btn btn-default newForm">
+                        <span class="glyphicon glyphicon-plus"></span>
+                      </button>
+                      <button  onclick=" return false;"  type="button" class="btn btn-default  remove">
+                        <span class="glyphicon glyphicon-minus"></span></button>
+                      </div>
                   </div>
 
+                  <div class="panel panel-success row">
+                      <div class="panel-heading">
+                          <h4 class ="text-left">Volume 관리</h4>
+                      </div>
+                      <div class="panel-body">
+                         <table data-toolbar="#toolbar"  data-pagination="true"  class="table table-striped jsonTable"></table>
+                       </div>
+                 </div>
 
-                    <!-- <div class="row">
-                          <div class="col-md-12">
-                                <div id="filelist">
-                                </div>
-                          </div>
-                    </div> -->
-                    </div>
+
+
+              </div>
+            </div>
+            <!-- hidden -->
                     <form class="form-horizontal" id="hiddenForm">
                       <div class="form-group">
                         <label for="name" class="col-sm-2 control-label">Volume Name: </label>
@@ -73,7 +65,6 @@
                         </div>
                       </div>
                     </form>
-            </div>
     </div>
 </div>
 
