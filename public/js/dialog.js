@@ -36,10 +36,11 @@ dialog.prototype.show = function () {
 dialog.prototype.close = function (timeout) {
     var diaglogInstance = (this.dialogInstance);
     var $body = (this.$body);
+
+    $body.spinStop();
     diaglogInstance.getModalBody().html('Dialog closes in 5 seconds.');
     setTimeout(function(){
               diaglogInstance.close();
-               $body.spinStop();
     }, timeout);
 };
 

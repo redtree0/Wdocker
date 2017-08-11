@@ -41,9 +41,6 @@ mongo.prototype.create = function(req, res) {
 
 mongo.prototype.find = function(data, callback) {
   var self = this;
-  // self.db.findById(req.params.id, function (err, db) {
-  //   if(err) { return handleError(res, err); }
-  //   if(!db) { return res.send(404); }
 
   self.db.findOne(data, function(err, db){
         if(err) return ({error: 'database failure'});

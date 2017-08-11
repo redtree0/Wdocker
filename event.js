@@ -1,11 +1,7 @@
 "use strict";
 
 var Socket = require("./socket");
-// var docker = require('./docker')();
-// var spawn = require('child_process').spawn;
-// var fs = require('fs');
-// var path = require('path');
-// var os = require('os');
+
 var p = require('./p');
 var mongo = require("./mongoController");
 
@@ -43,6 +39,7 @@ var eventLists = function(io){
 				swarm(server);
 				node(server);
 				service(server);
+				task(server);
   }
 
   var container = function(server){
@@ -128,6 +125,10 @@ var image = function(server){
      server.listen("RemoveImages", function(data, fn) {
        p.image.remove(data, fn);
      });
+
+		 server.listen("PushImages", function(data, fn) {
+			 p.image.push(data, fn);
+		 });
 };
 
 var volume = function(server){
@@ -411,42 +412,72 @@ var settings = function(server){
 			p.settings.delete(data, fn);
 
 	});
+	function getServerIp() {
+			var os = require("os");
+			var ifaces = os.networkInterfaces();
+			var result = '';
+			for (var dev in ifaces) {
+					var alias = 0;
+					if(dev === "eth0"){
+						ifaces[dev].forEach(function(details) {
+							if (details.family == 'IPv4' && details.internal === false) {
+								result = details.address;
+								++alias;
+							}
+						});
+					}
+			}
+
+			return result;
+	}
+	server.listen('IsConnected', function(data, fn) {
+
+
+			if(data.ip === getServerIp() || data.ip === "default" ) {
+				var docker = defaultDocker;
+				fn(true);
+			}else {
+				mongo.docker.find({"ip" : data.ip}, (result)=>{
+
+					var opts = {
+						"host" : result.ip,
+						"port" : result.port
+					}
+					p.settings.ping(opts, (err, data)=> {
+						fn({err : err, data: data});
+					});
+				});
+			}
+	});
 
 	server.listen('ConnectDocker', function(data, fn) {
-		function getServerIp() {
-				var os = require("os");
-				var ifaces = os.networkInterfaces();
-				var result = '';
-				for (var dev in ifaces) {
-						var alias = 0;
-						if(dev === "eth0"){
-							ifaces[dev].forEach(function(details) {
-								if (details.family == 'IPv4' && details.internal === false) {
-									result = details.address;
-									++alias;
-								}
-							});
-						}
-				}
 
-				return result;
-		}
-		console.log(getServerIp());
+		// console.log(getServerIp());
 		if(data.ip === getServerIp()) {
 			var docker = defaultDocker;
 			p[data.docker].docker = docker;
+			fn(true);
 		}else {
 			mongo.docker.find({"ip" : data.ip}, (result)=>{
-
 				var opts = {
 					"host" : result.ip,
 					"port" : result.port
 				}
-				var docker = p.settings.setDocker(opts);
-				p[data.docker].docker = docker;
+				p.settings.ping(opts, (err, data)=> {
+					// fn({err : err, data: data});
+					console.log(err);
+					console.log(data);
+					if(err !== null) {
+						return fn({err : err.code});
+					}else {
+						var docker = p.settings.setDocker(opts);
+						p[data.docker].docker = docker;
+						return fn(true);
+					}
+				});
+				// fn(true);
 			});
 		}
-		fn(true);
 	});
 
 	server.listen('GetThisDocker', function(data, fn) {
@@ -579,6 +610,9 @@ var service = function(server){
 	});
 }
 
+var task = function(server){
+	// server.listen("")
+}
 
 
 module.exports = eventLists;

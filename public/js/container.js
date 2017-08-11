@@ -71,18 +71,30 @@ $(function(){
   };
   $all.form.getSettingValue = function(self) {
     var self = self.data ;
-    return {
+
+    var opts = {
       Image : self.$image.text().trim(),
       name : self.$name.val(),
       Cmd : self.$command.val()
     }
+    if(self.$volume.text().trim() !== "Volumes" && self.$containerDest.val() !== null){
+      // opts.Mounts = [ self.$volume.text().trim + ":" + self.$containerDest];
+      opts.volume = self.$volume.text().trim();
+      opts.containerDest = self.$containerDest.val();
+      console.log(opts);
+
+    }
+    return opts;
   }
   $all.form.create = {};
   $all.form.create.data = {
     $imageMenu : $("#imageMenu"),
     $image : $('#imageDropDown'),
     $name : $("#name"),
-    $command : $("#command")
+    $command : $("#command"),
+    $volumeMenu : $("#volumeMenu"),
+    $volume : $("#volumeDropDown"),
+    $containerDest : $("#containerDest")
   };
   $all.form.create.$newForm =  $(".newForm");
   $all.form.formName = "컨테이너 생성";
@@ -96,15 +108,25 @@ $(function(){
   };
 
   $all.form.create.initDropdown = function(self){
-    console.log(self);
     var self = self.data;
-    console.log(self);
     var jsonUrl = '/myapp/image/data.json';
     var $contextMenu =   self.$imageMenu;
     var $dropDown =   self.$image;
     var attr = "RepoTags";
     var index = 0;
-    return initDropdown(jsonUrl, $contextMenu, $dropDown, { attr : attr, index :  index} );
+    initDropdown(jsonUrl, $contextMenu, $dropDown, { attr : attr, index :  index} );
+
+    var jsonUrl = '/myapp/volume/data.json';
+    var $contextMenu =   self.$volumeMenu;
+    var $dropDown =   self.$volume;
+    var attr = "Name";
+
+    initDropdown(jsonUrl, $contextMenu, $dropDown, { attr : attr } );
+  }
+  $all.form.create.more = {
+    $more : $("#more"),
+    $less : $("#less"),
+    $moreForm : $(".moreForm")
   }
 
   $all.connect = {};
@@ -115,6 +137,7 @@ $(function(){
     hideColumns : ["Id", "ImageID", "Ports", "Mounts", "HostConfig", "NetworkingSettings"],
     columns : columns,
     jsonUrl : '/myapp/container/data.json',
+    isExpend : true
   };
 
   $all.event = {};
@@ -162,8 +185,16 @@ $(function(){
     console.log(arguments);
     if(hasValue(data)){
       var dialog = require("./dialog.js");
-
-      var finished = new dialog("컨테이너", data.msg + data.statusCode, $("body"));
+      if(data.err === undefined){
+          data.err = "";
+      }
+      if(data.msg === undefined){
+        data.msg = "";
+      }
+      if(data.statusCode === undefined){
+        data.statusCode = "";
+      }
+      var finished = new dialog("컨테이너", data.err + data.msg + data.statusCode, $("body"));
       finished.setDefaultButton('Close[Enker]', 'btn-primary create');
       finished.show();
 

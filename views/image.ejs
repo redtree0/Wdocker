@@ -18,14 +18,28 @@
             <div class="row placeholders">
                 <% include ./partials/connectDocker %>
 
-                <div id="toolbar">
+                  <div id="toolbar" class="form-inline row" role="form">
+                      <div class="form-group">
                         <div  class="btn-group" role="group">
                           <button  onclick=" return false;"  type="button" class="btn btn-default newForm">
                             <span class="glyphicon glyphicon-plus"></span>
                           </button>
                           <button  onclick=" return false;"  type="button" class="btn btn-default  remove">
                             <span class="glyphicon glyphicon-minus"></span></button>
-                        </div>
+                          </div>
+                      </div>
+                      <div class="form-group" style="border: 0.5px solid #48BAE4; height: auto; padding:1px;">
+                      <div class="form-group">
+                            <button  onclick=" return false;"  type="button" class="btn btn-info  push">
+                              <span class="glyphicon glyphicon-upload"></span>Push</button>
+                      </div>
+                      <div class="form-group">
+                            <input type="text" class="form-control" id="repositoryImage" value=""  placeholder="repository/image">
+                      </div>
+                      <div class="form-group">
+                            <input type="text" class="form-control" id="repositoryTag" value=""  placeholder="tag">
+                      </div>
+                      </div>
                  </div>
 
                  <div class="panel panel-success row">
@@ -75,7 +89,6 @@
                     <div class="col-md-12">
                         <table class="table table-striped dataTable"></table>
                         <button class="btn-default btn download">Download</button>
-
                     </div>
                   </div>
               </div>
@@ -87,7 +100,6 @@
               </div>
                 <div class="progress  progress-bar-success progress-bar-striped active">
                     <div class='progress-bar' role='progressbar' style='width: 0%' aria-valuenow='0' aria-valuemin='0' aria-valuemax='100'>
-
                     </div>
                 </div>
           </div>

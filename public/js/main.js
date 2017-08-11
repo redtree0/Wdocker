@@ -72,6 +72,7 @@ var main = (function(){
               settings.connect.$connectDropDown = $("#connectDropDown");
               settings.connect.$whoisConnected = $(".whoisConnected");
               settings.connect.$connectButton = $(".connectButton");
+              settings.connect.$status = $(".status");
 
               self.connectDocker();
             }
@@ -118,16 +119,26 @@ var main = (function(){
           });
         },
         initTable: function(){
+          if(settings.table.hasOwnProperty("main")){
 
-          var self = settings.table.main;
-          var mainTable =  settings.mainTable;
-          mainTable.initUrlTable(self.jsonUrl, true);
-          if(self.hasOwnProperty("hideColumns")){
-            mainTable.hideColumns(self.hideColumns);
+              var self = settings.table.main;
+              var mainTable =  settings.mainTable;
+              // console.log(self);
+              // console.log(main);
+              if(self.hasOwnProperty("isExpend")){
+                mainTable.initUrlTable(self.jsonUrl, self.isExpend);
+              }else {
+                mainTable.initUrlTable(self.jsonUrl, false);
+              }
+              if(self.hasOwnProperty("hideColumns")){
+                mainTable.hideColumns(self.hideColumns);
+              }
+              mainTable.checkAllEvents();
+              mainTable.clickRowAddColor("danger");
+              if(self.hasOwnProperty("clickRow")){
+                self.$table.on("click-row.bs.table", self.clickRow );
+              }
           }
-          mainTable.checkAllEvents();
-          mainTable.clickRowAddColor("danger");
-
           if(settings.table.hasOwnProperty("sub")){
             var self = settings.table.sub;
             var subTable =  settings.subTable;
@@ -149,6 +160,20 @@ var main = (function(){
 
             if(self.hasOwnProperty("initDropdown")){
               self.initDropdown(self);
+            }
+            if(self.hasOwnProperty("more")){
+              self.more.$moreForm.hide();
+              self.more.$less.hide();
+              self.more.$more.click((e)=>{
+                self.more.$moreForm.show();
+                self.more.$more.hide();
+                self.more.$less.show();
+              });
+              self.more.$less.click((e)=>{
+                self.more.$moreForm.hide();
+                self.more.$more.show();
+                self.more.$less.hide();
+              })
             }
 
             popup.appendButton('Create', 'btn-primary create',
@@ -196,6 +221,22 @@ var main = (function(){
          client.sendEvent("GetThisDocker", {"docker" : self.dockerinfo}, (data)=>{
               self.$whoisConnected.text(data);
          });
+         setInterval(
+            ()=>{
+              var data = {
+                "ip" : self.$whoisConnected.text(),
+                "docker" : self.dockerinfo
+              }
+           console.log(data);
+           client.sendEvent("IsConnected",  data, (data)=>{
+             if(data){
+                  self.$status.text("Connected");
+             }else {
+                  self.$status.text("Disconnected");
+             }
+           });
+         }
+         , 120000); // 2ms 120000
 
         self.$connectButton.click((e)=>{
             //  e.preventDefault();
@@ -211,7 +252,13 @@ var main = (function(){
                }
                if(settings.hasOwnProperty("mainTable")){
 
-                 client.sendEventTable("ConnectDocker", settings.mainTable, data);
+                 client.sendEventTable("ConnectDocker", settings.mainTable, data, (data)=>{
+                   if(data.err){
+                     settings.connect.$status.text("Disconnected");
+                   }else {
+                     settings.connect.$status.text("Connected");
+                   }
+                 });
 
                }else {
                  client.sendEvent("ConnectDocker",  data, (data)=>{console.log(data);});

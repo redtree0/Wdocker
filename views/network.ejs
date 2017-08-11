@@ -5,6 +5,8 @@
   <% include ./partials/head %>
   <!-- 스크립트 -->
   <script src='/myapp/js/bundle/network.bundle.js'></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.10/jquery.mask.js"></script>
+  
 
 </head>
 
@@ -45,10 +47,10 @@
 
                     <table data-toolbar="#toolbar"  data-pagination="true" class="table table-striped jsonTable"> </table>
 
-                    <button id="connect" type="button" class="btn btn-success ctlbtn">
+                    <button id="connect" type="button" class="btn btn-success">
                       <span class="glyphicon glyphicon-log-in"></span>
                       Connect</button>
-                    <button id="disconnect" type="button" class="btn btn-default ctlbtn">
+                    <button id="disconnect" type="button" class="btn btn-default">
                       <span class="glyphicon glyphicon-log-out"></span>Disconnect</button>
                 </div>
 
@@ -85,10 +87,37 @@
               </label>
             </div>
             <div class="form-group">
-              <label for="options" class="col-sm-2 control-label">Options : </label>
-              <div class="col-sm-10">
-                <input type="text" class="form-control" id="options" placeholder="options">
-              </div>
+              <label for="internal" class="col-sm-2 control-label">Ingress : </label>
+              <label class="checkbox-inline">
+                <input type="checkbox" id="ingress" data-toggle="toggle" data-on="true"
+                data-off="false" data-onstyle="success" data-offstyle="danger"></input>
+              </label>
+            </div>
+            <button type="button" class="btn btn-primary" id ="more">
+              <span class="glyphicon glyphicon-plus"></span>
+              More</button>
+            <button type="button" class="btn btn-danger" id ="less">
+                <span class="glyphicon glyphicon-minus"></span>
+               Less</button>
+            <div class="moreForm">
+                  <div class="form-group">
+                    <label for="options" class="col-sm-2 control-label">IPRange : </label>
+                    <div class="col-sm-10">
+                      <input type="text" class="form-control ip_address" id="ipRange" placeholder="xxx.xxx.xxx.xxx/subnet">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="options" class="col-sm-2 control-label">Subnet : </label>
+                    <div class="col-sm-10">
+                      <input type="text" class="form-control ip_address" id="subnet" placeholder="xxx.xxx.xxx.xxx/subnet">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="options" class="col-sm-2 control-label">Gateway : </label>
+                    <div class="col-sm-10">
+                      <input type="text" class="form-control ip_address" id="gateway" placeholder="xxx.xxx.xxx.xxx">
+                    </div>
+                  </div>
             </div>
           </form>
 

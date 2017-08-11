@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <% include ./partials/head %>
+    <script src='/myapp/js/bundle/task.bundle.js'></script>
+  </head>
+  <body>
+    <% include ./partials/topnav %>
+    <div class="container-fluid">
+          <div class="row">
+            <% include ./partials/nav %>
+            <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+              <div class="row placeholders">
+                <table id="ctable" data-pagination="true" class="table table-striped jsonTable">
+                </table>
+                <div class="dockerNode row">
+                  <div class="alert alert-success" role="alert">
+                        <div class="alert alert-info" role="alert">...</div>
+                  </div>
+
+                  <div class="alert alert-warning" role="alert">...</div>
+                  <div class="alert alert-danger" role="alert">...</div>
+                </div>
+              </div>
+            </div>
+          </div>
+    </div>
+
+  </body>
+</html>

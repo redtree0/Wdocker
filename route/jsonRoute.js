@@ -76,7 +76,13 @@
   router.get( '/task/data.json' , (req, res) => {
     p.task.getAllLists({}, resCallback.bind(null, res));
   });
-  
+
+  router.get( '/task/data/:id' , (req, res) => {
+    var id = req.params.id;
+
+    p.task.inspect({id : id}, resCallback.bind(null, res));
+  });
+
   router.get( '/node/data.json' , (req, res) => {
       p.node.getAllLists({}, resCallback.bind(null, res));
   });

@@ -78,6 +78,8 @@ const columns = [{
 
 $(function(){
 
+  $('.ip_address').mask('0ZZ.0ZZ.0ZZ.0ZZ/00', { translation: { 'Z': { pattern: /[0-9]/, optional: true } } });
+
   var $all = {};
   $all.init = function(){
     var self = this;
@@ -96,12 +98,20 @@ $(function(){
   };
   $all.form.getSettingValue = function(self) {
     var self = self.data ;
-
-    return {
+    var opts = {
       Name : self.$name.val(),
       Driver : self.$driver.text().trim(),
       internal : self.$internal.prop('checked')
+    };
+
+    if(self.$ipRange !== null && self.$subnet !== null && self.$gateway !== null){
+      opts.ipRange = self.$ipRange.val();
+      opts.subnet = self.$subnet.val();
+      opts.gateway = self.$gateway.val();
     }
+
+    return opts;
+
   };
   $all.form.create = {};
   $all.form.create.data = {
@@ -110,7 +120,10 @@ $(function(){
     $driver : $('#driverDropDown'),
     $internal : $("#internal"),
     $container : $("#containerDropDown"),
-    $containerMenu : $("#containerMenu")
+    $containerMenu : $("#containerMenu"),
+    $ipRange : $("#ipRange"),
+    $subnet : $("#subnet"),
+    $gateway : $("#gateway")
   };
   $all.form.create.formName = "네트워크 생성";
   $all.form.create.formEvent = "CreateNetwork";
@@ -131,6 +144,12 @@ $(function(){
 
     return initDropdownArray(data, $contextMenu, $dropDown);
   }
+  $all.form.create.more = {
+    $more : $("#more"),
+    $less : $("#less"),
+    $moreForm : $(".moreForm")
+  }
+
   $all.connect = {};
   $all.connect.dockerinfo = "network";
   $all.table = {};
@@ -138,7 +157,8 @@ $(function(){
       "$table" : $(".jsonTable"),
       "hideColumns" : ["EnableIPv6", "Labels", "IPAM", "Containers", "Options", "Created", "Id"],
       "columns" : columns,
-      "jsonUrl" : '/myapp/network/data.json'
+      "jsonUrl" : '/myapp/network/data.json',
+      isExpend : false
     };
 
   $all.event = {};

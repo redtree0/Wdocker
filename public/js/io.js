@@ -61,12 +61,14 @@ var clientsocket = (function clientsocket(io, $body) {
           self.$body.spinStart();
 
           return self.sendEvent(eventName, data, (data)=>{
-            console.log("getData");
             (self.$body).spinStop();
             table.reload();
-            self.completeEvent(data, callback);
-            // callback;
+            self.completeEvent(data);
+            if(typeof callback !== undefined && typeof callback === "function") {
+              callback(data);
+            }
           });
+
 
     };
 

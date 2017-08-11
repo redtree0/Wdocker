@@ -248,6 +248,51 @@
   image.remove = function (data, callback) {
        this.doTask(data, callback,  "remove");
   };
+
+  image.push = function (data, callback) {
+    var self = this;
+        var opts =  {
+        //  "X-Registry-Auth" :,
+         name : "commandx0/test",
+         tag : "latest"
+       };
+       var auth = {
+          "username": "commandx0",
+          "password": "doubles9",
+          "email": "kimcc000@naver.com",
+          "serveraddress": "https://index.docker.io/v1/"
+        }
+        // self.docker.checkAuth({
+        //   "username": "commandx0",
+        //   "password": "doubles9",
+        //   "email": "kimcc000@naver.com",
+        //   "serveraddress": "https://index.docker.io/v1/"
+        // }, (err,data)=>{
+        //   console.log(err);
+        //   console.log(data);
+        // }); RepoTags[0]
+        var image = self.docker.getImage(data[0].RepoTags[0]);
+
+        image.push(opts,
+        function(err, stream) {
+          // console.log(stream);
+          if (err) return console.log(err);
+          var docker = require("./docker")();
+          docker.modem.followProgress(stream, onFinished, onProgress);
+
+           function onFinished(err, output) {
+             console.log("onFinished");
+            //  server.sendEvent("progress", true);
+
+           }
+           function onProgress(event) {
+                console.log(event);
+                // server.sendEvent("progress", event);
+            }
+        },auth);
+      //  this.doTask(data, callback, opts ,"push");
+  };
+
   image.create = function (data,  callback) {
 
     data.forEach( (images) => {
@@ -256,8 +301,8 @@
       (self.docker).createImage({ "fromImage" : images.name , "tag" : "latest"},
           callback);
     });
-
   };
+
   image.build = function(data, callback) {
       var self = this;
       console.log(data);
@@ -301,49 +346,30 @@
 
     var settings = Object.create(test);
 
-    settings.get = function (data, callback) {
-      var lists = [];
-      for(var i in data) {
-        var opts = {
-          host : data[i].ip,
-          port : data[i].port
-        }
-        lists.push(opts);
-      }
-      return lists;
-    }
     settings.ping = function (data, callback) {
-      // console.log(data);
-      var self = this;
-      var lists = self.get(data);
 
-      for (var i in lists) {
-        var docker = require("./docker")(lists[i]);
-        console.log(docker);
-  			docker.ping((err,data)=>{
-          console.log(err);
-          console.log(data);
+      if(data.hasOwnProperty("host") && data.hasOwnProperty("port")){
+        var docker = require("./docker")(data);
+        docker.ping((err,data)=>{
+
           callback(err, data);
-        })
+        });
+      }else {
+        callback({data : "IP or Port is null"});
       }
+
     };
 
     settings.delete = function (data, callback) {
-      // console.log(data);
-      var self = this;
-      // var lists = self.get(data);
-      var lists = data;
-      for (var i in lists) {
+        var self = this;
         var dbLists = require("./mongo.js");
 
-        dbLists.docker.remove({ _id: lists[i]._id }, function(err, output){
+        dbLists.docker.remove(data, function(err, output){
             if(err) {
-              console.log(err);
+              callback(err);
             }
-
             callback(true);
         });
-      }
     };
 
     settings.connectDocker = function (data, callback) {
@@ -531,7 +557,9 @@
     task.getInfo = "getTask";
     task.getLists = "listTasks";
 
-
+    task.inspect = function(data, callback){
+      this.doTask(data, callback, "inspect");
+    }
 
 
 

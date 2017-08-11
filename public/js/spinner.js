@@ -14,7 +14,8 @@
    $.fn.spinStart = function() {
      this.each(function() {
        var $this = $(this), data = $this.data();
-
+       console.log($this);
+       console.log(data.spinner);
        if (data.spinner) {
          data.spinner.stop();
          delete data.spinner;
@@ -26,8 +27,12 @@
      return this;
    };
 
-   $.fn.spinStop = function stopMe(){
-     $(this).data().spinner.stop();
+   $.fn.spinStop = function (){
+      var $this = $(this), data = $this.data();
+      if (data.spinner) {
+        data.spinner.stop();
+        // $(this).data().spinner.stop();
+      }
      // $('#'+id).data('spinner').stop();
    }
  });

@@ -102,7 +102,7 @@ $(function(){
 
 
   $all.form.completeEvent = function(data, callback){
-    console.log(arguments);
+    // console.log(arguments);
     if(hasValue(data)){
       return callback(data.msg);
     }
@@ -116,6 +116,7 @@ $(function(){
     hideColumns : ["Id", "ImageID", "Ports", "Mounts", "HostConfig", "NetworkingSettings"],
     columns : columns,
     jsonUrl : '/myapp/image/data.json',
+    isExpend : false
   };
   $all.table.sub = {
     $table : $(".dataTable"),
@@ -131,6 +132,12 @@ $(function(){
   $all.event.remove = {
       $button : $(".remove"),
       eventName : "RemoveImages",
+      clickEvent : clickDefault
+  };
+
+  $all.event.push = {
+      $button : $(".push"),
+      eventName : "PushImages",
       clickEvent : clickDefault
   };
   //

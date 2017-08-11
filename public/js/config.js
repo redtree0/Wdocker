@@ -12,6 +12,12 @@ var config = (function(){
         "OpenStdin": true,
         "StdinOnce": true,
          "HostConfig" : {
+          //  "Binds" : [], /// volume-name:container-dest
+          "Mounts" :[{
+              "target" : "",  // container Path
+              "Source" : "", // volume_name
+              "Type" : "volume"
+          }],
            "LogConfig": {
                 "Type": "json-file",
                 "Config": {
@@ -32,8 +38,17 @@ var config = (function(){
     opts.Image = filter.Image;
     opts.name = filter.name;
     opts.Cmd = [ filter.Cmd];
+    if(filter.hasOwnProperty("volume") && filter.hasOwnProperty("containerDest") ){
+      console.log("k");
+      opts.HostConfig.Mounts = [{
+          "target" : filter.containerDest,
+          "Source" : filter.volume,
+          "Type" : "volume"
+      }];
+    }
+    console.log(opts);
 
-    console.log(portArray);
+
     for ( var i in portArray) {
       var portinfo = portArray[i].containerPort +"/"+ portArray[i].protocol;
       opts.ExposedPorts[portinfo] = {};
@@ -49,14 +64,14 @@ var config = (function(){
           "Ingress" : false,
           "Attachable" : false,
           "IPAM" : {
-            // "Config": [
-            //       {
-            //           // "Subnet" : "",
-            //           // "IPRange" : "",
-            //           // "Gateway" : ""
-            //       }
-            //     ]
-                // ,
+            "Config": [
+                  {
+                      // "Subnet" : "",
+                      // "IPRange" : "",
+                      // "Gateway" : ""
+                  }
+                ]
+                ,
                 "Options" : {
                   // "parent" : "wlan0"
                 }
@@ -80,6 +95,11 @@ var config = (function(){
     opts.Name = filter.Name;
     opts.Driver = filter.Driver;
     opts.internal = filter.internal;
+    opts.IPAM.Config = [{
+      "Subnet" : filter.subnet,
+      "IPRange" : filter.ipRange,
+      "Gateway" : filter.gateway
+    }]
   }
 
   var image = {
