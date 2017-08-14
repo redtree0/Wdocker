@@ -453,6 +453,8 @@ var settings = function(server){
 	server.listen('ConnectDocker', function(data, fn) {
 
 		// console.log(getServerIp());
+		var type = (data.docker);
+		console.log(data);
 		if(data.ip === getServerIp()) {
 			var docker = defaultDocker;
 			p[data.docker].docker = docker;
@@ -471,7 +473,7 @@ var settings = function(server){
 						return fn({err : err.code});
 					}else {
 						var docker = p.settings.setDocker(opts);
-						p[data.docker].docker = docker;
+						p[type].docker = docker;
 						return fn(true);
 					}
 				});
@@ -570,14 +572,14 @@ var swarm = function(server){
 }
 
 var node = function(server){
-	server.listen("StartNode", function(data, fn){
-		// var opts = {force : data};
-		// console.log(data);
-		p.node.start(data);
-		// mongo.system.show();
-		// p.node.start(data, fn);
-		// mongo.system.find()
-	});
+	// server.listen("StartNode", function(data, fn){
+	// 	// var opts = {force : data};
+	// 	// console.log(data);
+	// 	p.node.start(data);
+	// 	// mongo.system.show();
+	// 	// p.node.start(data, fn);
+	// 	// mongo.system.find()
+	// });
 
 	server.listen("StopNode", function(data, fn){
 		// var opts = {force : data};

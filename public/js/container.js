@@ -1,8 +1,6 @@
 // client index.js
 'use strict';
 
-// console.log(socket);
-// var a = new t(socket);
 const columns = [{
       checkbox: true,
       title: 'Check'
@@ -57,18 +55,28 @@ const columns = [{
   }, {
       field: 'Mounts',
       title: 'Mounts'
+  }, {
+      field: 'Attach',
+      title: '컨테이너 접속',
+      formatter : function (value , row, index){
+        var button = "<button type='button' class='btn btn-success attach'>Attach</button>";
+        return button
+      }
   }];
 
 
 $(function(){
   var $all = {};
-  $all.init = function(){};
+  $all.init = function(){
+    $("#terminal").hide();
+  };
   $all.form = {};
   $all.form.$form = $("#hiddenForm");
   $all.form.settingMethod = {
     get : "getContainer",
     set : "setContainer"
   };
+
   $all.form.getSettingValue = function(self) {
     var self = self.data ;
 
@@ -81,11 +89,12 @@ $(function(){
       // opts.Mounts = [ self.$volume.text().trim + ":" + self.$containerDest];
       opts.volume = self.$volume.text().trim();
       opts.containerDest = self.$containerDest.val();
-      console.log(opts);
+      // console.log(opts);
 
     }
     return opts;
   }
+  $all.form.formName = "컨테이너 생성";
   $all.form.create = {};
   $all.form.create.data = {
     $imageMenu : $("#imageMenu"),
@@ -97,7 +106,6 @@ $(function(){
     $containerDest : $("#containerDest")
   };
   $all.form.create.$newForm =  $(".newForm");
-  $all.form.formName = "컨테이너 생성";
   $all.form.create.formEvent = "CreateContainer";
   $all.form.create.portlists = [];
   $all.form.create.$portAdd = $(".portAdd");
@@ -134,10 +142,35 @@ $(function(){
   $all.table = {};
   $all.table.main = {
     $table : $(".jsonTable"),
-    hideColumns : ["Id", "ImageID", "Ports", "Mounts", "HostConfig", "NetworkingSettings"],
+    hideColumns : ["Id", "ImageID", "Ports", "Mounts", "HostConfig", "NetworkingSettings", "Status"],
     columns : columns,
     jsonUrl : '/myapp/container/data.json',
-    isExpend : true
+    isExpend : true,
+    clickRow : function  (e, row, $element, field) {
+
+      if(field === "Attach"){
+          if(row.State !== "running" && $("#terminal").is(":visible")){
+            $("#terminal").hide();
+          }
+          else if($element.find(".exit").length > 0){
+            $("#terminal").hide();
+            $element.find(".exit").attr({
+              class : "btn btn-success attach"
+            }).text("Attach");
+            if($terminal !== null){
+              $terminal.destroy();
+            }
+          }
+          else if(row.State === "running" ){
+              $("#terminal").show();
+              terminal(row.Id);
+              $element.find(".attach").attr({
+                class : "btn btn-danger exit"
+              }).text("exit");
+
+        }
+      }
+    }
   };
 
   $all.event = {};
@@ -218,5 +251,71 @@ $(function(){
      }];
      containerTable.expandRow(expandinfo);
 
+     var client = main.getSocket();
+     var $terminal = null;
 
+     client.listen('stdout', function(data) {
+       $terminal.echo(String(data));
+     });
+     client.listen('stderr', function(data) {
+       $terminal.error(String(data));
+     });
+     client.listen('disconnect', function() {
+       $terminal.disable();
+     });
+     client.listen('enable', function() {
+       $terminal.enable();
+     });
+     client.listen('disable', function(data) {
+       $terminal.disable();
+     });
+
+     function terminal(containerId){
+
+       function userlogin(name, password, callback){
+           if(name === "pirate"){
+               callback("some token");
+           } else {
+               callback(false);
+           }
+       }
+
+        $terminal =  $("#terminal").terminal((command, term) => {
+         console.log(containerId);
+         console.log(command);
+         client.sendEvent('stdin', command);
+         var cmd = $.terminal.parse_command(command);
+         console.log(cmd);
+         return ;
+
+       }, {
+         login : userlogin,
+         prompt: containerId + " >",
+
+         greetings: false,
+         history : true,
+         exit: true,
+         onInit: function(term){
+           term.echo("컨테이너 접속 완료");
+
+           client.sendEvent('stdin', "docker attach " + containerId);
+         },
+         onBeforeLogin: function(term){
+          //  console.log("before login");
+          //  console.log(term);
+         },
+         onBeforeCommand : function(term){
+          //  console.log(term);
+         },
+         onExit : function(term){
+          //  console.log("exit");
+          client.sendEvent('stdin', "exit");
+          containerTable.reload();
+          term.destroy();
+           $("#terminal").hide();
+         }
+       });
+
+
+     }
 });

@@ -5,30 +5,22 @@
   var docker = require('../docker')();
   var p = require("../p");
 
-  // function promiseTojson(callback, res, opts){
-  //   callback.then( (resultJson) => {
-  //     res.setHeader("Content-Type", "application/json");
-  //
-  //     if(opts) {
-  //       var resdata = resultJson[opts];
-  //     }else {
-  //         var resdata  = resultJson;
-  //     }
-  //     if( resdata === null ){
-  //         res.json(false);
-  //     }
-  //     res.json(resdata);
-  //   });
-  // }
-  router.use(function timeLog(req, res, next) {
-    console.log('Time: ', Date.now());
-    res.setHeader("Content-Type", "application/json");
 
-    next();
+  router.use(function timeLog(req, res, next) { /// 라우터 요정 왔을때 언제 도달했는지 확인
+    console.log('Time: ', Date.now());  ///  시간 로깅
+    res.setHeader("Content-Type", "application/json");  /// application/json 헤더 설정
+
+    next(); /// 다음 라우터로 요청 넘김
   });
 
 
-
+  /** @method  - resCallback
+  *  @description
+  *  @param {Object} res - Express res 객체
+  *  @param {Object} opts -
+  *  @param {Object} json - json
+  *  @return {Object} res.json
+  */
   function resCallback(res, opts, json){
     var data = null;
 
@@ -36,6 +28,7 @@
         json = opts;
         opts = null;
         data = json;
+        console.log(data);
     }else {
        data = json[opts];
     }
@@ -43,28 +36,30 @@
     if( data === null ){
           data = false;
     }
-    res.json(data);
+    return  res.json(data);
+
   };
+
+
   router.get( '/container/data.json' , (req, res) => {
         p.container.getAllLists({all: true}, resCallback.bind(null, res));
   });
 
   router.get( '/network/data.json' , (req, res) => {
+    console.log("network/data");
+    res.setHeader("Content-Type", "application/json");  /// application/json 헤더 설정
+
         p.network.getAllLists({}, resCallback.bind(null, res));
   });
-  //
-  // router.get( '/network/data/:id' , (req, res) => {
-  //       var id = req.params.id;
-  //
-  //       p.network.getAllLists({"Id" : id}, resCallback.bind(null, res));
-  // });
 
   router.get( '/image/data.json' , (req, res) => {
         p.image.getAllLists({}, resCallback.bind(null, res));
   });
+
   router.get( '/volume/data.json' , (req, res) => {
       p.volume.getAllLists({}, resCallback.bind(null, res, "Volumes"));
   });
+
   router.get( '/swarm/data.json' , (req, res) => {
     // p.swarm.getAllLists(null, resCallback.bind(null, res));
     docker.swarmInspect().then(resCallback.bind(null, res));
@@ -79,7 +74,6 @@
 
   router.get( '/task/data/:id' , (req, res) => {
     var id = req.params.id;
-
     p.task.inspect({id : id}, resCallback.bind(null, res));
   });
 
@@ -175,4 +169,6 @@
 
     res.json(cpulist);
   });
+
+
 module.exports = router;

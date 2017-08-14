@@ -68,7 +68,7 @@ $(function() {
   }, {
       login : userlogin,
       prompt: defaultprompt,
-      greetings: 'Welcome to the web shell',
+      greetings: 'Welcome to the web shell!!!',
       history : true,
       exit: true
   });

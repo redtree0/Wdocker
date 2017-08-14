@@ -55,86 +55,181 @@ const nodeColumns = [{
       title: 'Check'
   },{
       field: 'ID',
-      title: 'ID'
+      title: 'Node ID',
+      halign : "center",
+      align : "center"
   }, {
       field: 'CreatedAt',
-      title: '생성일'
+      title: '생성일',
+      halign : "center",
+      align : "center"
   }, {
       field: 'Spec.Role',
-      title: 'Role'
+      title: 'Role',
+      halign : "center",
+      align : "center"
   }, {
       field: 'Version.Index',
-      title: '버전'
+      title: '버전',
+      halign : "center",
+      align : "center"
   }, {
       field: 'Spec.Availability',
-      title: 'Availability'
+      title: 'Availability',
+      halign : "center",
+      align : "center"
   }, {
       field: 'Description.Hostname',
-      title: 'Hostname'
+      title: 'Hostname',
+      halign : "center",
+      align : "center"
   }, {
       field: 'Description.Platform.Architecture',
-      title: 'Architecture'
+      title: 'Architecture',
+      halign : "center",
+      align : "center"
   }, {
       field: 'Description.Platform.OS',
-      title: 'OS'
+      title: 'OS',
+      halign : "center",
+      align : "center"
   }, {
       field: 'ManagerStatus.Addr',
-      title: 'Manager IP'
+      title: 'Manager IP',
+      halign : "center",
+      align : "center"
   }, {
       field: 'Status.State',
-      title: '상태'
+      title: '상태',
+      halign : "center",
+      align : "center"
   }, {
       field: 'Status.Addr',
-      title: '호스트 IP'
+      title: '호스트 IP',
+      halign : "center",
+      align : "center"
   }];
 
 
 $(function(){
     $('.ip_address').mask('0ZZ.0ZZ.0ZZ.0ZZ', { translation: { 'Z': { pattern: /[0-9]/, optional: true } } });
+    var $all = {};
+    $all.init = function(){
+        initDropdownArray(["Active", "Pause", "Drain"], $(".dropdown-menu") , $("#availability"));
 
-    var socket = io();
-    var Socket = require("./io");
-    var client = new Socket(socket, $('body'));
-    var spin = require("./spinner");
-    var table = require("./table.js");
-    var dialog = require("./dialog.js");
-    var $node = $("#nodeTable");
-    var nodeTable = new table($node, nodeColumns);
+          $.getJSON('/myapp/swarm/data.json', function(json, textStatus) {
+            function addRowText( _class,  _text, _id){
+              return $('<div/>', { class: _class, text: _text, id : _id  });
+            }
+            function addNewRow( _id ){
+              return $('<div/>', { class: "row", id : _id });
+            }
 
-    nodeTable.initUrlTable('/myapp/node/data.json', false );
-    nodeTable.checkAllEvents();
-    nodeTable.clickRowAddColor("danger");
+            var indexCol = "col-md-2";
+            var dataCol = "col-md-10";
 
-    var $swarm = $("#swarmTable");
-    var swarmTable = new table($swarm, swarmColumns);
-
-
-    swarmTable.initUrlTable('/myapp/settings/data.json', false );
-    swarmTable.checkAllEvents();
-    swarmTable.clickRowAddColor("danger");
-
-    swarmTable.$table.on("post-body.bs.table" , function(){
-      $('.joinType').bootstrapToggle({
-          on: 'Manager',
-          off: 'Worker',
-          onstyle : 'info',
-          offstyle : 'defalt'
-        });
-        $('.leaveType').bootstrapToggle({
-            on: 'Force',
-            off: 'Unforce',
-            onstyle : 'danger',
-            offstyle : 'default'
+            $(".token").append(addNewRow("manager"));
+            $("#manager").append(createElement("<button/>", indexCol + " btn btn-primary", "Manager", "Manager"));
+            $("#manager").append(addRowText(dataCol, json.JoinTokens.Manager, "managerToken"));
+            $(".token").append(addNewRow("worker"));
+            $("#worker").append(createElement("<button/>", indexCol + " btn btn-default", "Worker", "Worker"));
+            $("#worker").append(addRowText(dataCol, json.JoinTokens.Worker, "workerToken"));
           });
+    };
+
+
+    $all.table = {};
+    $all.table.main = {
+      $table : $("#nodeTable"),
+      columns : nodeColumns,
+      hideColumns : ["CreatedAt"],
+      jsonUrl : '/myapp/node/data.json',
+      isExpend : false
+    };
+    $all.table.sub = {
+      $table : $("#swarmTable"),
+      columns : swarmColumns,
+      jsonUrl : '/myapp/settings/data.json',
+    }
+    $all.event = {};
+    function clickDefault(client, eventName, table){
+      return function(){
+        client.sendEventTable(eventName, table);
+      };
+    }
+
+    $all.event.remove = {
+        $button : $(".delete"),
+        eventName : "RemoveNode",
+        clickEvent : clickDefault
+    };
+
+    $all.event.update = {
+        $button : $(".update"),
+        eventName : "RemoveNode",
+        clickEvent : function(client, eventName, table){
+          var opts = {
+              "lists" : table.checkedRowLists,
+              "Availability" : $("#availability").text().trim()
+          };
+          return function(){
+            client.sendEventTable(eventName, table, opts);
+          }
+        }
+    };
+
+    // $(".init").click((e)=>{
+    //   e.preventDefault();
+    //   var $swarmPort = $("#swarmPort");
+    //   client.sendEvent("swarmInit" ,$swarmPort.val(), ()=>{});
+    // });
+    // $(".update").click((e)=>{
+    //   var opts = {
+    //     "lists" : nodeTable.checkedRowLists,
+    //     "Availability" : $("#availability").text().trim()
+    //   };
+    //   console.log($("#availability").text().trim());
+    //     client.sendEventTable("UpdateNode", nodeTable, opts);
+    // });
+
+    //
+    $all.completeEvent = function(data, callback){
+      console.log(arguments);
+      if(hasValue(data)){
+        var finished = new dialog("NODE", JSON.stringify(data), $("body"));
+        finished.setDefaultButton('Close[Enker]', 'btn-primary create');
+        finished.show();
+        callback;
+      }
+    };
+
+      var main = require("./main.js");
+      main.init($all);
+
+
+  var swarmTable = main.getSubTable();
+  var client = main.getSocket();
+
+  swarmTable.$table.on("post-body.bs.table" , function(){
+    $('.joinType').bootstrapToggle({
+      on: 'Manager',
+      off: 'Worker',
+      onstyle : 'info',
+      offstyle : 'defalt'
     });
+    $('.leaveType').bootstrapToggle({
+      on: 'Force',
+      off: 'Unforce',
+      onstyle : 'danger',
+      offstyle : 'default'
+    });
+  });
 
     swarmTable.$table.on("click-row.bs.table", function (e, row, $element, field) {
       var parTr =  $element.closest('[data-index]').data('index');
       var joinType = ($("#joinType"+parTr).prop("checked") ? "manager" : "worker");
       var leaveType = ($("#leaveType"+parTr).prop("checked") ? true : false  );
-      // console.log($element);
-      // console.log(field);
-      // console.log($element.prop("button"));
+
       if(field === "join"){
         if( joinType !== null){
           var opts = {
@@ -155,63 +250,26 @@ $(function(){
       }
     });
 
+  //
+  //
+
+  //
+  // $(".leave").click((e)=>{
+  //   e.preventDefault();
+  //   client.sendEvent("swarmLeave" , true, ()=>{});
+  // });
+  //
+  // $(".start").click((e)=>{
+  //     client.sendEventTable("StartNode", nodeTable);
+  // });
+  //
+  // $(".delete").click((e)=>{
+  //     client.sendEventTable("RemoveNode", nodeTable);
+  // });
+  //
+
+  //
+  //
 
 
-  $(".init").click((e)=>{
-    e.preventDefault();
-    var $swarmPort = $("#swarmPort");
-    client.sendEvent("swarmInit" ,$swarmPort.val(), ()=>{});
-  });
-
-  $(".leave").click((e)=>{
-    e.preventDefault();
-    client.sendEvent("swarmLeave" , true, ()=>{});
-  });
-
-  $(".start").click((e)=>{
-      client.sendEventTable("StartNode", nodeTable);
-  });
-
-  $(".delete").click((e)=>{
-      client.sendEventTable("RemoveNode", nodeTable);
-  });
-
-  $(".update").click((e)=>{
-    var opts = {
-      "lists" : nodeTable.checkedRowLists,
-      "Availability" : $("#availability").text().trim()
-    };
-    console.log($("#availability").text().trim());
-      client.sendEventTable("UpdateNode", nodeTable, opts);
-  });
-
-  initDropdownArray(["Active", "Pause", "Drain"], $(".dropdown-menu") , $("#availability"));
-
-  client.completeEvent = function(data, callback){
-    if(hasValue(data)){
-      var finished = new dialog("노드", data, $("body"));
-      finished.setDefaultButton('Close[Enker]', 'btn-primary create');
-      finished.show();
-      nodeTable.reload();
-      callback;
-    }
-  }
-    $.getJSON('/myapp/swarm/data.json', function(json, textStatus) {
-      function addRowText( _class,  _text, _id){
-        return $('<div/>', { class: _class, text: _text, id : _id  });
-      }
-      function addNewRow( _id ){
-        return $('<div/>', { class: "row", id : _id });
-      }
-
-      var indexCol = "col-md-2";
-      var dataCol = "col-md-10";
-
-      $(".token").append(addNewRow("manager"));
-      $("#manager").append(createElement("<button/>", indexCol + " btn btn-primary", "Manager", "Manager"));
-      $("#manager").append(addRowText(dataCol, json.JoinTokens.Manager, "managerToken"));
-      $(".token").append(addNewRow("worker"));
-      $("#worker").append(createElement("<button/>", indexCol + " btn btn-default", "Worker", "Worker"));
-      $("#worker").append(addRowText(dataCol, json.JoinTokens.Worker, "workerToken"));
-    });
 });

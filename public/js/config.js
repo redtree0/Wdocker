@@ -13,11 +13,13 @@ var config = (function(){
         "StdinOnce": true,
          "HostConfig" : {
           //  "Binds" : [], /// volume-name:container-dest
-          "Mounts" :[{
-              "target" : "",  // container Path
-              "Source" : "", // volume_name
-              "Type" : "volume"
-          }],
+          "Mounts" :[
+          //   {
+          //     "target" : "",  // container Path
+          //     "Source" : "", // volume_name
+          //     "Type" : "" // volume
+          // }
+        ],
            "LogConfig": {
                 "Type": "json-file",
                 "Config": {
@@ -208,6 +210,7 @@ var config = (function(){
       opts.Name = filter.Name;
       opts.TaskTemplate.ContainerSpec.Image = filter.Image;
       opts.TaskTemplate.ContainerSpec.Command = [filter.Command];
+      console.log(filter.Replicas);
       opts.Mode.Replicated.Replicas = filter.Replicas;
       opts.TaskTemplate.Networks = [ {"Target" : filter.Network }] ;
 

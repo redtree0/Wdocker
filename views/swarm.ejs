@@ -20,59 +20,81 @@
               <div class="row placeholders">
                 <div class="container">
 
-                    <div class = "row">
-                          <div class="row">
-                              <div class="col-md-4">
-                                <label for="swarmPort" class="col-sm-2 control-label">swarm Init Port : </label>
-                              </div>
-                              <div class="form-group">
-                                  <div class="col-md-4">
-                                    <input type="text" class="form-control"  name="swarmPort" id="swarmPort">
-                                  </div>
-                              </div>
 
-                            <div class="col-md-4">
-                              <button type="submit" class="btn btn-primary init">Init</button>
-                            </div>
-                          </div>
 
-                      <div class="row">
 
-                          <div class="col-md-8">
-                            <label for="force" class="col-sm-2 control-label">force : </label>
+                    <div class="panel panel-info row">
+                        <div class="panel-heading">
+                            <h4 class ="text-left">Swarm 관리</h4>
+                        </div>
+                        <div class="panel-body">
+
+                                    <div class="form-group row">
+                                        <div class="form-group" >
+                                          <label for="swarmPort" class="col-sm-2 control-label">Swarm Port 초기화</label>
+                                          <div class="col-md-2 form-group">
+                                            <input type="number" class="form-control"  min="1" max="65535" name="swarmPort" id="swarmPort" >
+                                          </div>
+                                          <div class="col-md-2 form-group">
+                                            <button type="submit" class="btn btn-primary init">Init</button>
+                                          </div>
+                                        <div class="form-group">
+                                          <label for="force" class="col-sm-2 control-label">force </label>
+                                          <label class="checkbox-inline">
+                                            <input type="checkbox" id="force" checked data-toggle="toggle" data-on="unforce"
+                                            data-off="force" data-onstyle="success" data-offstyle="danger"></input>
+                                          </label>
+                                          <button class="btn btn-danger leave">Leave</button>
+                                        </div>
+                                      </div>
+
+                                    </div>
+
+                                    <div class = "form-group token">
+                                    </div>
+
+                          <table data-pagination="true" id="swarmTable" class="table table-striped jsonTable"> </table>
+                       </div>
+                     </div>
+
+
+                    <div id="toolbar" class="form-inline row" role="form">
+                      <div class="form-group">
+                        <button class="btn btn-default delete">
+                          <span class="	glyphicon glyphicon-remove"></span></button>
+                      </div>
+                      <div class="form-group" style="border: 0.5px solid #48BAE4; height: auto; padding:1px;">
+                          <div class="form-group">
                             <label class="checkbox-inline">
-                              <input type="checkbox" id="force" checked data-toggle="toggle" data-on="unforce"
-                              data-off="force" data-onstyle="success" data-offstyle="danger"></input>
+                              <input type="checkbox" id="role" checked data-toggle="toggle" data-on="Manager"
+                              data-off="Worker" data-onstyle="primary" data-offstyle="default"></input>
                             </label>
                           </div>
-                          <div class="col-md-4">
-                            <button class="btn btn-danger leave">Leave</button>
+                          <div class="form-group">
+                              <div class="col-sm-2">
+                                <button id="availability" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                  Availability <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                </ul>
+                              </div>
+                          </div>
+                          <div class="form-group">
+                              <button class="btn btn-primary update">update</button>
                           </div>
                       </div>
-
-                    </div>
-                    <div class = "row token">
                     </div>
 
-                    <table data-pagination="true" id="swarmTable" class="table table-striped jsonTable">
-                    </table>
+                    <div class="panel panel-success row">
+                        <div class="panel-heading">
+                            <h4 class ="text-left">Node 관리</h4>
+                        </div>
+                        <div class="panel-body">
+                           <table data-toolbar="#toolbar"  data-pagination="true"  id="nodeTable"  class="table table-striped jsonTable">
+                           </table>
+                       </div>
+                     </div>
 
-                    <label class="checkbox-inline">
-                       <input type="checkbox" id="role" checked data-toggle="toggle" data-on="Manager"
-                       data-off="Worker" data-onstyle="primary" data-offstyle="default"></input>
-                    </label>
-                    <div class="col-sm-2">
-                      <button id="availability" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                         Availability <span class="caret"></span>
-                      </button>
-                      <ul class="dropdown-menu">
-                      </ul>
-                    </div>
-                    <button class="btn btn-success start">Start</button>
-                    <button class="btn btn-primary update">update</button>
-                    <button class="btn btn-danger delete">delete</button>
-                    <table data-pagination="true"  id="nodeTable"  class="table table-striped jsonTable">
-                    </table>
                 </div>
 
 

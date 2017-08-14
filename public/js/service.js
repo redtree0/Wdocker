@@ -44,11 +44,12 @@ $(function(){
   };
   $all.form.getSettingValue = function(getThis) {
     var self = getThis.data;
+    console.log(self.$replicas.val());
     return {
       "Image" : self.$image.text().trim(),
       "Name" : self.$name.val(),
       "Command" : self.$command.val(),
-      "replicas" : self.$replicas.val(),
+      "Replicas" : parseInt(self.$replicas.val()),
       "Network" : self.$network.text().trim()
     }
   };

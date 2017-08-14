@@ -6,7 +6,7 @@
   <!-- 스크립트 -->
   <script src='/myapp/js/bundle/network.bundle.js'></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.10/jquery.mask.js"></script>
-  
+
 
 </head>
 
@@ -29,14 +29,19 @@
                 <button  onclick=" return false;"  type="button" class="btn btn-default  remove">
                   <span class="glyphicon glyphicon-minus"></span></button>
               </div>
-            </div>
               <div  class="btn-group dropdown">
-                  <button id="containerDropDown" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                    Containers <span class="caret"></span>
-                  </button>
-                  <ul class="dropdown-menu" id="containerMenu">
-                  </ul>
+                <button id="containerDropDown" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                  Containers <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" id="containerMenu">
+                </ul>
               </div>
+              <button id="connect" type="button" class="btn btn-success">
+                <span class="glyphicon glyphicon-log-in"></span>
+                Connect</button>
+                <button id="disconnect" type="button" class="btn btn-default">
+                  <span class="glyphicon glyphicon-log-out"></span>Disconnect</button>
+            </div>
 
 
             <div class="panel panel-success row">
@@ -47,11 +52,7 @@
 
                     <table data-toolbar="#toolbar"  data-pagination="true" class="table table-striped jsonTable"> </table>
 
-                    <button id="connect" type="button" class="btn btn-success">
-                      <span class="glyphicon glyphicon-log-in"></span>
-                      Connect</button>
-                    <button id="disconnect" type="button" class="btn btn-default">
-                      <span class="glyphicon glyphicon-log-out"></span>Disconnect</button>
+
                 </div>
 
             </div>
