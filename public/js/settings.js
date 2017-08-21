@@ -33,11 +33,18 @@ const columns = [{
       }
     }];
 
+
 $(function(){
 
       $('.ip_address').mask('0ZZ.0ZZ.0ZZ.0ZZ', { translation: { 'Z': { pattern: /[0-9]/, optional: true } } });
       var $all = {};
-      $all.init = function(){};
+      $all.init = function(){
+            $.getJSON("/myapp/auth/data.json",(data)=>{
+              $("#user").val(data[0].user);
+              $("#password").val(data[0].password);
+              $("#email").val(data[0].email);
+            });
+      };
       // $all.form = {};
       $all.table = {};
       $all.table.main = {
@@ -56,7 +63,6 @@ $(function(){
                   host : row.ip,
                   port : row.port,
                 }
-              console.log(opts);
               client.sendEvent("PING", opts,(data)=>{
                 var finished = null;
                 if(data.err) {
@@ -72,7 +78,6 @@ $(function(){
               var opts = {
                 _id : row._id,
               }
-              console.log(opts);
               client.sendEventTable("DELETE", $(".jsonTable"), opts, (data)=>{
                 var finished = new dialog("삭제", data, $("body"));
                 finished.setDefaultButton('Close[Enker]', 'btn-primary create');
@@ -81,6 +86,7 @@ $(function(){
             }
           }
         };
+
       $all.event = {};
       function clickDefault(client, eventName, table){
         return function(){
@@ -95,5 +101,17 @@ $(function(){
       var main = require("./main.js");
       main.init($all);
 
+      var client = main.getSocket();
+      var dialog = main.getDialog();
+      $("#authCheck").click((e)=>{
+        var opts = {
+          user : $("#user").val(),
+          password : $("#password").val()
+        }
+          client.sendEvent("authCheck", opts, (err, data)=>{
+            var finished = new dialog("작업 완료",  data.Status + data.err, $("body"));
+            finished.show();
+          });
+      });
 
 });

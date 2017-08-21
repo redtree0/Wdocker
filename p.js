@@ -1,4 +1,5 @@
 
+var mongo = require("./mongoController.js");
 
   var p = function( docker){
     this.docker = docker; /// docker modem 겍체 설정
@@ -127,7 +128,7 @@
     */
     this.getAllLists = function (opts, callback){
       var self = this;
-      
+
       if(self.getLists !== null){
         var dockerInfo = self.docker[self.getLists](opts);
       }
@@ -341,13 +342,7 @@
        };
        return list;
      };
-     //  self.list =  function (filters, callback) {
-     //      var self = this;
-     //
-     //      return new Promise(function (resolve, reject) {
-     //          resolve((self.docker).listNetworks(filters));
-     //      });
-     //    }
+
 
      /** @method  - create
      *  @description network 생성
@@ -444,36 +439,33 @@
     */
       self.push = function (data, callback) {
           var opts =  {
-            //  "X-Registry-Auth" :,
             name : "commandx0/test",
             tag : "latest"
           };
-          var auth = {
-            "username": "commandx0",
-            "password": "doubles9",
-            "email": "kimcc000@naver.com",
-            "serveraddress": "https://index.docker.io/v1/"
+
+          if(data){
+            var image = self.docker.getImage(data[0].RepoTags[0]);
+            mongo.auth.show((result)=>{
+              var auth = (result[0]);
+              return image.push(opts,
+                function(err, stream) {
+                  // console.log(stream);
+                  if (err) return console.log(err);
+                  var docker = require("./docker")();
+                  docker.modem.followProgress(stream, onFinished, onProgress);
+
+                  function onFinished(err, output) {
+                    console.log("onFinished");
+                    //  server.sendEvent("progress", true);
+
+                  }
+                  function onProgress(event) {
+                    console.log(event);
+                    // server.sendEvent("progress", event);
+                  }
+                },auth);
+            });
           }
-
-          var image = self.docker.getImage(data[0].RepoTags[0]);
-
-          return image.push(opts,
-              function(err, stream) {
-                // console.log(stream);
-                if (err) return console.log(err);
-                var docker = require("./docker")();
-                docker.modem.followProgress(stream, onFinished, onProgress);
-
-                function onFinished(err, output) {
-                  console.log("onFinished");
-                  //  server.sendEvent("progress", true);
-
-                }
-                function onProgress(event) {
-                  console.log(event);
-                  // server.sendEvent("progress", event);
-                }
-          },auth);
         //  self.doTask(data, callback, opts ,"push");
       };
 
@@ -511,6 +503,7 @@
           context :  dirPath,
           src : [fileName]
         }, {
+          "dockerfile" : fileName,
           "t" : imageTag.toString()
         }, callback);
 
@@ -552,15 +545,7 @@
 
     (function(){
       var self = this;
-      // self.docker.checkAuth({
-      //   "username": "commandx0",
-      //   "password": "doubles9",
-      //   "email": "kimcc000@naver.com",
-      //   "serveraddress": "https://index.docker.io/v1/"
-      // }, (err,data)=>{
-      //   console.log(err);
-      //   console.log(data);
-      // }); RepoTags[0]
+
       /** @method  - ping
       *  @description docker host ping test
       *  @param {Object} data - 설정 데이터
@@ -604,6 +589,12 @@
         return self.setRemoteDocker(data);
       };
 
+      self.authCheck = function(data, callback){
+        mongo.auth.find(data, (result)=>{
+          self.docker.checkAuth(result, callback);
+
+        });
+      }
     }).call(settings);
 
     var swarm = Object.create(test);

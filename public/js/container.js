@@ -239,9 +239,7 @@ $(function(){
     main.init($all);
     var containerTable = main.getMainTable();
 
-    // var $detail = $("#detail");
-    //
-    // containerTable.clickRow($detail);
+
      var expandinfo = [{
        url : "/myapp/container/top/",
        keys : ["Titles", "Processes"]
@@ -318,4 +316,12 @@ $(function(){
 
 
      }
+});
+
+/// backspace 뒤로가기 막기
+$(document).keydown(function(e){
+  history.pushState(null, null, location.href);
+    window.onpopstate = function(event) {
+      history.go(1);
+    };
 });

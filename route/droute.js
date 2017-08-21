@@ -46,8 +46,8 @@
         res.render("node.ejs");
   });
 
-  router.get('/test' , (req, res) => {
-        res.render("test.ejs");
+  router.get('/terminal' , (req, res) => {
+        res.render("terminal.ejs");
   });
 
   router.get('/graph', (req, res) => {
@@ -66,9 +66,22 @@
         res.render("task.ejs");
   });
 
-
   router.get('/settings' , (req, res) => {
         res.render("settings.ejs");
   });
+
+  router.get('/vnc' , (req, res) => {
+    // res.redirect('http://192.168.0.108:3000/myapp/vnc_core.ejs');
+
+        res.render("vnc.ejs");
+  });
+
+  router.get('/vnc_core.ejs' , (req, res) => {
+    // res.redirect('http://192.168.0.108:3000/myapp/vnc_core.ejs');
+
+        res.render("vnc_core.ejs");
+  });
+
+
 
 module.exports = router;

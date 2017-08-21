@@ -3,6 +3,7 @@ var dbLists = require("./mongo.js");
 
 var dockerDB = dbLists.docker;
 var systemDB = dbLists.system;
+var authDB = dbLists.auth;
 
 var mongo = function(db){
   this.db = db;
@@ -24,11 +25,10 @@ mongo.prototype.save = function(data, callback){
   }
   self.instence.save(function(err){
           if(err){
-              // console.error(err);
               return err;
           }
-          // res.render("settings.ejs");
       });
+      callback;
 };
 
 mongo.prototype.create = function(req, res) {
@@ -87,10 +87,12 @@ mongo.prototype.destroy = function(callback) {
 
 var docker = new mongo(dockerDB);
 var system = new mongo(systemDB);
+var auth = new mongo(authDB);
 
 var lists = {
    "docker" : docker,
-   "system" : system
+   "system" : system,
+   "auth" : auth
 };
 
 module.exports = lists;

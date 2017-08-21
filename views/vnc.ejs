@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <% include ./partials/head %>
+
+  </head>
+  <body>
+    <% include ./partials/topnav %>
+    <!-- <script type="text/javascript">
+        $(function () {
+            $('#extFrame').load(function () {
+                var iframeContentWindow = this.contentWindow;
+                var height = iframeContentWindow.$(document).height();
+                this.style.height = height + 'px';
+            });
+        });
+    </script> -->
+
+
+    <div class="container-fluid">
+          <div class="row">
+            <% include ./partials/nav %>
+            <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+              <div class="row placeholders">
+                  <iframe id="extFrame" src="./vnc_core.ejs"
+                  style="display:block; width:75vw; height: 80vh"></iframe>
+              </div>
+            </div>
+          </div>
+    </div>
+
+  </body>
+</html>

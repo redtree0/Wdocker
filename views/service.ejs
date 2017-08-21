@@ -14,7 +14,6 @@
             <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
               <div class="row placeholders">
                 <div class="container">
-                  <% include ./partials/connectDocker %>
 
                       <button type="button" class="btn btn-default btn-lg ctlbtn update">Update</button>
                       <button type="button" class="btn btn-danger btn-lg ctlbtn remove">Remove</button>
@@ -24,12 +23,6 @@
                               <button  onclick=" return false;"  type="button" class="btn btn-info btn-lg newForm">
                                 <span class="glyphicon glyphicon-plus"></span> Plus
                                 </button>
-                              <!-- <button  onclick=" return false;"  type="button" class="btn btn-primary btn-lg start">Start</button>
-                              <button  onclick=" return false;"  type="button" class="btn btn-default btn-lg stop">Stop</button>
-                              <button  onclick=" return false;"  type="button" class="btn btn-success btn-lg pause">Pause</button>
-                              <button  onclick=" return false;"  type="button" class="btn btn-info btn-lg unpause">Unpause</button>
-                              <button  onclick=" return false;"  type="button" class="btn btn-warning btn-lg remove">Remove</button>
-                              <button  onclick=" return false;"  type="button" class="btn btn-danger btn-lg kill">Kill</button> -->
                       </div>
                       <table id="ctable" data-pagination="true" class="table table-striped jsonTable">
                       </table>

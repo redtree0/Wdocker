@@ -497,6 +497,10 @@ var settings = function(server){
 		// // console.log(p[data.docker].getDocker().host);
 		fn(whoisDocker);
 	});
+
+	server.listen('authCheck', function(data, fn) {
+		p.settings.authCheck(data, fn);
+	});
 }
 
 

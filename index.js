@@ -37,6 +37,12 @@ app.use(staticPath, dbRoute);
 
 
 const port = 3000;
+var websockify = require("nodev6-websockify");
+websockify({
+  source: '192.168.0.108:9000',
+  target: '192.168.0.108:5901',
+  web : "./views/"
+});
 const server = app.listen(port, () => {
     console.log("Express server has started on port " + port);
 });

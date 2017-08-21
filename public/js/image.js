@@ -9,10 +9,6 @@
           title: 'RepoTags'
       }
       ,{
-          field: 'Containers',
-          title: 'Containers'
-      }
-      ,{
           field: 'Created',
           title: 'Created'
       },{
@@ -28,14 +24,8 @@
           field: 'RepoDigests',
           title: 'RepoDigests'
       },{
-          field: 'SharedSize',
-          title: 'SharedSize'
-      },{
           field: 'Size',
           title: 'Size'
-      },{
-          field: 'VirtualSize',
-          title: 'VirtualSize'
       }];
       const searchcolumns = [{
               checkbox: true,
@@ -116,7 +106,7 @@ $(function(){
     hideColumns : ["Id", "ImageID", "Ports", "Mounts", "HostConfig", "NetworkingSettings"],
     columns : columns,
     jsonUrl : '/myapp/image/data.json',
-    isExpend : false
+    isExpend : true
   };
   $all.table.sub = {
     $table : $(".dataTable"),
@@ -142,7 +132,6 @@ $(function(){
   };
   //
   $all.completeEvent = function(data, callback){
-    console.log(arguments);
     if(hasValue(data)){
       var finished = new dialog("이미지", JSON.stringify(data), $("body"));
       finished.setDefaultButton('Close[Enker]', 'btn-primary create');
@@ -158,47 +147,52 @@ $(function(){
         var dialog = main.getDialog();
         var searchTable = main.getSubTable();
         var imageTable = main.getMainTable();
+
+
+        imageTable.$table.on("expand-row.bs.table", function (e, index, row, $detail){
+              $detail.append($("#toolbar"));
+        });
         var $msgdiag = $("#msgdiag");
         $msgdiag.hide();
         $(".download").click((e)=> {
-          e.preventDefault();
+              e.preventDefault();
 
 
-        client.completeEvent = function(data, callback){
-             if(hasValue(data)){
+            client.completeEvent = function(data, callback){
+                 if(hasValue(data)){
 
-                  var finished = new dialog("이미지", JSON.stringify(data), $("body"));
-                  finished.setDefaultButton('Close[Enker]', 'btn-primary create');
-                  finished.show();
-                  callback;
-              }
-          }
-          client.sendEventTable("PullImages", searchTable);
-          var $progress = $(".progress-bar");
-          $progress.css("width", '0%');
-          var popup = new dialog("이미지 다운 중", $msgdiag.show(), $("body"));
-          var $status = $("#status");
-          client.listen("progress", (event)=> {
-                if((event.status)){
-                  $status.text(event.status);
-                }
-                if((event.progressDetail)){
-                  var download = event.progressDetail;
-                  if(download.current && download.total){
-                    var percentage = (download.current / download.total) * 100;
-                    var $progress = $(".progress");
-                    if(percentage != NaN) {
-                      $progress.css("width", Math.round(percentage)+ '%');
-                    }
+                      var finished = new dialog("이미지", JSON.stringify(data), $("body"));
+                      finished.setDefaultButton('Close[Enker]', 'btn-primary create');
+                      finished.show();
+                      callback;
                   }
-                }else if (event === true) {
-                    popup.close(5000);
-                    imageTable.reload();
-                }
-            });
+              }
+              client.sendEventTable("PullImages", searchTable);
+              var $progress = $(".progress-bar");
+              $progress.css("width", '0%');
+              var popup = new dialog("이미지 다운 중", $msgdiag.show(), $("body"));
+              var $status = $("#status");
+              client.listen("progress", (event)=> {
+                    if((event.status)){
+                      $status.text(event.status);
+                    }
+                    if((event.progressDetail)){
+                      var download = event.progressDetail;
+                      if(download.current && download.total){
+                        var percentage = (download.current / download.total) * 100;
+                        var $progress = $(".progress");
+                        if(percentage != NaN) {
+                          $progress.css("width", Math.round(percentage)+ '%');
+                        }
+                      }
+                    }else if (event === true) {
+                        popup.close(5000);
+                        imageTable.reload();
+                    }
+                });
 
-            popup.show();
-          });
+                popup.show();
+        });
 
 
 });

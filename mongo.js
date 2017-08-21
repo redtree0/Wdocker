@@ -36,9 +36,17 @@ var system = new Schema({
   // password : String
 });
 
+var auth = new Schema({
+  user : String,
+  password : String,
+  email : String,
+  serveraddress : String
+});
+
 
 
 module.exports = {
   "docker" : mongoose.model('docker', docker),
-  "system" : mongoose.model('system', system)
+  "system" : mongoose.model('system', system),
+  "auth" : mongoose.model('auth', auth)
 } ;

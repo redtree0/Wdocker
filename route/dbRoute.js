@@ -6,6 +6,7 @@ module.exports = function(dbRoute){
   var router = express.Router();
   var docker = dbRoute.docker;
   var system = dbRoute.system;
+  var auth = dbRoute.auth;
   var mongo = require("../mongoController");
 
   router.use(function timeLog(req, res, next) {
@@ -16,29 +17,32 @@ module.exports = function(dbRoute){
   });
 
   router.post('/settings', function(req, res){
-    if(req.body.ip === null || req.body.port === null){
-      if(req.body.ip === getServerIp()){
-
-      }else {
-        res.render("settings.ejs");
-        return false;
-      }
-    }
-  var db = new docker();
-  db.ip = req.body.ip;
-  db.port = req.body.port;
-
-
-  db.save(function(err){
-          if(err){
-              console.error(err);
-              res.render("settings.ejs");
-              return;
-          }
+      if(req.body.ip === null || req.body.port === null){
+        if(req.body.ip !== getServerIp()){
           res.render("settings.ejs");
-      });
+          return false;
+        }
+      }else {
+        var opts = {
+          "ip" : req.body.ip,
+          "port" :  req.body.port
+        }
+        mongo.docker.save(opts, res.render("settings.ejs"));
+      }
   });
 
+    router.post('/auth', function(req, res){
+        if(req.body.user !== null && req.body.password !== null){
+          mongo.auth.destroy(req,res);
+          var opts = {
+            "user" : req.body.user,
+            "password" : req.body.password,
+            "email" : req.body.email,
+            "serveraddress" : "https://index.docker.io/v1/"
+          };
+          mongo.auth.save(opts, res.redirect("/myapp/settings"));
+        }
+    });
 
     function getServerIp() {
   			var os = require("os");
@@ -74,11 +78,18 @@ module.exports = function(dbRoute){
     });
 
   router.get('/settings/data.json', function(req,res){
-        docker.find(function(err, books){
+        docker.find(function(err, db){
             if(err) return res.status(500).send({error: 'database failure'});
-            res.json(books);
+            res.json(db);
         })
-      });
+  });
+
+  router.get('/auth/data.json', function(req,res){
+        auth.find(function(err, db){
+            if(err) return res.status(500).send({error: 'database failure'});
+            res.json(db);
+        })
+  });
 
   router.delete('/settings/:_id', function(req, res){
     // var db = new dockerDB();
