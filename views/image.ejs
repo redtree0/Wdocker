@@ -18,8 +18,7 @@
             <div class="row placeholders">
                 <% include ./partials/connectDocker %>
 
-                  <div id="toolbar" class="form-inline row" role="form">
-                      <div class="form-group">
+                  <div id="toolbar" >
                         <div  class="btn-group" role="group">
                           <button  onclick=" return false;"  type="button" class="btn btn-default newForm">
                             <span class="glyphicon glyphicon-plus"></span>
@@ -27,33 +26,40 @@
                           <button  onclick=" return false;"  type="button" class="btn btn-default  remove">
                             <span class="glyphicon glyphicon-minus"></span></button>
                           </div>
-                      </div>
-                      <div class="form-group" style="border: 0.5px solid #48BAE4; height: auto; padding:1px;">
-                      <div class="form-group">
-                            <button  onclick=" return false;"  type="button" class="btn btn-info  push">
-                              <span class="glyphicon glyphicon-upload"></span>Push</button>
-                      </div>
-                      <div class="form-group">
-                            <input type="text" class="form-control" id="repositoryImage" value=""  placeholder="repository/image">
-                      </div>
-                      <div class="form-group">
-                            <input type="text" class="form-control" id="repositoryTag" value=""  placeholder="tag">
-                      </div>
-                      </div>
-                 </div>
+                  </div>
 
                  <div class="panel panel-success row">
                      <div class="panel-heading">
                          <h4 class ="text-left">Image 관리</h4>
                      </div>
                      <div class="panel-body">
-                        <table data-toolbar="#toolbar" class="table table-striped jsonTable"></table>
+                        <table data-toolbar="#toolbar"  data-pagination="true" class="table table-striped jsonTable"></table>
                     </div>
                   </div>
 
               </div>
           </div>
 
+          <!-- hide -->
+                            <div id="expand">
+                              <div class="form-inline text-left">
+                                  <div class="form-group">
+                                    <input type="text" class="form-control" id="repositoryImage" value=""  placeholder="repository/image">
+                                  </div>
+                                  <div class="form-group">
+                                    <input type="text" class="form-control" id="repositoryTag" value=""  placeholder="tag">
+                                  </div>
+                                  <div class="form-group">
+                                    <button  onclick=" return false;"  type="button" class="btn btn-info  push">
+                                      <span class="glyphicon glyphicon-upload"></span>Push</button>
+                                    </div>
+                                    <div>
+                                      <p><span class="glyphicon glyphicon-exclamation-sign"></span>docker repository로 이미지 올릴 시 이미지 명는 repository계정/image명:태그 순이여야 한다.</p>
+                                    </div>
+
+                                </div>
+                            </div>
+          <!-- hide -->
 <!-- hide -->
           <form class="form-horizontal" id="hiddenForm">
               <div class="form-group">

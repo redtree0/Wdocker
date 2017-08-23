@@ -4,8 +4,8 @@
 <head>
   <% include ./partials/head %>
   <!-- 스크립트 -->
-  <link type="text/css" href="/myapp/css/jquery.terminal.css" rel="stylesheet" />
-  <script src="/myapp/js/jquery.terminal.min.js"></script>
+  <link type="text/css" href="/myapp/lib/css/jquery.terminal.css" rel="stylesheet" />
+  <script src="/myapp/lib/js/jquery.terminal.min.js"></script>
 
   <script src='/myapp/js/bundle/container.bundle.js'></script>
 
@@ -90,6 +90,22 @@
                         </div>
                       </div>
                       <div class="form-group">
+                        <label class="col-sm-2">Label</label>
+                        <br/>
+                          <label for="key" class="col-sm-2 control-label">Key : </label>
+                          <div class="col-sm-2">
+                            <input type="text" class="form-control" id="key" >
+                          </div>
+                          <label for="key" class="col-sm-2 control-label">Value : </label>
+                          <div class="col-sm-2">
+                            <input type="text" class="form-control" id="value" >
+                          </div>
+                          <button class="btn btn-primary labelAdd">Add</button>
+                      </div>
+                      <div class="form-group">
+                        <div class = "labellists"></div>
+                      </div>
+                      <div class="form-group">
                         <label for="containerPort" class="col-sm-2 control-label">Container port : </label>
                         <div class="col-sm-2">
                           <input type="number" class="form-control"  min="1" max="65535" id="containerPort" >
@@ -143,6 +159,17 @@
                                 </div>
                               </div>
 
+                              <hr class="divider">
+                              <div class="form-group">
+                                <label for="volumeDropDown" class="col-sm-2 control-label">Network : </label>
+                                  <div class="col-sm-10 btn-group  btn-block">
+                                    <button id="networkDropDown" type="button" class="btn btn-default dropdown-toggle btn-block"  data-toggle="dropdown" aria-expanded="false">
+                                       Networks <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu col-xs-12" id="networkMenu">
+                                    </ul>
+                                  </div>
+                             </div>
                         </div>
                   </form>
               </div>

@@ -28,6 +28,12 @@ const columns = [
     }, {
         field: 'Scope',
         title: "스코프"
+    }, {
+        field: 'Labels',
+        title: '라벨',
+        formatter : function (value , row, index){
+          return JSON.stringify(value);
+        }
     }
 ];
 
@@ -94,9 +100,9 @@ $(function(){
 
   $all.completeEvent = function(data, callback){
       if(hasValue(data)){
-          var dialog = require("./dialog.js");
+          var dialog = require("./module/dialog.js");
 
-           var finished = new dialog("볼륨", data.msg + data.statusCode, $("body"));
+           var finished = new dialog("볼륨", data);
            finished.setDefaultButton('Close[Enker]', 'btn-primary create');
            finished.show();
 
@@ -104,7 +110,7 @@ $(function(){
          }
   };
 
-    var main = require("./main.js");
+    var main = require("./module/main.js");
     main.init($all);
 
 });

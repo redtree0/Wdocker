@@ -36,7 +36,10 @@ const columns = [{
       title: '포트'
   }, {
       field: 'Labels',
-      title: '라벨'
+      title: '라벨',
+      formatter : function (value , row, index){
+        return JSON.stringify(value);
+      }
   }, {
       field: 'State',
       title: '상태',
@@ -103,17 +106,18 @@ $(function(){
     $command : $("#command"),
     $volumeMenu : $("#volumeMenu"),
     $volume : $("#volumeDropDown"),
-    $containerDest : $("#containerDest")
+    $containerDest : $("#containerDest"),
+    $networkMenu : $("#networkMenu"),
+    $network : $("#networkDropDown")
   };
   $all.form.create.$newForm =  $(".newForm");
   $all.form.create.formEvent = "CreateContainer";
   $all.form.create.portlists = [];
   $all.form.create.$portAdd = $(".portAdd");
   $all.form.create.$portlists = $(".portlists");
-  $all.form.create.dropDown = {
-    $dropDown : $('#imageDropDown'),
-    default : "Images"
-  };
+  $all.form.create.labellists = [];
+  $all.form.create.$labelAdd = $(".labelAdd");
+  $all.form.create.$labellists = $(".labellists");
 
   $all.form.create.initDropdown = function(self){
     var self = self.data;
@@ -130,6 +134,14 @@ $(function(){
     var attr = "Name";
 
     initDropdown(jsonUrl, $contextMenu, $dropDown, { attr : attr } );
+
+    var jsonUrl = '/myapp/network/data.json';
+    var $contextMenu =   self.$networkMenu;
+    var $dropDown =   self.$network;
+    var attr = "Name";
+    // var index = 0;
+    initDropdown(jsonUrl, $contextMenu, $dropDown, { "attr" :  attr});
+
   }
   $all.form.create.more = {
     $more : $("#more"),
@@ -215,19 +227,10 @@ $(function(){
       clickEvent : clickDefault
   };
   $all.completeEvent = function(data, callback){
-    console.log(arguments);
     if(hasValue(data)){
-      var dialog = require("./dialog.js");
-      if(data.err === undefined){
-          data.err = "";
-      }
-      if(data.msg === undefined){
-        data.msg = "";
-      }
-      if(data.statusCode === undefined){
-        data.statusCode = "";
-      }
-      var finished = new dialog("컨테이너", data.err + data.msg + data.statusCode, $("body"));
+      var dialog = require("./module/dialog.js");
+
+      var finished = new dialog("컨테이너", data);
       finished.setDefaultButton('Close[Enker]', 'btn-primary create');
       finished.show();
 
@@ -235,7 +238,7 @@ $(function(){
     }
   };
 
-    var main = require("./main.js");
+    var main = require("./module/main.js");
     main.init($all);
     var containerTable = main.getMainTable();
 
@@ -279,8 +282,6 @@ $(function(){
        }
 
         $terminal =  $("#terminal").terminal((command, term) => {
-         console.log(containerId);
-         console.log(command);
          client.sendEvent('stdin', command);
          var cmd = $.terminal.parse_command(command);
          console.log(cmd);
@@ -299,14 +300,12 @@ $(function(){
            client.sendEvent('stdin', "docker attach " + containerId);
          },
          onBeforeLogin: function(term){
-          //  console.log("before login");
           //  console.log(term);
          },
          onBeforeCommand : function(term){
           //  console.log(term);
          },
          onExit : function(term){
-          //  console.log("exit");
           client.sendEvent('stdin', "exit");
           containerTable.reload();
           term.destroy();

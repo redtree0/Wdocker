@@ -53,9 +53,9 @@ $(function(){
         jsonUrl : '/myapp/settings/data.json',
         isExpend : false,
         clickRow : function  (e, row, $element, field) {
-          var dialog = require("./dialog.js");
+          var dialog = require("./module/dialog.js");
           var socket = io();
-          var Socket = require("./io");
+          var Socket = require("./module/io");
           var client = new Socket(socket, $('body'));
 
             if(field === "PING"){
@@ -98,7 +98,7 @@ $(function(){
           eventName : "DELETE",
           clickEvent : clickDefault
       };
-      var main = require("./main.js");
+      var main = require("./module/main.js");
       main.init($all);
 
       var client = main.getSocket();
@@ -109,7 +109,7 @@ $(function(){
           password : $("#password").val()
         }
           client.sendEvent("authCheck", opts, (err, data)=>{
-            var finished = new dialog("작업 완료",  data.Status + data.err, $("body"));
+            var finished = new dialog("작업 완료",  data);
             finished.show();
           });
       });

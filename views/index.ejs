@@ -2,49 +2,19 @@
 <html>
   <head>
     <% include ./partials/head %>
-    <script src="/socket.io/socket.io.js"></script>
-     <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
-   <script type="text/javascript" src="/myapp/js/liquidFillGauge.js"></script>
-       <script type="text/javascript" src="/myapp/js/index.js"></script>
-       <!-- Plotly.js -->
-         <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-         <!-- Numeric JS -->
-         <script src="https://cdnjs.cloudflare.com/ajax/libs/numeric/1.2.6/numeric.min.js"></script>
 
   </head>
 
-  <body>
+  <body  style="overflow:hidden;">
     <% include ./partials/topnav %>
     <div class="container-fluid">
           <div class="row">
             <% include ./partials/nav %>
             <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-              <div class="row placeholders">
-                <div class="container">
-                  <div id="stateInfo" class="row">
-                    <div id="others"></div>
-                    <div id="cpuInfo">
-                        <div class="row"><span>CPU</span></div>
-                        <div id="cpu_core" class="row"></div>
-                        <div id="cpu_model" class="row"></div>
-                    </div>
-                    <div id="networkInfo">
-                        <div class="row"><span>Network</span></div>
-                    </div>
-                    <div id="memoryInfo">
-                        <div class="row"><span>Memory</span></div>
-                    </div>
-
-                  </div>
-
-
-                  <div class="row">
-                    <div id="cpuStatus" class="col-md-6"></div>
-                    <svg id="memoryStatus"  height="250" class="col-md-6"></svg>
-                  </div>
-
-
-                </div>
+              <div class="form-group placeholders">
+                  <iframe id="extFrame" src="./dashboard.ejs".
+                  style=" border: 0; width:85vw;  height: 100vh" scrolling="auto"
+                  ></iframe>
               </div>
             </div>
           </div>

@@ -1,8 +1,9 @@
 module.exports = {
   entry: {
-    config : './public/js/config.js',
-    dialog : './public/js/dialog.js',
-    io : "./public/js/io.js",
+    config : './public/js/module/config.js',
+    dialog : './public/js/module/dialog.js',
+    io : "./public/js/module/io.js",
+    table : './public/js/module/table.js',
     container : './public/js/container.js',
     network : './public/js/network.js',
     image : './public/js/image.js',
@@ -12,8 +13,7 @@ module.exports = {
     terminal : './public/js/terminal.js',
     swarm : './public/js/swarm.js',
     service : './public/js/service.js',
-    task : './public/js/task.js',
-    table : './public/js/table.js'
+    task : './public/js/task.js'
   },
   output: {
     path: __dirname + '/public/js/bundle',

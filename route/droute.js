@@ -18,6 +18,7 @@
   });
 
   router.get('/index', (req, res) => {
+    console.log("index");
         res.render(file);
   });
 
@@ -72,13 +73,10 @@
 
   router.get('/vnc' , (req, res) => {
     // res.redirect('http://192.168.0.108:3000/myapp/vnc_core.ejs');
-
         res.render("vnc.ejs");
   });
 
   router.get('/vnc_core.ejs' , (req, res) => {
-    // res.redirect('http://192.168.0.108:3000/myapp/vnc_core.ejs');
-
         res.render("vnc_core.ejs");
   });
 

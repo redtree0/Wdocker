@@ -389,6 +389,7 @@ var main = (function(){
 
           for (var i in self.event) {
             /// button event를 loop로 초기화
+            // console.log(self.event[i]);
             self.event[i].$button.click(
               self.event[i].clickEvent(client, self.event[i].eventName, self.mainTable) /// clickEvent 클로저
             );

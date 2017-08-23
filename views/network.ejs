@@ -51,6 +51,10 @@
                 <div class="panel-body">
 
                     <table data-toolbar="#toolbar"  data-pagination="true" class="table table-striped jsonTable"> </table>
+                    <p><span class="glyphicon glyphicon-exclamation-sign"></span>
+                      해당 호스트가 swarm 구성이 되있을 경우, 재 기능을 안할 수 있습니다.
+                      다른 node 상태 확인하시오.
+                  </p>
 
 
                 </div>
@@ -94,6 +98,23 @@
                 data-off="false" data-onstyle="success" data-offstyle="danger"></input>
               </label>
             </div>
+            <div class="form-group">
+              <label class="col-sm-2">Label</label>
+              <br/>
+                <label for="key" class="col-sm-2 control-label">Key : </label>
+                <div class="col-sm-2">
+                  <input type="text" class="form-control" id="key" >
+                </div>
+                <label for="key" class="col-sm-2 control-label">Value : </label>
+                <div class="col-sm-2">
+                  <input type="text" class="form-control" id="value" >
+                </div>
+                <button class="btn btn-primary labelAdd">Add</button>
+            </div>
+            <div class="form-group">
+              <div class = "labellists"></div>
+            </div>
+            
             <button type="button" class="btn btn-primary" id ="more">
               <span class="glyphicon glyphicon-plus"></span>
               More</button>

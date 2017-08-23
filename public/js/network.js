@@ -60,9 +60,12 @@ const columns = [{
   },{
       field: 'Options',
       title: 'Options'
-  },{
+  }, {
       field: 'Labels',
-      title: 'Labels'
+      title: '라벨',
+      formatter : function (value , row, index){
+        return JSON.stringify(value);
+      }
   }];
 
 
@@ -131,10 +134,13 @@ $(function(){
   $all.form.create.portlists = [];
   $all.form.create.$portAdd = $(".portAdd");
   $all.form.create.$portlists = $(".portlists");
-  $all.form.create.dropDown =  {
-    $dropDown : $('#driverDropDown'),
-    default : "driver"
-  };
+  $all.form.create.labellists = [];
+  $all.form.create.$labelAdd = $(".labelAdd");
+  $all.form.create.$labellists = $(".labellists");
+  // $all.form.create.dropDown =  {
+  //   $dropDown : $('#driverDropDown'),
+  //   default : "driver"
+  // };
 
   $all.form.create.initDropdown = function(self){
     var self = self.data;
@@ -199,19 +205,17 @@ $(function(){
     }
   };
   $all.completeEvent = function(data, callback){
-    console.log(arguments);
+    // console.log(arguments);
     if(hasValue(data)){
-        var dialog = require("./dialog.js");
-
-         var finished = new dialog("네트워크", data.msg + data.statusCode, $("body"));
+        // var dialog = require("./module/dialog.js");
+         var finished = new dialog("네트워크", data);
          finished.setDefaultButton('Close[Enker]', 'btn-primary create');
          finished.show();
-         finished.close(5000);
          callback;
        }
   };
 
-  var main = require("./main.js");
+  var main = require("./module/main.js");
   main.init($all);
   var networkTable = main.getMainTable();
     var $detail = $("#detail");

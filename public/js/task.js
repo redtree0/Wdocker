@@ -56,7 +56,7 @@ $(function(){
     columns : columns,
     jsonUrl : '/myapp/task/data.json',
   };
-  var main = require("./main.js");
+  var main = require("./module/main.js");
   main.init($all);
 
 

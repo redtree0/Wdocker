@@ -203,7 +203,7 @@ $(function(){
       }
     };
 
-      var main = require("./main.js");
+      var main = require("./module/main.js");
       main.init($all);
 
 

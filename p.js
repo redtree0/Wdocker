@@ -437,33 +437,33 @@ var mongo = require("./mongoController.js");
     *  @param {Function} callback - 클라이언트로 보낼 callback
     *  @return {Function} doTask
     */
-      self.push = function (data, callback) {
-          var opts =  {
-            name : "commandx0/test",
-            tag : "latest"
-          };
-
-          if(data){
-            var image = self.docker.getImage(data[0].RepoTags[0]);
+      self.push = function (opts, callback) {
+          if(opts){
+            var image = self.docker.getImage(opts.name);
             mongo.auth.show((result)=>{
               var auth = (result[0]);
-              return image.push(opts,
-                function(err, stream) {
-                  // console.log(stream);
-                  if (err) return console.log(err);
-                  var docker = require("./docker")();
-                  docker.modem.followProgress(stream, onFinished, onProgress);
 
-                  function onFinished(err, output) {
-                    console.log("onFinished");
-                    //  server.sendEvent("progress", true);
+              // return new Promise(function(resolve, reject){
+              // resolve(image.push(opts, undefined,auth))
+              image.push(opts,
+                  function(err, stream) {
+                    // console.log(stream);
+                    if (err) return self.failureCallback(callback, err) ;
+                    // var docker = require("./docker")();
+                    self.docker.modem.followProgress(stream, onFinished, onProgress);
 
-                  }
-                  function onProgress(event) {
-                    console.log(event);
-                    // server.sendEvent("progress", event);
-                  }
-                },auth);
+                    function onFinished(err, output) {
+                      console.log("onFinished");
+                      return self.successCallback(callback, output);
+                    }
+                    function onProgress(event) {
+                      console.log("onProgress");
+                      console.log(event);
+                    }
+                  },
+
+                auth);
+
             });
           }
         //  self.doTask(data, callback, opts ,"push");

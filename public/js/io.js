@@ -42,6 +42,12 @@ var clientsocket = (function clientsocket(io, $body) {
           var data = null;
           var checkedRowLists = table.checkedRowLists; /// table checked row data
 
+          if(self.$body === null){
+            return
+          }
+          if(table === null){
+            return
+          }
           if(arguments.length === 2) {
               opts = null;
               callback = null;
@@ -50,16 +56,17 @@ var clientsocket = (function clientsocket(io, $body) {
               callback = opts;
               opts = null;
               data = checkedRowLists;
-          } else if( (arguments.length === 3) && (typeof opts === "object") ){
-              data = opts;
-          } else if (arguments.length === 4 ){
+          }
+          // else if( (arguments.length === 3) && (typeof opts === "object") ){
+          //     data = opts;
+          // }
+           else if (arguments.length === 4 ){
               data = opts;
           } else {
               return;
           }
 
           self.$body.spinStart();  /// spinner 시작
-
           return self.sendEvent(eventName, data, (data)=>{
             (self.$body).spinStop(); /// spinner 정지
             table.reload();  /// 테이블 갱신
@@ -92,7 +99,9 @@ var clientsocket = (function clientsocket(io, $body) {
         //// eventName 소켓 이벤트 명
         //// data 서버로 보낼 데이터
         //// callback 서버에서 다시 클라이언트로 보낸 데이터를 받은 후 실행할 콜백 함수
-        return socket.emit(eventName, data, callback);
+        return socket.emit(eventName, data, (data)=>{
+             callback(data);
+        });
     };
 
     /** @method  - listen

@@ -60,11 +60,12 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 0);
+/******/ 	return __webpack_require__(__webpack_require__.s = 3);
 /******/ })
 /************************************************************************/
-/******/ ([
-/* 0 */
+/******/ ({
+
+/***/ 3:
 /***/ (function(module, exports) {
 
 
@@ -81,6 +82,14 @@ var config = (function(){
         "OpenStdin": true,
         "StdinOnce": true,
          "HostConfig" : {
+          //  "Binds" : [], /// volume-name:container-dest
+          "Mounts" :[
+          //   {
+          //     "target" : "",  // container Path
+          //     "Source" : "", // volume_name
+          //     "Type" : "" // volume
+          // }
+        ],
            "LogConfig": {
                 "Type": "json-file",
                 "Config": {
@@ -101,6 +110,16 @@ var config = (function(){
     opts.Image = filter.Image;
     opts.name = filter.name;
     opts.Cmd = [ filter.Cmd];
+    if(filter.hasOwnProperty("volume") && filter.hasOwnProperty("containerDest") ){
+      console.log("k");
+      opts.HostConfig.Mounts = [{
+          "target" : filter.containerDest,
+          "Source" : filter.volume,
+          "Type" : "volume"
+      }];
+    }
+    console.log(opts);
+
 
     for ( var i in portArray) {
       var portinfo = portArray[i].containerPort +"/"+ portArray[i].protocol;
@@ -117,14 +136,14 @@ var config = (function(){
           "Ingress" : false,
           "Attachable" : false,
           "IPAM" : {
-            // "Config": [
-            //       {
-            //           // "Subnet" : "",
-            //           // "IPRange" : "",
-            //           // "Gateway" : ""
-            //       }
-            //     ]
-                // ,
+            "Config": [
+                  {
+                      // "Subnet" : "",
+                      // "IPRange" : "",
+                      // "Gateway" : ""
+                  }
+                ]
+                ,
                 "Options" : {
                   // "parent" : "wlan0"
                 }
@@ -146,8 +165,13 @@ var config = (function(){
   var setNetwork = function(filter) {
     var opts = network;
     opts.Name = filter.Name;
-    opts.driver = filter.driver;
+    opts.Driver = filter.Driver;
     opts.internal = filter.internal;
+    opts.IPAM.Config = [{
+      "Subnet" : filter.subnet,
+      "IPRange" : filter.ipRange,
+      "Gateway" : filter.gateway
+    }]
   }
 
   var image = {
@@ -168,54 +192,109 @@ var config = (function(){
     var opts = image;
     opts.term = filter.term;
     opts.limit = filter.limit;
-    opts["is-automated"] = filter["is-automated"];
-    opts["is-official"] = filter["is-official"];
-    opts.stars = filter.stars;
+    opts.filters["is-automated"] = [filter["is-automated"]];
+    opts.filters["is-official"] = [filter["is-official"]];
+    if(filter.stars) {
+      opts.filters["stars"] = filter.stars;
+    }
   };
+
+  var volume = {
+    "Name" : "",
+    "Driver" : ""
+    // , "DriverOpts"  : ""
+  };
+
+  var getVolume = function(){
+    return volume;
+  }
+  var setVolume = function (filter){
+    var opts = volume;
+    opts.Name = filter.Name;
+    opts.Driver = filter.Driver;
+  }
 
   var service = {
           "Name" : "",
           "TaskTemplate" : {
             "ContainerSpec" : {
               "Image" : "",
-              "Command" : [],
-              "HealthCheck" : {
-                "Test" : [],
-                "Interval" : 30000000 ,
-                "Timeout" : 300000000 , //  1000000 = 1ms
-                "Retries" : 3,
-                "StartPeriod" : 10000000
-              }
-            }
+              "Command" : []
+              // ,"HealthCheck" : {
+              //   "Test" : ["NONE"]
+              //   // ,
+              //   // "Interval" : 30000000 ,
+              //   // "Timeout" : 300000000 , //  1000000 = 1ms
+              //   // "Retries" : 3,
+              //   // "StartPeriod" : 10000000
+              // }
+            } ,
+             "Resources": {
+            "Limits": {},
+            "Reservations": {}
+            },
+             "RestartPolicy": {},
+                "Placement": {},
+                "Networks" : []
           },
           "Mode": {
               "Replicated": {
-                "Replicas": 4
+                "Replicas": 1
               }
           },
-          "UpdateConfig": {
-                "Parallelism": 2,
-                "Delay": 1000000000,
-                "FailureAction": "pause",
-                "Monitor": 15000000000,
-                "MaxFailureRatio": 0.15
-          },
-          "RollbackConfig": {
-                "Parallelism": 1,
-                "Delay": 1000000000,
-                "FailureAction": "pause",
-                "Monitor": 15000000000,
-                "MaxFailureRatio": 0.15
-          },
+          // "UpdateConfig": {
+          //       "Parallelism": 2,
+          //       "Delay": 1000000000,
+          //       "FailureAction": "pause",
+          //       "Monitor": 15000000000,
+          //       "MaxFailureRatio": 0.15
+          // },
+          // "RollbackConfig": {
+          //       "Parallelism": 1,
+          //       "Delay": 1000000000,
+          //       "FailureAction": "pause",
+          //       "Monitor": 15000000000,
+          //       "MaxFailureRatio": 0.15
+          // },
           "EndpointSpec": {
                 "Ports": [
-                      {
-                      "Protocol": "tcp",
-                      "PublishedPort": null,
-                      "TargetPort": null
-                      }
+                      // {
+                      // "Protocol": "tcp",
+                      // "PublishedPort": null,
+                      // "TargetPort": null
+                      // }
                   ]
             }
+    };
+
+
+    var getService = function(){
+      console.log("getService");
+      console.log(service);
+
+      return service;
+    };
+
+    var setService = function (filter, portlists){
+      var opts = service;
+      opts.Name = filter.Name;
+      opts.TaskTemplate.ContainerSpec.Image = filter.Image;
+      opts.TaskTemplate.ContainerSpec.Command = [filter.Command];
+      console.log(filter.Replicas);
+      opts.Mode.Replicated.Replicas = filter.Replicas;
+      opts.TaskTemplate.Networks = [ {"Target" : filter.Network }] ;
+
+      for ( var i in portlists) {
+        var portinfo = {
+          "Protocol": portlists[i].protocol,
+          "PublishedPort": parseInt(portlists[i].hostPort),
+          "TargetPort": parseInt(portlists[i].containerPort)
+        }
+        opts.EndpointSpec.Ports.push(portinfo);
+      }
+      service = opts;
+      console.log("setService");
+      console.log(opts);
     };
 
 
@@ -225,7 +304,11 @@ var config = (function(){
     getNetwork : getNetwork,
     setNetwork : setNetwork,
     getImage : getImage,
-    setImage : setImage
+    setImage : setImage,
+    getVolume : getVolume,
+    setVolume : setVolume,
+    getService : getService,
+    setService : setService
   };
 
 })();
@@ -237,4 +320,5 @@ module.exports = config;
 
 
 /***/ })
-/******/ ]);
+
+/******/ });

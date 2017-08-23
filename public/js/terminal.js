@@ -45,9 +45,8 @@ function userlogin(name, password, callback){
 
 $(function() {
   var socket = io();
-  var Socket = require("./io");
+  var Socket = require("./module/io");
   var client = new Socket(socket, $('body'));
-  var spin = require("./spinner");
   var defaultprompt = 'shell $';
 //  console.log($("#terminal"));
   var terminal = $("#terminal").terminal((command, terminal) => {

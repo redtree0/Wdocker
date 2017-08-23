@@ -14,9 +14,12 @@
       },{
           field: 'Id',
           title: 'Id'
-      },{
+      }, {
           field: 'Labels',
-          title: 'Labels'
+          title: '라벨',
+          formatter : function (value , row, index){
+            return JSON.stringify(value);
+          }
       },{
           field: 'ParentId',
           title: 'ParentId'
@@ -53,6 +56,7 @@ $(function(){
   var $all = {};
   $all.init = function(){
     $(".results").hide();
+    $("#expand").hide();
   };
   $all.form = {};
   $all.form.$form = $("#hiddenForm");
@@ -83,6 +87,9 @@ $(function(){
   $all.form.create.$newForm =  $(".newForm");
   $all.form.create.formName = "이미지 생성";
   $all.form.create.formEvent = "SearchImages";
+  $all.form.create.labellists = [];
+  $all.form.create.$labelAdd = $(".labelAdd");
+  $all.form.create.$labellists = $(".labellists");
   $all.form.create.callback = function(data){
             var row = data ;
             $all.table.sub.$table.bootstrapTable('load', data);
@@ -133,14 +140,14 @@ $(function(){
   //
   $all.completeEvent = function(data, callback){
     if(hasValue(data)){
-      var finished = new dialog("이미지", JSON.stringify(data), $("body"));
+      var finished = new dialog("이미지", data);
       finished.setDefaultButton('Close[Enker]', 'btn-primary create');
       finished.show();
       callback;
     }
   };
 
-    var main = require("./main.js");
+    var main = require("./module/main.js");
     main.init($all);
 
         var client = main.getSocket();
@@ -148,10 +155,29 @@ $(function(){
         var searchTable = main.getSubTable();
         var imageTable = main.getMainTable();
 
-
+        var $expand = $("#expand").clone();
+        $("#expand").remove();
+        var isExpand = false;
         imageTable.$table.on("expand-row.bs.table", function (e, index, row, $detail){
-              $detail.append($("#toolbar"));
-        });
+          if(isExpand) {
+            isExpand = false;
+            imageTable.$table.bootstrapTable("collapseAllRows");
+          }else {
+            $detail.append($expand);
+            $expand.show();
+            isExpand = true;
+
+              $(".push").click((e)=>{
+                var opts = {
+                  name : $("#repositoryImage").val(),
+                  tag : $("#repositoryTag").val()
+                };
+
+                  client.sendEventTable("PushImages", imageTable, opts);
+
+              });
+            };
+          });
         var $msgdiag = $("#msgdiag");
         $msgdiag.hide();
         $(".download").click((e)=> {

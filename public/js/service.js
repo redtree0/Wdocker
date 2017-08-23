@@ -169,16 +169,16 @@ $(function(){
 
   $all.completeEvent = function(data, callback){
       if(hasValue(data)){
-        var dialog = require("./dialog.js");
+        var dialog = require("./module/dialog.js");
 
-        var finished = new dialog("서비스", data, $("body"));
+        var finished = new dialog("서비스", data);
         finished.setDefaultButton('Close[Enker]', 'btn-primary create');
         finished.show();
         callback;
     }
   };
 
-    var main = require("./main.js");
+    var main = require("./module/main.js");
     main.init($all);
   var serviceTable = main.getMainTable();
 

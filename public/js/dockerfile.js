@@ -6,10 +6,9 @@ $(function(){
   var $fileName = $("#filename");
   var $editor = $("#editor");
   var socket = io();
-  var Socket = require("./io");
+  var Socket = require("./module/io");
   var client = new Socket(socket, $('body'));
-  var spin = require("./spinner");
-  var dialog = require("./dialog");
+  var dialog = require("./module/dialog");
 
   var $jstree = $("#jstree");
 
@@ -17,7 +16,7 @@ $(function(){
   $all.connect = {};
   $all.connect.dockerinfo = "image";
 
-  var main = require("./main.js");
+  var main = require("./module/main.js");
   main.init($all);
 
   var editor = CodeMirror.fromTextArea(document.getElementById("editor"), {
@@ -259,7 +258,7 @@ function jstreeRefresh($jstree, newTree){
             callback;
           });
           var $building = $("#building");
-          var popup = new dialog("이미지 생성", $building , $("body"));
+          var popup = new dialog("이미지 생성", $building);
           // popup.appendButton('Search', 'btn-primary create',
           client.listen("buildingImage", (data)=>{
             console.log(data);
