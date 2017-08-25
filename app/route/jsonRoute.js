@@ -40,59 +40,64 @@
 
   };
 
+  function failureCallback(res, err){
+    console.log(err);
+    return  res.json(err);
+  }
+
 
   router.get( '/container/data.json' , (req, res) => {
-        p.container.getAllLists({all: true}, resCallback.bind(null, res));
+        p.container.getAllLists({all: true}, resCallback.bind(null, res), failureCallback.bind(null, res));
   });
 
   router.get( '/network/data.json' , (req, res) => {
     res.setHeader("Content-Type", "application/json");  /// application/json 헤더 설정
 
-        p.network.getAllLists({}, resCallback.bind(null, res));
+        p.network.getAllLists({}, resCallback.bind(null, res), failureCallback.bind(null, res));
   });
 
   router.get( '/image/data.json' , (req, res) => {
-        p.image.getAllLists({}, resCallback.bind(null, res));
+        p.image.getAllLists({}, resCallback.bind(null, res), failureCallback.bind(null, res));
   });
 
   router.get( '/volume/data.json' , (req, res) => {
-      p.volume.getAllLists({}, resCallback.bind(null, res, "Volumes"));
+      p.volume.getAllLists({}, resCallback.bind(null, res, "Volumes"), failureCallback.bind(null, res));
   });
 
   router.get( '/swarm/data.json' , (req, res) => {
     // p.swarm.getAllLists(null, resCallback.bind(null, res));
-    docker.swarmInspect().then(resCallback.bind(null, res));
+    docker.swarmInspect().then(resCallback.bind(null, res), failureCallback.bind(null, res));
     // p.swarm.getAllLists({}, resCallback.bind(null, res));
 
     // promiseTojson(docker.swarmInspect(), res);
   });
 
   router.get( '/task/data.json' , (req, res) => {
-    p.task.getAllLists({}, resCallback.bind(null, res));
+    p.task.getAllLists({}, resCallback.bind(null, res), failureCallback.bind(null, res));
   });
 
   router.get( '/task/data/:id' , (req, res) => {
     var id = req.params.id;
-    p.task.inspect({id : id}, resCallback.bind(null, res));
+    p.task.inspect({id : id}, resCallback.bind(null, res), failureCallback.bind(null, res));
   });
 
   router.get( '/node/data.json' , (req, res) => {
-      p.node.getAllLists({}, resCallback.bind(null, res));
+      p.node.getAllLists({}, resCallback.bind(null, res), failureCallback.bind(null, res));
   });
   router.get( '/service/data.json' , (req, res) => {
-    p.service.getAllLists({}, resCallback.bind(null, res));
+    p.service.getAllLists({}, resCallback.bind(null, res), failureCallback.bind(null, res));
   });
 
   router.get( '/service/data/:id' , (req, res) => {
     var id = req.params.id;
-    p.service.getAllLists({id : id}, resCallback.bind(null, res));
+    p.service.getAllLists({id : id}, resCallback.bind(null, res), failureCallback.bind(null, res));
   });
 
 
   router.get( '/container/stats/:id' , (req, res) => {
     var id = req.params.id;
     var p = require("../p");
-    var promise = p.container.stats(id, resCallback.bind(null, res));
+    var promise = p.container.stats(id, resCallback.bind(null, res), failureCallback.bind(null, res));
     // promise.then( (data)=>{res.json(data)});
 
   });
@@ -100,7 +105,7 @@
   router.get( '/container/top/:id' , (req, res) => {
     var id = req.params.id;
     var p = require("../p");
-    var promise = p.container.top(id, resCallback.bind(null, res));
+    var promise = p.container.top(id, resCallback.bind(null, res), failureCallback.bind(null, res));
     // promise.then( (data)=>{res.json(data);});
   });
 
@@ -117,7 +122,7 @@
     var filters = { "filters" : {
             id : [id]}
           };
-    var promise = (p.network.list(filters));
+    var promise = (p.network.getAllLists(filters));
     promise.then( (data)=>{ var json = data[0];  res.json(json);});
 
   });

@@ -69,14 +69,7 @@ const columns = [{
   }];
 
 
-  // function clickDropdown(id) {
-  //   $("#container_list").on("click", "li a", function(event){
-  //         $('#container').text($(this).text());
-  //         checkAddColor('networklist', $(this).text(), "success");
-  //     });
-  //
-  //
-  // }
+
 
 
 $(function(){
@@ -92,6 +85,7 @@ $(function(){
     var attr = "Names";
     // var index = 0;
     return initDropdown(jsonUrl, $contextMenu, $dropDown, {attr : attr});
+
   };
   $all.form = {};
   $all.form.$form = $("#hiddenForm");
@@ -186,7 +180,10 @@ $(function(){
         if($("#containerDropDown").text().trim() === "Containers") {
           return false;
         }else {
-          client.sendEventTable(eventName, table);
+          var opts ={
+            "container" : $("#containerDropDown").text().trim()
+          }
+          client.sendEventTable(eventName, table, opts);
         }
       };
     }
@@ -199,7 +196,10 @@ $(function(){
         if($("#containerDropDown").text().trim() === "Containers") {
           return false;
         }else {
-          client.sendEventTable(eventName, table);
+          var opts ={
+            "container" : $("#containerDropDown").text().trim()
+          }
+          client.sendEventTable(eventName, table, opts);
         }
       };
     }
@@ -207,7 +207,7 @@ $(function(){
   $all.completeEvent = function(data, callback){
     // console.log(arguments);
     if(hasValue(data)){
-        // var dialog = require("./module/dialog.js");
+        var dialog = require("./module/dialog.js");
          var finished = new dialog("네트워크", data);
          finished.setDefaultButton('Close[Enker]', 'btn-primary create');
          finished.show();
@@ -218,8 +218,7 @@ $(function(){
   var main = require("./module/main.js");
   main.init($all);
   var networkTable = main.getMainTable();
-    var $detail = $("#detail");
-      networkTable.clickRow($detail);
+      // networkTable.clickRow($detail);
 
   var expandinfo = [{
      url : "/myapp/network/",
@@ -227,5 +226,71 @@ $(function(){
    }];
    networkTable.expandRow(expandinfo);
 
+  var $detail = $("#detail");
+  $("#containerMenu").click((e)=>{
+      networkConnectedlists();
+  });
 
+  networkTable.$table.on("page-change.bs.table", function(e, number, size){
+      networkConnectedlists()
+  })
+
+  function networkConnectedlists(){
+    var item =   $("#containerDropDown").text().trim();
+    if(item === "Containers"){
+      return ;
+    }
+
+    return showDetailAddColor((networkTable.$table), item, "danger");
+  }
+
+
+  function showDetailAddColor($table, item, _class){
+    var rows = $table.bootstrapTable('getData');
+
+    $.getJSON("/myapp/container/data.json", function(json, textStatus) {
+      var searchNetwork = [];
+      var container = json;
+      container.forEach ( (data) => {
+            if(item === data.Names.toString()){
+              // $detail.append(JSON.stringify(data));
+              var networkmsg = null;
+              console.log(Object.keys(data.NetworkSettings.Networks));
+              if(Object.keys(data.NetworkSettings.Networks).length === 0){
+                    networkmsg = "not Exist";
+              }else {
+                networkmsg = Object.keys(data.NetworkSettings.Networks) ;
+              }
+              var msg = "Container : " + data.Names
+                + "<br/>Image : " + data.Image
+                + "<br/>Network : " + networkmsg;
+              $detail.html(msg);
+
+            }
+            var networkSettings = data.NetworkSettings.Networks;
+            for(var network in networkSettings){
+                searchNetwork.push({"name" : data.Names, "networkId" : networkSettings[network].NetworkID});
+              }
+
+      } );
+      // console.log(searchNetwork);
+      $table.find("tr").removeClass(_class);
+      rows.forEach((data)=>{
+        for(var network in searchNetwork){
+          if(item == searchNetwork[network].name ){
+            if (data.Id == searchNetwork[network].networkId) {
+              // for(var i in $table.find("td:nth-child(2)"))
+              $table.find('td:nth-child(2)').filter(function() {
+                  return $(this).text() === data.Name ;
+              }).parent().addClass(_class);
+          
+              // $table.find("td:contains("+ data.Id + ")").parent().addClass(_class);
+            }
+          }
+        }
+      });
+
+
+    });
+  }
 });

@@ -89,16 +89,27 @@ $(function(){
       Cmd : self.$command.val()
     }
     if(self.$volume.text().trim() !== "Volumes" && self.$containerDest.val() !== null){
-      // opts.Mounts = [ self.$volume.text().trim + ":" + self.$containerDest];
       opts.volume = self.$volume.text().trim();
       opts.containerDest = self.$containerDest.val();
-      // console.log(opts);
+    }
+    if(self.$network.text().trim() !== "Networks"){
+      //  $.getJSON
+      var jsonUrl = "/myapp/network/data.json";
 
+      $.getJSON(jsonUrl, function(json, textStatus) {
+          json.forEach ( (data) => {
+            if(self.$network.text().trim() === data.Name ){
+              console.log(data.Id);
+              opts.networkID = data.Id;
+            }
+          });
+
+      });
     }
     return opts;
   }
-  $all.form.formName = "컨테이너 생성";
   $all.form.create = {};
+  $all.form.create.formName = "컨테이너 생성";
   $all.form.create.data = {
     $imageMenu : $("#imageMenu"),
     $image : $('#imageDropDown'),
@@ -319,6 +330,7 @@ $(function(){
 
 /// backspace 뒤로가기 막기
 $(document).keydown(function(e){
+  // console.log(e.keyCode);
   history.pushState(null, null, location.href);
     window.onpopstate = function(event) {
       history.go(1);

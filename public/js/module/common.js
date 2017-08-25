@@ -2,37 +2,40 @@
 
 function initDropdown(jsonUrl, $li, $button, opts) {
   var hasIndex = false;
+  var hasFilter = false;
   // attr, index, selected
   if(opts.hasOwnProperty("attr")){
     if(opts.hasOwnProperty("index")){
         hasIndex = true;
     }
   }
+  if(opts.hasOwnProperty("filter")){
+    hasFilter = true;
+  }
 
   $li.children().remove();
   $.getJSON(jsonUrl, function(json, textStatus) {
-    // console.log(jsonUrl);
-    // console.log(json);
-    // console.log(textStatus);
+
     if(json !== false){
-      json.forEach ( (data) => {
-        console.log(data);
-        var value = null;
-        if( hasIndex ) {
-          value = (data[opts.attr])[opts.index];
-          // console.log("t");
-        }else {
-          value = data[opts.attr];
-          //  console.log("F");
-        }
+         json.some((data)=>{
+           if(hasFilter){
+              if(data[opts.filter.key] !== opts.filter.value){
+                return false;
+              };
+            }
+          var value = null;
+              if( hasIndex ) {
+                value = (data[opts.attr])[opts.index];
+              }else {
+                value = data[opts.attr];
+              }
 
-
-        if(opts.hasOwnProperty("selected") && value === opts.selected){
-          $button.text(value);
-        }
-        // console.log(value);
-        $("<li><a>" +  value + "</a><li/>").appendTo($li);
-      });
+            if(opts.hasOwnProperty("selected") && value === opts.selected){
+              $button.text(value);
+            }
+            // console.log(value);
+            $("<li><a>" +  value + "</a><li/>").appendTo($li);
+        });
     }
   });
   changeTextDropdown($li, $button);
@@ -112,7 +115,8 @@ function createList ( $list, array ) {
     $list.children().remove();
     // console.log("createlists");
     for(var index in array) {
-        // console.log(array[index]);
+      console.log(index);
+        console.log(array[index]);
         var rowid = "#row"+ index;
         var $row = createElement("<div/>", "row", "", "row"+ index);
         var $deletebutton = createButton(index, "delete", "btn-danger", "glyphicon-remove");
@@ -126,10 +130,10 @@ function createList ( $list, array ) {
   function createRow($row, array, $buttons){
     var data = array;
     // console.log("createrow");
-
+    console.log(data);
     for (var index in data ) {
-
-        $row.append(createElement("<div/>", "col-sm-2 " + index, data[index]));
+      console.log(data[index]);
+        $row.append(createElement("<div/>", "col-sm-4 text-center " + index, data[index]));
     }
     // for (var i in $elements) {
     // }
@@ -177,5 +181,22 @@ function initPortLists($portlists, portlists, $portAdd, $dataLists){
       insertArray(portlists, $dataLists);
       createList ( $portlists, portlists );
     }
+  });
+}
+
+
+function addRowText( _class,  _text){
+  return $('<div/>', { class: _class, text: _text });
+}
+
+
+function isSwarm(){
+  $.getJSON('/myapp/swarm/data.json', function(json, textStatus) {
+
+    if(json.statusCode === 503){
+      alert("swarm 구성 필요합니다.");
+      location.href="/myapp/swarm/";
+    }
+
   });
 }

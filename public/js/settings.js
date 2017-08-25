@@ -65,6 +65,7 @@ $(function(){
                 }
               client.sendEvent("PING", opts,(data)=>{
                 var finished = null;
+                console.log(data);
                 if(data.err) {
                   finished = new dialog("PING ERROR",  data.err.code, $("body"));
                 } else {

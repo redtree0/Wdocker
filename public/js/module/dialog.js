@@ -25,8 +25,14 @@ function makeBootstrapDialog(title, message, button){
     if(message.statusCode === 200){
       msg = "작업완료"
     }else if(message.statusCode !== 200) {
+      
       title = "에러발생"
-      msg = message.error;
+      if(message.error === undefined){
+        msg = message.msg;
+      }else if (message.msg === undefined) {
+        msg = message.error;
+      }
+
       isError = true;
     }
   }else {

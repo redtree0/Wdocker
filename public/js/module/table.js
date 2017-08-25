@@ -100,7 +100,9 @@ var table = (function Table($table, columns){
           return true;
         }
         $detail.append(addRowText("col-md-6", key));
-        $detail.append(addRowText("col-md-6", value));
+        if(value){
+          $detail.append(addRowText("col-md-6", value));
+        }
       });
 
     });

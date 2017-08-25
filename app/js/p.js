@@ -127,7 +127,7 @@ var mongo = require("./mongoController.js");
     *  @param {Function} callback - client로 보낼 콜백함수
     *  @return {Function} callback - res로 보낼 콜백함수
     */
-    this.getAllLists = function (opts, callback){
+    this.getAllLists = function (opts, successCallback, failCallback){
       var self = this;
 
       if(self.getLists !== null){
@@ -135,10 +135,8 @@ var mongo = require("./mongoController.js");
       }
       return new Promise(function(resolve, reject){
         resolve(dockerInfo);
-      }).then(callback, (err)=>{
-        console.log("error");
-        console.log(err);
-      });
+      }).then(successCallback, failCallback);
+
 
     };
 
@@ -189,6 +187,7 @@ var mongo = require("./mongoController.js");
      *  @return {Object} docker.createContainer
      */
      self.create = function (data, callback) {
+       console.log(data);
        return (self.docker).createContainer(data).then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));
      }
 
@@ -373,13 +372,13 @@ var mongo = require("./mongoController.js");
      */
      self.connect =  function (data, callback) {
 
-       var lists = data.lists;
-       var container = (data.container);
+       var lists = data.checkedRowLists;
+       var container = (data.opts.container);
        var opts = {
          "Container" : container,
          "EndpointConfig" : {"NetworkID" : ""}
        };
-
+      //  console.log(opts);
        var promiseList = self.get( lists, opts, "connect");
        return self.dockerPromiseEvent(promiseList, callback);
 
@@ -392,10 +391,11 @@ var mongo = require("./mongoController.js");
      *  @return {object} Promise
      */
      self.disconnect =  function (data, callback) {
-       var lists = data.lists;
 
-       var opts = {"Container": data.container };
-       var promiseList = self.get( lists, opts, "connect");
+       var lists = data.checkedRowLists;
+       var opts = data.opts;
+
+       var promiseList = self.get( lists, opts, "disconnect");
        return  self.dockerPromiseEvent(promiseList, callback);
 
      };
@@ -604,14 +604,15 @@ var mongo = require("./mongoController.js");
       var self = this;
       self.getLists = "swarmInspect";
 
-      /** @method  - create
+      /** @method  - init
       *  @description swarm 초기화
       *  @param {Object} data - 설정 데이터
       *  @param {Function} callback - 클라이언트로 보낼 callback
       */
-      self.create = function (data, callback) {
-        return self.docker.swarmInit(data);
-        // self.docker.swarmInit(data).then(self.successCallback.bind(null, callback) , self.failureCallback.bind(null, callback));
+      self.init = function (data, callback) {
+
+        return self.docker.swarmInit(data).then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));
+
       };
 
       /** @method  - leave
@@ -621,7 +622,6 @@ var mongo = require("./mongoController.js");
       *  @return {Object} promise
       */
       self.leave = function (data, callback){
-        console.log("swarm leave");
         return self.docker.swarmLeave({force : data}).then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));
       };
 
@@ -643,40 +643,19 @@ var mongo = require("./mongoController.js");
       *  @param {Function} callback - 클라이언트로 보낼 callback
       */
       self.join = function (data, callback){
-
+        var config = data.RemoteAddrs[0].split(":");
         var hostconfig = {
-          host : data.host,
+          host : data.AdvertiseAddr,
           port : data.port
         }
-        var state = null;
-        if(data.type === "worker"){
-          state = true;
-        }else if(data.type === "manager"){
-          state = false;
-        }
-        self.setRemoteDocker(hostconfig);
-        var mongo = require("./mongoController");
+        delete data.port;
 
-        mongo.system.show((result)=>{
-          var opts = {
-            "AdvertiseAddr": hostconfig.host,
-            "ListenAddr": "0.0.0.0:"+result[0].swarmPort,
-            "RemoteAddrs": [result[0].swarmIP + ":" + result[0].swarmPort],
-            "JoinToken": ""
-          }
-          if(state){
-            opts.JoinToken = (result[0].token.worker);
-          }else {
-            opts.JoinToken = (result[0].token.manager);
-          }
-          console.log(opts);
-          console.log(self.remoteDocker);
-          self.remoteDocker.swarmJoin(opts).then( (err, data)=>{
-            console.log("swarm Join");
-            console.log(err);
-            console.log(data);
-          });
-        });
+        // console.log(hostconfig);
+        self.setRemoteDocker(hostconfig);
+
+          // console.log(self.remoteDocker);
+        return   self.remoteDocker.swarmJoin(data).then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));
+        // });
 
       };
 

@@ -45,7 +45,9 @@ $(function(){
 
 
   var $all = {};
-  $all.init = function(){};
+  $all.init = function(){
+    isSwarm();
+  };
 
   // $all.connect = {};
   // $all.connect.dockerinfo = "task";
@@ -97,10 +99,17 @@ $(function(){
           var hostIP = data[i].Status.Addr;State
           var State = data[i].Status.State;
           // $("#index" + rowIndex)
+          var msg =  "[Node]"
+              + " <br/> Role : "+ role
+              + " <br/> NodeID : "+ nodeID
+              + " <br/> Host : " + hostname
+              + " <br/> IP : "+ hostIP
+              + " <br/> State : " + State;
+
           $(".dockerNode").append($("<div/>").attr({
-            class : "form-group alert alert-success node  " + col,
+            class : "form-group alert alert-success node  text-left " + col,
             id : nodeID
-          }).text(role  + " "+ nodeID + " " + hostname + " "+ hostIP + " " + State) );
+          }).html(msg) );
         }
         $.getJSON("/myapp/task/data.json", (data)=>{
             // console.log(JSON.stringify(data));
@@ -108,11 +117,12 @@ $(function(){
 
               var taskinfo =   data[i];
               var nodeID =taskinfo.NodeID;
-              var insert = " Image " + taskinfo.Spec.ContainerSpec.Image.split("@")["0"]
-               + " <br/> Command " + taskinfo.Spec.ContainerSpec.Command
-               +  " <br/> State " + taskinfo.Status.State
-               + " <br/> IP " + taskinfo.NetworksAttachments["0"].Addresses["0"]
-               + "<br/> Network " + taskinfo.NetworksAttachments["0"].Network.Spec.Name;
+              var insert = "[Task]"
+               + " <br/> Image : " + taskinfo.Spec.ContainerSpec.Image.split("@")["0"]
+               + " <br/> Command : " + taskinfo.Spec.ContainerSpec.Command
+               +  " <br/> State : " + taskinfo.Status.State
+               + " <br/> IP : " + taskinfo.NetworksAttachments["0"].Addresses["0"]
+               + "<br/> Network : " + taskinfo.NetworksAttachments["0"].Network.Spec.Name;
               var task = $("<div/>").attr({
                       class : "alert alert-info text-left",
                     }).html(insert);

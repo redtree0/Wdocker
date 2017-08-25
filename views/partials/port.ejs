@@ -1,0 +1,37 @@
+
+<div class="form-group">
+  <label class="col-sm-2">Port</label>
+</div>
+<div class="form-group well">
+      <div class="form-group">
+          <label for="containerPort" class="col-sm-3 control-label">Container : </label>
+          <div class="col-sm-2">
+            <input type="number" class="form-control"  min="1" max="65535" id="containerPort" >
+          </div>
+
+          <label for="hostPort" class="col-sm-2 control-label">Host : </label>
+          <div class="col-sm-2">
+            <input type="number" class="form-control" min="1" max="65535" id="hostPort" >
+          </div>
+
+      </div>
+      <div class="form-group row">
+        <label for="protocol" class="col-sm-3 control-label">protocal : </label>
+        <div class="col-sm-2">
+          <label class="checkbox-inline">
+            <input type="checkbox" id="protocol" checked data-toggle="toggle" data-on="tcp"
+            data-off="udp" data-onstyle="success" data-offstyle="primary"></input>
+          </label>
+        </div>
+        <div class="col-sm-2">
+          &nbsp; &nbsp; &nbsp;
+        </div>
+        <div class="col-sm-3">
+            <button class="btn btn-primary" id="portAdd" >Add</button>
+        </div>
+
+      </div>
+ </div>
+<div class="form-group">
+  <div id = "portlists"></div>
+</div>

@@ -28,6 +28,13 @@ var config = (function(){
                  }
                 },
            "PortBindings" : {}
+         },
+         "NetworkingConfig" : {
+           "EndpointsConfig" : {
+            //  "network" : {
+            //    "NetworkID" : ""
+            //  }
+           }
          }
   };
 
@@ -47,6 +54,11 @@ var config = (function(){
           "Source" : filter.volume,
           "Type" : "volume"
       }];
+    }
+    if(filter.hasOwnProperty("network")){
+      opts.NetworkingConfig.EndpointsConfig.network = {};
+      opts.NetworkingConfig.EndpointsConfig.network.NetworkID = filter.networkID;
+
     }
 
 
@@ -164,6 +176,7 @@ var config = (function(){
 
   var service = {
           "Name" : "",
+          "Labels" : {},
           "TaskTemplate" : {
             "ContainerSpec" : {
               "Image" : "",
@@ -217,18 +230,15 @@ var config = (function(){
 
 
     var getService = function(){
-      console.log("getService");
-      console.log(service);
-
       return service;
     };
 
     var setService = function (filter, labellists, portlists){
+      console.log(arguments);
       var opts = service;
       opts.Name = filter.Name;
       opts.TaskTemplate.ContainerSpec.Image = filter.Image;
       opts.TaskTemplate.ContainerSpec.Command = [filter.Command];
-      console.log(filter.Replicas);
       opts.Mode.Replicated.Replicas = filter.Replicas;
       opts.TaskTemplate.Networks = [ {"Target" : filter.Network }] ;
 
@@ -240,11 +250,52 @@ var config = (function(){
         }
         opts.EndpointSpec.Ports.push(portinfo);
       }
-      service = opts;
-      console.log("setService");
+
+      var key = null;
+      for ( var i in labellists) {
+        key = labellists[i].key;
+        opts.Labels[key] = labellists[i].value;
+      }
+
       console.log(opts);
+      // service = opts;
+    };
+    var swarmInit = {
+      "AdvertiseAddr" : window.location.hostname,
+      "ListenAddr" :   "0.0.0.0:2377",
+      "ForceNewCluster" : true
     };
 
+    var getSwarmInit = function(){
+      return swarmInit;
+    };
+
+    var setSwarmInit = function (filter, labellists, portlists){
+      var opts = swarmInit;
+      opts.ListenAddr = "0.0.0.0:" + filter.port;
+      swarmInit = opts;
+    };
+
+    var swarmJoin = {
+      "AdvertiseAddr": "",
+      "ListenAddr": "0.0.0.0:",
+      "RemoteAddrs": "",
+      "JoinToken": ""
+    }
+
+    var getSwarmJoin = function(){
+      return swarmJoin;
+    };
+
+    var setSwarmJoin = function (filter, labellists, portlists){
+      var opts = swarmJoin;
+      opts.ListenAddr = "0.0.0.0:" + filter.managerPort ;
+      opts.AdvertiseAddr = filter.ip ;
+      opts.RemoteAddrs = [window.location.hostname + ":"+ filter.managerPort];
+      opts.JoinToken = filter.token;
+      opts.port = filter.port;
+      swarmJoin = opts;
+    };
 
   return {
     getContainer : getContainer,
@@ -256,7 +307,12 @@ var config = (function(){
     getVolume : getVolume,
     setVolume : setVolume,
     getService : getService,
-    setService : setService
+    setService : setService,
+    getSwarmInit : getSwarmInit,
+    setSwarmInit : setSwarmInit,
+    getSwarmJoin : getSwarmJoin,
+    setSwarmJoin : setSwarmJoin,
+
   };
 
 })();

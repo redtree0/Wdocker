@@ -69,14 +69,21 @@ var main = (function(){
             /// form 초기화
             if(settings.hasOwnProperty("form")){
               self.initForm();
+              if(settings.form.hasOwnProperty("update")){
+                /// update form 초기화
+                self.initUpdate();
+              }
             }
-
 
             /// connect 초기화
             if(settings.hasOwnProperty("connect")){
               self.connectDocker();
             }
 
+            if(settings.hasOwnProperty("event")){
+              /// button click event 후 socket event 실행 기능
+              self.socketButtonEvent();
+            }
             if(typeof callback === "function"){
               return callback;
             }
@@ -172,14 +179,11 @@ var main = (function(){
           if(settings.form.create.hasOwnProperty("$labellists")){
             self.initLabelLists();
           }
-          if(settings.hasOwnProperty("event")){
-            /// button click event 후 socket event 실행 기능
-            self.socketButtonEvent();
-          }
-          if(settings.form.hasOwnProperty("update")){
-            /// update form 초기화
-                self.initUpdate();
-          }
+          // if(settings.hasOwnProperty("event")){
+          //   /// button click event 후 socket event 실행 기능
+          //   self.socketButtonEvent();
+          // }
+
         },
         /** @method  - hideForm
          *  @description Form 숨김
@@ -238,18 +242,13 @@ var main = (function(){
                       return  config[self.get]();
                     }
                     // console.log(self.getSettingValue());
+                    console.log(self.labellists);
                     var opts = setSettings(settings.form.getSettingValue(self), self.labellists,  self.portlists ); /// docker 데이터 설정
-
+                    console.log(opts);
                     if(settings.checkValue(opts)){ /// opts 값 null, undefind , "" 존재 확인
                       if( self.hasOwnProperty("completeEvent") ){
                         client.completeEvent = self.completeEvent;
                       }
-                      // if( self.hasOwnProperty("dropDown") ){
-                      //   /// form 내에 dropDown 초기화
-                      //    (function(){
-                      //      settings.clickDropdown(this.$dropDown, this.default);
-                      //    }).call(self.dropDown);
-                      // }
                       if( self.hasOwnProperty("callback") ){
                         console.log("called callback");
                         client.sendEventTable(self.formEvent, settings.mainTable, opts, self.callback);
@@ -277,7 +276,9 @@ var main = (function(){
 
           function setNewId(i, element ){   //// form 내부 element id 새로 부여
             var originId = $(element).attr("id");
-            $(element).attr("id", originId + "New");
+            if(originId !== null && originId !== undefined){
+              $(element).attr("id", originId + "New");
+            }
           }
           var input = clone.find("input");  ///  update form 내 input 요소 찾기
           var button = (clone.find("button")); /// update form 내 button 요소 찾기
@@ -295,6 +296,8 @@ var main = (function(){
             clone.show();  /// update From 생긴 후
 
             self.initForm(self, row); /// data form 초기화
+            // initPortLists();
+            // initPortLists(self.$labellists, self.labellists, self.$labelAdd,  $dataLists  );
 
           });
         },
@@ -314,7 +317,7 @@ var main = (function(){
           /// dropdown button 초기화
           initDropdown(JSONURL, self.$connectMenu, self.$connectDropDown, {attr : ATTR});
 
-         client.sendEvent("GetThisDocker", {"docker" : self.dockerinfo}, (data)=>{
+         client.onlySendEvent("GetThisDocker", {"docker" : self.dockerinfo}, (data)=>{
               self.$whoisConnected.text(data);
          });
          const  timeInterval = 120000;  // 2ms 120000
@@ -326,7 +329,7 @@ var main = (function(){
                  "ip" : self.$whoisConnected.text(),
                  "docker" : self.dockerinfo
                }
-               client.sendEvent("IsConnected",  OPTS, (state)=>{
+               client.onlySendEvent("IsConnected",  OPTS, (state)=>{
                  var msg = null;
                  if(state){
                    msg = "Connected";
@@ -366,7 +369,7 @@ var main = (function(){
 
                }else {
 
-                 client.sendEvent(CONNECTDOCKER,  OPTS, (data)=>{console.log(data);});
+                 client.onlySendEvent(CONNECTDOCKER,  OPTS, (data)=>{console.log(data);});
                  self.$whoisConnected.text(hostIP);
 
                }
@@ -405,7 +408,8 @@ var main = (function(){
 
           for (var i in self.event) {
             /// button event를 loop로 초기화
-            // console.log(self.event[i]);
+            console.log(self.event[i]);
+            console.log(self.event[i].eventName);
             self.event[i].$button.click(
               self.event[i].clickEvent(client, self.event[i].eventName, self.mainTable) /// clickEvent 클로저
             );

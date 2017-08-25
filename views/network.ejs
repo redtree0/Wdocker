@@ -21,7 +21,7 @@
             <% include ./partials/connectDocker %>
 
 
-            <div id="toolbar" class="btn-group" role="group">
+            <div id="toolbar" >
               <div  class="btn-group" role="group">
                 <button  onclick=" return false;"  type="button" class="btn btn-default newForm">
                   <span class="glyphicon glyphicon-plus"></span>
@@ -35,12 +35,12 @@
                 </button>
                 <ul class="dropdown-menu" id="containerMenu">
                 </ul>
+                <button id="connect" type="button" class="btn btn-success">
+                  <span class="glyphicon glyphicon-log-in"></span>
+                  Connect</button>
+                  <button id="disconnect" type="button" class="btn btn-default">
+                    <span class="glyphicon glyphicon-log-out"></span>Disconnect</button>
               </div>
-              <button id="connect" type="button" class="btn btn-success">
-                <span class="glyphicon glyphicon-log-in"></span>
-                Connect</button>
-                <button id="disconnect" type="button" class="btn btn-default">
-                  <span class="glyphicon glyphicon-log-out"></span>Disconnect</button>
             </div>
 
 
@@ -49,6 +49,9 @@
                     <h4 class ="text-left">네트워크 관리</h4>
                 </div>
                 <div class="panel-body">
+                  <div id="detail" class="row detail text-left" style = "padding-left : 20px">
+                  </div>
+
 
                     <table data-toolbar="#toolbar"  data-pagination="true" class="table table-striped jsonTable"> </table>
                     <p><span class="glyphicon glyphicon-exclamation-sign"></span>
@@ -57,12 +60,11 @@
                   </p>
 
 
+
                 </div>
 
             </div>
 
-              <div id="detail" class="row detail">
-              </div>
           </div>
 
           <form class="form-horizontal" id="hiddenForm">
@@ -84,37 +86,31 @@
                 </div>
               </div>
             </div>
-            <div class="form-group">
-              <label for="internal" class="col-sm-2 control-label">Internal : </label>
-              <label class="checkbox-inline">
-                <input type="checkbox" id="internal" checked data-toggle="toggle" data-on="true"
-                data-off="false" data-onstyle="success" data-offstyle="danger"></input>
-              </label>
+            <div class="form-group row">
+                  <div class="col-sm-2">
+                      <label for="internal" class="control-label">Internal : </label>
+                  </div>
+                  <div class="col-sm-3">
+                      <label class="checkbox-inline">
+                        <input type="checkbox" id="internal" checked data-toggle="toggle" data-on="true"
+                        data-off="false" data-onstyle="success" data-offstyle="danger"></input>
+                      </label>
+                 </div>
+                 <div class="col-sm-2">
+                   <label for="internal" class="control-label">Ingress : </label>
+                 </div>
+
+                 <div class="col-sm-3">
+                      <label class="checkbox-inline">
+                        <input type="checkbox" id="ingress" data-toggle="toggle" data-on="true"
+                        data-off="false" data-onstyle="success" data-offstyle="danger"></input>
+                      </label>
+                 </div>
             </div>
-            <div class="form-group">
-              <label for="internal" class="col-sm-2 control-label">Ingress : </label>
-              <label class="checkbox-inline">
-                <input type="checkbox" id="ingress" data-toggle="toggle" data-on="true"
-                data-off="false" data-onstyle="success" data-offstyle="danger"></input>
-              </label>
-            </div>
-            <div class="form-group">
-              <label class="col-sm-2">Label</label>
-              <br/>
-                <label for="key" class="col-sm-2 control-label">Key : </label>
-                <div class="col-sm-2">
-                  <input type="text" class="form-control" id="key" >
-                </div>
-                <label for="key" class="col-sm-2 control-label">Value : </label>
-                <div class="col-sm-2">
-                  <input type="text" class="form-control" id="value" >
-                </div>
-                <button class="btn btn-primary labelAdd">Add</button>
-            </div>
-            <div class="form-group">
-              <div class = "labellists"></div>
-            </div>
-            
+
+            <% include ./partials/label %>
+
+
             <button type="button" class="btn btn-primary" id ="more">
               <span class="glyphicon glyphicon-plus"></span>
               More</button>

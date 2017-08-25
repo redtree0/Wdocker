@@ -16,15 +16,18 @@
                 <div class="container">
 
                       <button type="button" class="btn btn-default btn-lg ctlbtn update">Update</button>
-                      <button type="button" class="btn btn-danger btn-lg ctlbtn remove">Remove</button>
-
-
-                      <div id="bgrp" class="btn-group" role="group">
-                              <button  onclick=" return false;"  type="button" class="btn btn-info btn-lg newForm">
-                                <span class="glyphicon glyphicon-plus"></span> Plus
-                                </button>
+                      <div id="toolbar" class="btn-group" role="group">
+                        <div  class="btn-group" role="group">
+                          <button  onclick=" return false;"  type="button" class="btn btn-default newForm">
+                            <span class="glyphicon glyphicon-plus"></span>
+                          </button>
+                          <button  onclick=" return false;"  type="button" class="btn btn-default  remove">
+                            <span class="glyphicon glyphicon-minus"></span></button>
+                        </div>
                       </div>
-                      <table id="ctable" data-pagination="true" class="table table-striped jsonTable">
+
+
+                      <table id="ctable" data-toolbar="#toolbar" data-pagination="true" class="table table-striped jsonTable">
                       </table>
                       <p><span class="glyphicon glyphicon-exclamation-sign"></span>
                         해당 호스트가 swarm 구성이 되있을 경우, 재 기능을 안할 수 있습니다.
@@ -39,16 +42,16 @@
 <!-- hidden form -->
                           <form class="form-horizontal" id="hiddenForm">
                               <div class="form-group">
-                                <label for="serviceName" class="col-sm-2 control-label">Service Name : </label>
+                                <label for="serviceName" class="col-sm-2 control-label">Name  </label>
                                 <div class="col-sm-10">
                                   <input type="text" class="form-control" id="serviceName">
                                 </div>
                               </div>
                               <div class="form-group">
-                                <label for="image" class="col-sm-2 control-label">Images : </label>
+                                <label for="image" class="col-sm-2 control-label">Images  </label>
                                 <div class="col-sm-10">
-                                    <div class="btn-group">
-                                      <button id="imageDropDown" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                    <div class="btn-group  btn-block">
+                                      <button id="imageDropDown" type="button" class="btn btn-default dropdown-toggle btn-block" data-toggle="dropdown" aria-expanded="false">
                                          Images <span class="caret"></span>
                                       </button>
                                       <ul class="dropdown-menu" id="imageMenu">
@@ -57,10 +60,10 @@
                                 </div>
                               </div>
                               <div class="form-group">
-                                <label for="network" class="col-sm-2 control-label">Network : </label>
+                                <label for="network" class="col-sm-2 control-label">Network  </label>
                                 <div class="col-sm-10">
-                                    <div class="btn-group">
-                                      <button id="networkDropDown" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                    <div class="btn-group  btn-block">
+                                      <button id="networkDropDown" type="button" class="btn btn-default dropdown-toggle btn-block" data-toggle="dropdown" aria-expanded="false">
                                          Network <span class="caret"></span>
                                       </button>
                                       <ul class="dropdown-menu" id="networkMenu">
@@ -69,25 +72,27 @@
                                 </div>
                               </div>
                               <div class="form-group">
-                                <label for="command" class="col-sm-2 control-label">Command : </label>
+                                <label for="command" class="col-sm-2 control-label">Command  </label>
                                 <div class="col-sm-10">
                                   <input type="text" class="form-control" id="command">
                                 </div>
                               </div>
                               <div class="form-group">
-                                <label for="replicas" class="col-sm-2 control-label">Replicas : </label>
+                                <label for="replicas" class="col-sm-2 control-label">Replicas  </label>
                                 <div class="col-sm-2">
                                   <input type="number" class="form-control"  min="1" max="10" id="replicas" >
                                 </div>
                               </div>
                               <div class="form-group">
-                                <label for="healthCheck" class="col-sm-2 control-label">HealthCheck : </label>
+                                <label for="healthCheck" class="col-sm-2 control-label">HealthCheck  </label>
                                 <div class="col-sm-10">
                                   <input type="text" class="form-control" id="healthCheck">
                                 </div>
                               </div>
+                              <% include ./partials/label %>
 
-
+                              <% include ./partials/port %>
+                              <!--
                               <div class="form-group">
                                 <label for="containerPort" class="col-sm-2 control-label">Container port : </label>
                                 <div class="col-sm-2">
@@ -113,7 +118,7 @@
                               </div>
                               <div class="form-group">
                                 <div id = "portlists"></div>
-                              </div>
+                              </div> -->
                           </form>
 <!-- hidden form -->
 

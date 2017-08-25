@@ -11,6 +11,12 @@ const columns = [{
       field: 'Spec.Name',
       title: 'Name'
   }, {
+      field: 'Spec.Labels',
+      title: '라벨',
+      formatter : function (value , row, index){
+        return JSON.stringify(value);
+      }
+  },{
       field: 'Spec.TaskTemplate.ContainerSpec.Image',
       title: 'Image'
   }, {
@@ -33,6 +39,7 @@ $(function(){
   var $all = {};
   $all.init = function(){
     $(".results").hide();
+    isSwarm();
   };
 
 
@@ -70,10 +77,13 @@ $(function(){
   $all.form.create.portlists = [];
   $all.form.create.$portAdd = $("#portAdd");
   $all.form.create.$portlists = $("#portlists");
-  $all.form.create.dropDown = {
-    $dropDown : $('#imageDropDown'),
-    default : "Images"
-  };
+  // $all.form.create.dropDown = {
+  //   $dropDown : $('#imageDropDown'),
+  //   default : "Images"
+  // };
+  $all.form.create.labellists = [];
+  $all.form.create.$labelAdd = $("#labelAdd");
+  $all.form.create.$labellists = $("#labellists");
 
 
   $all.form.create.initDropdown = function(){
@@ -90,7 +100,14 @@ $(function(){
     var $dropDown =   self.data.$network;
     var attr = "Name";
     // var index = 0;
-    initDropdown(jsonUrl, $contextMenu, $dropDown, { "attr" :  attr});
+    var opts = {
+      "attr" :  attr,
+      "filter" : {
+        "key" : "Driver",
+        "value" : "overlay"
+      }
+    };
+    initDropdown(jsonUrl, $contextMenu, $dropDown, opts);
   }
 
   $all.form.update = {};
@@ -108,11 +125,17 @@ $(function(){
       $portlists : $("#portlistsNew"),
       $protocol :  $("#protocolNew"),
       $containerPort : $("#containerPortNew"),
-      $hostPort : $("#hostPortNew")
+      $hostPort : $("#hostPortNew"),
+      $labelAdd : $("#labelAddNew"),
+      $labellists : $("#labellistsNew"),
+      $key :  $("#keyNew"),
+      $value :  $("#valueNew")
     }
   };
   $all.form.update.$form = $("#detail");
   $all.form.update.formEvent = "UpdateService";
+
+
   $all.form.update.initForm = function(self, row){
 
       var data = row;
@@ -130,14 +153,29 @@ $(function(){
       });
       initDropdown("/myapp/image/data.json", self.$imageMenu, self.$image ,
       {"attr" :  "RepoTags", "index" :  0, "selected" :  data.Spec.TaskTemplate.ContainerSpec.Image.split("@")[0]});
+      var labellistsNew = [];
+      [data.Spec.Labels].some((val)=>{
+        for(var i in val){
+          var filter = {
+            key : i,
+            value : val[i]
+          };
+          labellistsNew.push(filter);
+        }
+      });
+      var $inputLabels = [self.$key, self.$value];
+      console.log(labellistsNew);
+      console.log($inputLabels);
+      initPortLists(self.$labellists, labellistsNew, self.$labelAdd,  $inputLabels );
 
       var portlistsNew = data.Spec.EndpointSpec.Ports.filter((val)=>{   delete val.PublishMode;  return val; });
       var $dataLists =  [self.$protocol, self.$containerPort, self.$hostPort ];
-      initPortLists(self.$portlists, portlistsNew, self.$portAdd,  $dataLists  );
+      console.log(portlistsNew);
+      initPortLists(self.$portlists, portlistsNew, self.$portAdd,  $dataLists );
+      // initPortLists(self.$portlists, portlistsNew, self.$portAdd,  $dataLists );
   }
 
-  $all.connect = {};
-  $all.connect.dockerinfo = "service";
+
   $all.table = {};
   $all.table.main = {
     $table : $(".jsonTable"),

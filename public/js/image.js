@@ -6,23 +6,34 @@
           title: 'Check'
       },{
           field: 'RepoTags',
-          title: 'RepoTags'
+          title: '이미지',
+          sortable : true,
+          halign : "center",
+          align : "center"
       }
       ,{
           field: 'Created',
-          title: 'Created'
+          title: '생성일',
+          halign : "center",
+          align : "center"
       },{
           field: 'Id',
-          title: 'Id'
+          title: '이미지 Id',
+          sortable : true,
+          halign : "center",
+          align : "center"
       }, {
           field: 'Labels',
           title: '라벨',
+          sortable : true,
+          halign : "center",
+          align : "center",
           formatter : function (value , row, index){
             return JSON.stringify(value);
           }
       },{
           field: 'ParentId',
-          title: 'ParentId'
+          title: '부모 Id'
       },{
           field: 'RepoDigests',
           title: 'RepoDigests'
@@ -110,7 +121,7 @@ $(function(){
   $all.table = {};
   $all.table.main = {
     $table : $(".jsonTable"),
-    hideColumns : ["Id", "ImageID", "Ports", "Mounts", "HostConfig", "NetworkingSettings"],
+    hideColumns : ["Id",  "ParentId", "Created", "RepoDigests"],
     columns : columns,
     jsonUrl : '/myapp/image/data.json',
     isExpend : true

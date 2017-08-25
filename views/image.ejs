@@ -74,22 +74,28 @@
                   <input type="number" class="form-control" id="limit"  placeholder="limit">
                 </div>
               </div>
-              <div class="form-group">
-                <label for="filters" class="col-sm-2 control-label">filters: </label>
-                <div class="col-sm-10">
-                  <label class="checkbox-inline">
-                    is_automated <input type="checkbox" id="is_automated" checked data-toggle="toggle" data-on="true"
-                     data-off="false" data-onstyle="success" data-offstyle="danger">
-                  </label>
-                  <label class="checkbox-inline">
-                    is_official <input type="checkbox" id="is_official" checked data-toggle="toggle" data-on="true"
-                     data-off="false" data-onstyle="success" data-offstyle="danger">
-                  </label>
-                  <div class="col-sm-10">
-                    <input type="text" class="form-control" id="stars"  placeholder="stars">
-                  </div>
-                </div>
+              <div class="form-group row">
+                    <div class="col-sm-3">
+                        <label for="is_automated" class="control-label">Automated : </label>
+                    </div>
+                    <div class="col-sm-3">
+                        <label class="checkbox-inline">
+                          <input type="checkbox" id="is_automated" checked data-toggle="toggle" data-on="true"
+                           data-off="false" data-onstyle="success" data-offstyle="danger">
+                        </label>
+                     </div>
+                     <div class="col-sm-2">
+                        <label for="is_official" class="control-label">Official  : </label>
+                     </div>
+
+                     <div class="col-sm-3">
+                         <label class="checkbox-inline">
+                           <input type="checkbox" id="is_official" checked data-toggle="toggle" data-on="true"
+                            data-off="false" data-onstyle="success" data-offstyle="danger">
+                         </label>
+                     </div>
               </div>
+
               <div class="form-group">
                   <div class="row results">
                     <div class="col-md-12">

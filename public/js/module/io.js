@@ -58,6 +58,10 @@ var clientsocket = (function clientsocket(io, $body) {
               data = checkedRowLists;
           }
           else if( (arguments.length === 3) && (typeof opts === "object") ){
+              // data = {
+              //   "checkedRowLists" : checkedRowLists,
+              //   "opts" : opts
+              // };
               data = opts;
           }
            else if (arguments.length === 4 ){
@@ -65,12 +69,13 @@ var clientsocket = (function clientsocket(io, $body) {
           } else {
               return;
           }
-
+          // console.log(data);
           self.$body.spinStart();  /// spinner 시작
           return self.sendEvent(eventName, data, (data)=>{
             (self.$body).spinStop(); /// spinner 정지
-            table.reload();  /// 테이블 갱신
-            self.completeEvent(data); /// 소켓 완료 후 실행 함수
+            if(table){
+              table.reload();  /// 테이블 갱신
+            }
             if(typeof callback !== undefined && typeof callback === "function") {
               callback(data);
             }
@@ -92,6 +97,8 @@ var clientsocket = (function clientsocket(io, $body) {
     *  @return {Function} socket.emit - 소켓 송신
     */
     this.sendEvent = function (eventName, data, callback) {
+        var self = this;
+
         console.log("do event %s , data %s", eventName, data);
 
         var socket =  this.socket;
@@ -100,7 +107,35 @@ var clientsocket = (function clientsocket(io, $body) {
         //// data 서버로 보낼 데이터
         //// callback 서버에서 다시 클라이언트로 보낸 데이터를 받은 후 실행할 콜백 함수
         return socket.emit(eventName, data, (data)=>{
-             callback(data);
+          self.completeEvent(data); /// 소켓 완료 후 실행 함수
+            if(typeof callback === "function"){
+              callback(data);
+            }
+        });
+    };
+
+
+    /** @method  - onlyEvent
+    *  @description 소켓 데이터 송신 함수
+    *  @param {String} eventName - 소켓 이벤트 명
+    *  @param {Object} data - json data
+    *  @param {Function} callback - 콜백 함수
+    *  @return {Function} socket.emit - 소켓 송신
+    */
+    this.onlySendEvent = function (eventName, data, callback) {
+        var self = this;
+
+        console.log("do event %s , data %s", eventName, data);
+
+        var socket =  this.socket;
+        ///// socket.emit (eventName, data, callback)
+        //// eventName 소켓 이벤트 명
+        //// data 서버로 보낼 데이터
+        //// callback 서버에서 다시 클라이언트로 보낸 데이터를 받은 후 실행할 콜백 함수
+        return socket.emit(eventName, data, (data)=>{
+            if(typeof callback === "function"){
+              callback(data);
+            }
         });
     };
 

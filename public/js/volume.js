@@ -24,13 +24,19 @@ const columns = [
         align : "center"
     }, {
         field: 'Options',
-        title: '옵션'
+        title: '옵션',
+        halign : "center",
+        align : "center"
     }, {
         field: 'Scope',
-        title: "스코프"
+        title: "스코프",
+        halign : "center",
+        align : "center"
     }, {
         field: 'Labels',
         title: '라벨',
+        halign : "center",
+        align : "center",
         formatter : function (value , row, index){
           return JSON.stringify(value);
         }
@@ -65,10 +71,14 @@ $(function(){
   $all.form.create.$newForm =  $(".newForm");
   $all.form.create.formName = "볼륨 생성";
   $all.form.create.formEvent = "CreateVolume";
-   $all.form.create.dropDown =  {
-     $dropDown : $('#driverDropDown'),
-     default : "driver"
-   };
+  $all.form.create.labellists = [];
+  $all.form.create.$labelAdd = $(".labelAdd");
+  $all.form.create.$labellists = $(".labellists");
+
+  //  $all.form.create.dropDown =  {
+  //    $dropDown : $('#driverDropDown'),
+  //    default : "driver"
+  //  };
   $all.form.create.initDropdown = function(self){
     var self = self.data;
     var data = ["local"];

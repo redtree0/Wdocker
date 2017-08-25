@@ -527,46 +527,16 @@ var swarm = function(server){
 	}
 
 
-	server.listen("swarmInit", function(data , fn){
-		if(typeof data === "number"){
-			var port = data;
-		}else {
-			port = "2377"
-		}
-	  var ip = getServerIp();
-	  var opts = {
-			"AdvertiseAddr" : ip,
-	    "ListenAddr" :   "0.0.0.0:"+ data,
-	    "ForceNewCluster" : true
-	  };
-
-	  p.swarm.create(opts).then(()=>{
-			p.swarm.getToken().then((result)=>{
-				mongo.system.destroy();
-				mongo.system.save({ "swarmPort" : data,
-				"swarmIP" : ip,
-				"token" : {
-					worker : result.JoinTokens.Worker,
-					manager : result.JoinTokens.Manager
-				}
-			});
-		});
-
-	}).catch((err)=>{
-		console.log(err);
-	});
-		// token : {
-	  //   manager : String,
-	  //   worker : String
-	  // }
+	server.listen("InitSwarm", function(data , fn){
+		p.swarm.init(data, fn);
 	});
 
-	server.listen("swarmLeave", function(data, fn){
+	server.listen("LeaveSwarm", function(data, fn){
 		var opts = {force : data};
 		p.swarm.leave(opts, fn);
 	});
 
-	server.listen("swarmJoin", function(data, fn){
+	server.listen("JoinSwarm", function(data, fn){
 		p.swarm.join(data, fn);
 	});
 
