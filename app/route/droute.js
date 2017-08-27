@@ -64,6 +64,10 @@
         res.render("task.ejs");
   });
 
+  router.get('/test' ,  (req, res) => {
+        res.render("test.ejs");
+  });
+
   router.get('/settings' , (req, res) => {
         res.render("settings.ejs");
   });

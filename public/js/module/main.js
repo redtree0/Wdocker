@@ -287,7 +287,10 @@ var main = (function(){
           button.each(setNewId); //// form 내부 button id 새로 부여
           div.each(setNewId); //// form 내부 div id 새로 부여
 
-          clone.append($("<button/>").addClass("btn btn-primary").attr("id", "update").text("Update"));
+          clone.append($("<button/>").addClass("btn btn-default").attr({
+              "id" : "update",
+              "type" : "button"
+            }).text("Update"));
           self.$form.append(clone);
 
           settings.mainTable.$table.on('click-row.bs.table', function (e, row, $element, field){
@@ -295,7 +298,7 @@ var main = (function(){
 
             clone.show();  /// update From 생긴 후
 
-            self.initForm(self, row); /// data form 초기화
+            self.initUpdateForm(self, row, client); /// data form 초기화
             // initPortLists();
             // initPortLists(self.$labellists, self.labellists, self.$labelAdd,  $dataLists  );
 

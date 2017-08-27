@@ -7,6 +7,9 @@ const columns = [{
   },{
       field: 'ID',
       title: 'ID'
+  },{
+      field: 'Version.Index',
+      title: 'Version'
   }, {
       field: 'Spec.Name',
       title: 'Name'
@@ -51,7 +54,11 @@ $(function(){
   };
   $all.form.getSettingValue = function(getThis) {
     var self = getThis.data;
-    console.log(self.$replicas.val());
+    // console.log(self.$replicas.val());
+    console.log(getThis);
+    console.log(self);
+    console.log(self.$image);
+    console.log(self.$image.text());
     return {
       "Image" : self.$image.text().trim(),
       "Name" : self.$name.val(),
@@ -113,34 +120,39 @@ $(function(){
   $all.form.update = {};
   $all.form.update.getSelector = function (){
     return {
+      "data" : {
 
-      $imageMenu : $("#imageMenu"),
-      $image : $('#imageDropDownNew'),
-      $networkMenu : $("#networkMenu"),
-      $network : $('#networkDropDownNew'),
-      $name : $("#serviceNameNew"),
-      $command : $("#commandNew"),
-      $replicas : $("#replicasNew"),
-      $portAdd : $("#portAddNew"),
-      $portlists : $("#portlistsNew"),
-      $protocol :  $("#protocolNew"),
-      $containerPort : $("#containerPortNew"),
-      $hostPort : $("#hostPortNew"),
-      $labelAdd : $("#labelAddNew"),
-      $labellists : $("#labellistsNew"),
-      $key :  $("#keyNew"),
-      $value :  $("#valueNew")
+        $imageMenu : $("#imageMenu"),
+        $image : $('#imageDropDownNew'),
+        $networkMenu : $("#networkMenu"),
+        $network : $('#networkDropDownNew'),
+        $name : $("#serviceNameNew"),
+        $command : $("#commandNew"),
+        $replicas : $("#replicasNew"),
+        $portAdd : $("#portAddNew"),
+        $portlists : $("#portlistsNew"),
+        $protocol :  $("#protocolNew"),
+        $containerPort : $("#containerPortNew"),
+        $hostPort : $("#hostPortNew"),
+        $labelAdd : $("#labelAddNew"),
+        $labellists : $("#labellistsNew"),
+        $key :  $("#keyNew"),
+        $value :  $("#valueNew"),
+        portlistsNew : [],
+        labellistsNew : []
+      }
     }
   };
   $all.form.update.$form = $("#detail");
   $all.form.update.formEvent = "UpdateService";
 
-
-  $all.form.update.initForm = function(self, row){
-
+  $all.form.update.initUpdateForm = function(self, row, client){
       var data = row;
+      var getSelector = self.getSelector()
+      var self = getSelector.data;
 
-      var self = self.getSelector();
+      var Id = data.ID;
+      var version = data.Version.Index;
 
       self.$name.val(data.Spec.Name);
       self.$command.val(data.Spec.TaskTemplate.ContainerSpec.Command);
@@ -153,26 +165,45 @@ $(function(){
       });
       initDropdown("/myapp/image/data.json", self.$imageMenu, self.$image ,
       {"attr" :  "RepoTags", "index" :  0, "selected" :  data.Spec.TaskTemplate.ContainerSpec.Image.split("@")[0]});
-      var labellistsNew = [];
+      // var labellistsNew = [];
       [data.Spec.Labels].some((val)=>{
         for(var i in val){
           var filter = {
             key : i,
             value : val[i]
           };
-          labellistsNew.push(filter);
+          self.labellistsNew.push(filter);
         }
       });
       var $inputLabels = [self.$key, self.$value];
-      console.log(labellistsNew);
-      console.log($inputLabels);
-      initPortLists(self.$labellists, labellistsNew, self.$labelAdd,  $inputLabels );
+      initPortLists(self.$labellists, self.labellistsNew, self.$labelAdd,  $inputLabels );
 
-      var portlistsNew = data.Spec.EndpointSpec.Ports.filter((val)=>{   delete val.PublishMode;  return val; });
+      self.portlistsNew = data.Spec.EndpointSpec.Ports.filter((val)=>{   delete val.PublishMode;  return val; });
       var $dataLists =  [self.$protocol, self.$containerPort, self.$hostPort ];
-      console.log(portlistsNew);
-      initPortLists(self.$portlists, portlistsNew, self.$portAdd,  $dataLists );
-      // initPortLists(self.$portlists, portlistsNew, self.$portAdd,  $dataLists );
+      // console.log(portlistsNew);
+      initPortLists(self.$portlists, self.portlistsNew, self.$portAdd,  $dataLists );
+
+      $("#update").click((e)=>{
+        console.log("do");
+        var config = require("./module/config");
+        // var socket = io();
+        // var Socket = require("./module/io");
+        // var client = new Socket(socket, $('body'));
+        // var self = $all.form.update.getSelector
+        config.setService($all.form.getSettingValue(getSelector)
+        , self.labellistsNew
+        , self.portlistsNew);
+        // $all.form.update.getSelector
+        // (settings.form.getSettingValue(self), self.labellists,  self.portlists );
+        var opts = config.getService();
+        opts.Id = Id;
+        opts.version = version;
+        console.log("table");
+        console.log($(".jsonTable"));
+        client.sendEvent("UpdateService", opts, ()=>{
+          refresh();
+        });
+      });
   }
 
 
@@ -198,12 +229,6 @@ $(function(){
   };
 
 
-  // $all.update = {};
-  // $all.update = {
-  //     $button : $("#update"),
-  //     eventName : "RemoveService",
-  //     clickEvent : clickDefault
-  // };
 
   $all.completeEvent = function(data, callback){
       if(hasValue(data)){
@@ -219,9 +244,22 @@ $(function(){
     var main = require("./module/main.js");
     main.init($all);
   var serviceTable = main.getMainTable();
-
+  var client = main.getSocket();
   var $detail = $("#detail");
-
+  // $("#update").click((e)=>{
+  //   function setSettings (json, labellists, portArray){
+  //     var config = require("./config");
+  //     var self = settings.form.settingMethod;
+  //     config[self.set](json, labellists, portArray);
+  //
+  //     return  config[self.get]();
+  //   }
+  //   // console.log(self.getSettingValue());
+  //   var opts = setSettings(settings.form.getSettingValue(self), self.labellists,  self.portlists ); /// docker 데이터 설정
+  //
+  //
+  //       client.sendEventTable(self.formEvent, settings.mainTable, opts);
+  // });
   // serviceTable.clickRow($detail);
   // var clone = $("#hiddenForm").clone().attr("id", "updateForm");
   // var input = clone.find("input");

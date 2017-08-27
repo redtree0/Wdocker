@@ -62,11 +62,8 @@ $(function(){
   main.init($all);
 
 
-    $.getJSON("/myapp/service/data.json", (data)=>{
-      console.log(data[0].Endpoint.Ports);
-    });
     $.getJSON("/myapp/node/data.json", (data)=>{
-      console.log(data.length);
+      // console.log(data.length);
       var col = null;
       if(data.length === 1) {
          col = "col-md-12";
@@ -92,7 +89,7 @@ $(function(){
       }));
         for(var i in data){
           rowIndex = rowIndex++ / 3;
-          console.log(data[i]);
+          // console.log(data[i]);
           var role = data[i].Spec.Role;
           var nodeID = data[i].ID;
           var hostname = data[i].Description.Hostname;
@@ -112,24 +109,38 @@ $(function(){
           }).html(msg) );
         }
         $.getJSON("/myapp/task/data.json", (data)=>{
-            // console.log(JSON.stringify(data));
+            // var before = 0;
+            // function getMax(arr, prop) {
+            //     var max;
+            //     for (var i=0 ; i<arr.length ; i++) {
+            //         if (!max || parseInt(arr[i][prop]) > parseInt(max[prop]))
+            //             max = arr[i];
+            //     }
+            //     return max;
+            // }
+            //
+            // var maxVersion = getMax(data, "Version.Index");
             for(var i in data){
-
               var taskinfo =   data[i];
-              var nodeID =taskinfo.NodeID;
-              var insert = "[Task]"
-               + " <br/> Image : " + taskinfo.Spec.ContainerSpec.Image.split("@")["0"]
-               + " <br/> Command : " + taskinfo.Spec.ContainerSpec.Command
-               +  " <br/> State : " + taskinfo.Status.State
-               + " <br/> IP : " + taskinfo.NetworksAttachments["0"].Addresses["0"]
-               + "<br/> Network : " + taskinfo.NetworksAttachments["0"].Network.Spec.Name;
-              var task = $("<div/>").attr({
-                      class : "alert alert-info text-left",
+
+              // if(maxVersion.Version.Index === taskinfo.Version.Index ){
+                    var nodeID =taskinfo.NodeID;
+
+                    var insert = "[Task]"
+                    + " <br/> Image : " + taskinfo.Spec.ContainerSpec.Image.split("@")["0"]
+                    + " <br/> Version : " + taskinfo.Version.Index
+                    + " <br/> Command : " + taskinfo.Spec.ContainerSpec.Command
+                    +  " <br/> State : " + taskinfo.Status.State
+                    + " <br/> IP : " + taskinfo.NetworksAttachments["0"].Addresses["0"]
+                    + "<br/> Network : " + taskinfo.NetworksAttachments["0"].Network.Spec.Name;
+                    var task = $("<div/>").attr({
+                      class : "alert alert-info text-left disabled",
                     }).html(insert);
-              $("#" + nodeID).append(task);
-              if($("#" + nodeID).children().length > 0){
-                $("#" + nodeID).css("height", "auto");
-              }
+                    $("#" + nodeID).append(task);
+                    if($("#" + nodeID).children().length > 0){
+                      $("#" + nodeID).css("height", "auto");
+                    }
+              // }
             }
         });
 

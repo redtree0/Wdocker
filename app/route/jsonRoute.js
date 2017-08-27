@@ -65,8 +65,10 @@
   });
 
   router.get( '/swarm/data.json' , (req, res) => {
+    p.swarm.getAllLists({}, resCallback.bind(null, res), failureCallback.bind(null, res));
+
     // p.swarm.getAllLists(null, resCallback.bind(null, res));
-    docker.swarmInspect().then(resCallback.bind(null, res), failureCallback.bind(null, res));
+    // docker.swarmInspect().then(resCallback.bind(null, res), failureCallback.bind(null, res));
     // p.swarm.getAllLists({}, resCallback.bind(null, res));
 
     // promiseTojson(docker.swarmInspect(), res);

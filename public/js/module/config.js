@@ -234,6 +234,7 @@ var config = (function(){
     };
 
     var setService = function (filter, labellists, portlists){
+      console.log("argument");
       console.log(arguments);
       var opts = service;
       opts.Name = filter.Name;
@@ -243,18 +244,38 @@ var config = (function(){
       opts.TaskTemplate.Networks = [ {"Target" : filter.Network }] ;
 
       for ( var i in portlists) {
-        var portinfo = {
-          "Protocol": portlists[i].protocol,
-          "PublishedPort": parseInt(portlists[i].hostPort),
-          "TargetPort": parseInt(portlists[i].containerPort)
+        console.log("portData");
+        console.log(portlists[i]);
+        if(portlists[i].hasOwnProperty("protocolNew") && portlists[i].hasOwnProperty("containerPortNew")
+            && portlists[i].hasOwnProperty("hostPortNew")){
+          var portinfo = {
+            "Protocol": portlists[i].protocolNew,
+            "PublishedPort": parseInt(portlists[i].hostPortNew),
+            "TargetPort": parseInt(portlists[i].containerPortNew)
+          }
+          console.log(portinfo);
+        }else {
+          var portinfo = {
+            "Protocol": portlists[i].protocol,
+            "PublishedPort": parseInt(portlists[i].hostPort),
+            "TargetPort": parseInt(portlists[i].containerPort)
+          }
+
         }
         opts.EndpointSpec.Ports.push(portinfo);
       }
 
       var key = null;
       for ( var i in labellists) {
-        key = labellists[i].key;
-        opts.Labels[key] = labellists[i].value;
+
+        if(labellists[i].hasOwnProperty("keyNew") && labellists[i].hasOwnProperty("valueNew")){
+          key = labellists[i].keyNew;
+          opts.Labels[key] = labellists[i].valueNew;
+        }else{
+          key = labellists[i].key;
+          opts.Labels[key] = labellists[i].value;
+        }
+
       }
 
       console.log(opts);

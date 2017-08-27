@@ -199,7 +199,7 @@ $(function(){
             var opts = config.getSwarmInit();
             // console.log(opts);
             client.sendEvent(eventName , opts, ()=>{
-              setTimeout(()=>{location.reload(true)}, 3000);
+              refresh();
             });
 
           }

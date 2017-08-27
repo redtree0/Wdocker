@@ -526,10 +526,19 @@ var swarm = function(server){
 			return result;
 	}
 
+	server.listen("CreateSwarm", function(data , fn){
+		p.swarm.create(data, fn);
+	});
 
 	server.listen("InitSwarm", function(data , fn){
 		p.swarm.init(data, fn);
 	});
+
+	server.listen("LoadSwarm", function(data , fn){
+		console.log(data);
+		p.swarm.load(data, fn);
+	});
+
 
 	server.listen("LeaveSwarm", function(data, fn){
 		var opts = {force : data};
@@ -540,7 +549,7 @@ var swarm = function(server){
 		p.swarm.join(data, fn);
 	});
 
-	server.listen("throwNode", function(data, fn){
+	server.listen("ThrowNode", function(data, fn){
 		p.swarm.throwNode(data, fn);
 	});
 }
@@ -554,6 +563,10 @@ var node = function(server){
 	// 	// p.node.start(data, fn);
 	// 	// mongo.system.find()
 	// });
+	server.listen("LoadNode", function(data , fn){
+		console.log(data);
+		p.node.load(data, fn);
+	});
 
 	server.listen("StopNode", function(data, fn){
 		// var opts = {force : data};
@@ -581,8 +594,8 @@ var service = function(server){
 	});
 
 	server.listen("UpdateService", function(data, fn){
-		// p.service.remove(data, fn);
 		console.log(data);
+		p.service.update(data, fn);
 	});
 }
 

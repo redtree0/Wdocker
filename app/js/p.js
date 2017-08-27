@@ -603,6 +603,167 @@ var mongo = require("./mongoController.js");
     (function(){
       var self = this;
       self.getLists = "swarmInspect";
+      self.getAllLists = function(data, callback){
+        var self = this;
+
+        if(self.getLists !== null){
+          var dockerInfo = self.docker[self.getLists]();
+        }
+        mongo.docker.show( (result)=>{
+          // callback(result);
+          console.log(result);
+          for(var i in result){
+            console.log(result[i]);
+            var hostconfig = {
+              host : result[i].ip,
+              port : result[i].port
+            }
+            if(getServerIp() === result.ip){
+              var dockerInfo = self.docker[self.getLists]();
+              dockerInfo.then((data)=>{
+                return callback(data);
+
+              }).catch((err)=>{
+                console.log(err);
+              });
+            }else {
+              self.setRemoteDocker(hostconfig);
+              var dockerInfo = self.remoteDocker[self.getLists]();
+              dockerInfo.then((data)=>{
+                return  callback(data);
+              }).catch((err)=>{
+                console.log(err);
+              });
+            }
+          }
+        });
+        // return new Promise(function(resolve, reject){
+        //   resolve(dockerInfo);
+        // }).then(successCallback, failCallback);
+
+      };
+      var os = require("os");
+      function getServerIp() {
+    			var ifaces = os.networkInterfaces();
+    			var result = '';
+    			for (var dev in ifaces) {
+    					var alias = 0;
+    					if(dev === "eth0"){
+    						ifaces[dev].forEach(function(details) {
+    							if (details.family == 'IPv4' && details.internal === false) {
+    								result = details.address;
+    								++alias;
+    							}
+    						});
+    					}
+    			}
+
+    			return result;
+    	}
+      /** @method  - create
+      *  @description swarm 초기화
+      *  @param {Object} data - 설정 데이터
+      *  @param {Function} callback - 클라이언트로 보낼 callback
+      */
+      self.create = function (data, callback) {
+        console.log(data);
+        var managerToken = data.managerToken;
+        var workerToken = data.workerToken;
+        var swarmJoin = {
+          "AdvertiseAddr": "",
+          "ListenAddr": "0.0.0.0:" +  data.swarmPort,
+          "RemoteAddrs": [data.leader[0].ip + ":" + data.swarmPort],
+          "JoinToken": ""
+        }
+        var hostconfig = {};
+        // host : data.AdvertiseAddr,
+        // port : data.port
+        // var opts = swarmJoin;
+        // opts.ListenAddr = "0.0.0.0:" + filter.managerPort ;
+        // opts.AdvertiseAddr = filter.ip ;
+        // opts.RemoteAddrs = [window.location.hostname + ":"+ filter.managerPort];
+        // opts.JoinToken = filter.token;
+        // opts.port = filter.port;
+        // swarmJoin = opts;
+        var workers = data.workers;
+        console.log("worker");
+        for(var i in workers){
+          hostconfig.host = workers[i].ip;
+          hostconfig.port = workers[i].port;
+
+          swarmJoin.AdvertiseAddr = workers[i].ip;
+          swarmJoin.JoinToken = workerToken;
+          console.log("host");
+          console.log(hostconfig);
+          console.log("swarm");
+          console.log(swarmJoin);
+          var docker = null;
+          if(hostconfig.host === getServerIp()){
+            docker = self.docker;
+          }else{
+            self.setRemoteDocker(hostconfig);
+            docker = self.remoteDocker;
+          }
+          console.log(docker);
+          // self.docker.swarmLeave({force : true}).then( (err, data)=>{
+          //   console.log(err);
+          //   console.log(data);
+            // self.docker.swarmJoin(swarmJoin).then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));
+          // });
+// .then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));
+docker.swarmLeave({force : true}).then((data)=>{
+  setTimeout(()=>{
+    docker.swarmJoin(swarmJoin).then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));
+  }, 5000);
+});
+
+          // docker.swarmJoin(swarmJoin).then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));
+
+        }
+        var managers = data.managers;
+        console.log("manager");
+
+        for(var i in managers){
+          // p.swarm.join(data, fn);
+          hostconfig.host = managers[i].ip;
+          hostconfig.port = managers[i].port;
+
+          swarmJoin.AdvertiseAddr = managers[i].ip;
+          swarmJoin.JoinToken = managerToken;
+          console.log("host");
+          console.log(hostconfig);
+          console.log("swarm");
+          console.log(swarmJoin);
+          var docker = null;
+          if(hostconfig.host === getServerIp()){
+            docker = self.docker;
+          }else{
+            self.setRemoteDocker(hostconfig);
+            docker = self.remoteDocker;
+          }
+          console.log(docker);
+          console.log(swarmJoin);
+          docker.swarmLeave({force : true}).then((data)=>{
+            setTimeout(()=>{
+              docker.swarmJoin(swarmJoin).then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));
+            }, 5000);
+          });
+
+          // docker.swarmJoin(swarmJoin).then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));
+
+          // self.docker.swarmLeave({force : true}).then( (err, data)=>{
+          //   console.log(err);
+          //   console.log(data);
+          //   self.docker.swarmJoin(swarmJoin).then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));
+          // });
+
+
+          // self.setRemoteDocker(hostconfig);
+          // console.log(managers[i]);
+        }
+        // return self.docker.swarmInit(data).then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));
+
+      };
 
       /** @method  - init
       *  @description swarm 초기화
@@ -610,9 +771,36 @@ var mongo = require("./mongoController.js");
       *  @param {Function} callback - 클라이언트로 보낼 callback
       */
       self.init = function (data, callback) {
+        var docker = null;
+        if(data.port === null) {
+          docker = self.docker;
+        }else {
+          var hostconfig = {
+            host : data.host,
+            port : data.port
+          }
+          console.log(hostconfig);
+          self.setRemoteDocker(hostconfig);
+          docker = self.remoteDocker;
+        }
+        return docker.swarmInit(data).then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));
 
-        return self.docker.swarmInit(data).then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));
+      };
 
+      /** @method  - Load
+      *  @description swarm Load
+      *  @param {Object} data - 설정 데이터
+      *  @param {Function} callback - 클라이언트로 보낼 callback
+      *  @return {Object} promise
+      */
+      self.load = function (data, callback){
+        console.log(data);
+        var hostconfig = data;
+        self.setRemoteDocker(hostconfig);
+
+        return new Promise(function(resolve, reject){
+          resolve(self.remoteDocker.swarmInspect())
+        }).then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));
       };
 
       /** @method  - leave
@@ -643,7 +831,7 @@ var mongo = require("./mongoController.js");
       *  @param {Function} callback - 클라이언트로 보낼 callback
       */
       self.join = function (data, callback){
-        var config = data.RemoteAddrs[0].split(":");
+
         var hostconfig = {
           host : data.AdvertiseAddr,
           port : data.port
@@ -667,16 +855,15 @@ var mongo = require("./mongoController.js");
       */
       self.throwNode = function (data, callback){
         var hostconfig = {
-          host : data.host,
+          // host : data.host,
+          host : data.ip,
           port : data.port
         }
-
+        console.log(hostconfig);
         self.setRemoteDocker(hostconfig);
+        console.log("throwNode");
 
-        return self.remoteDocker.swarmLeave({force : data.type}).then( (err, data)=>{
-          console.log(err);
-          console.log(data);
-        });
+        return self.remoteDocker.swarmLeave({force : true})  .then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));
       };
 
     }).call(swarm);
@@ -688,6 +875,21 @@ var mongo = require("./mongoController.js");
       self.getLists = "listNodes";
       self.attr = "ID"
 
+      /** @method  - load
+      *  @description node load
+      *  @param {Object} data - 설정 데이터
+      *  @param {Function} callback - 클라이언트로 보낼 callback
+      *  @return {Object} dotask
+      */
+      self.load = function (data, callback){
+        console.log(data);
+        var hostconfig = data;
+        self.setRemoteDocker(hostconfig);
+
+        return new Promise(function(resolve, reject){
+          resolve(self.remoteDocker.listNodes())
+        }).then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));
+      };
       /** @method  - remove
       *  @description node remove
       *  @param {Object} data - 설정 데이터
@@ -695,7 +897,14 @@ var mongo = require("./mongoController.js");
       *  @return {Object} dotask
       */
       self.remove = function (data, callback){
-        return self.doTask(data, callback, {force: true},"remove");
+        var hostconfig = data.leader;
+        self.setRemoteDocker(hostconfig);
+        console.log(data.nodeID);
+        console.log(data);
+        var node = self.remoteDocker[self.getInfo](data.remove.nodeID);
+        console.log(node);
+        return node.remove().then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));
+        // return self.doTask(data, callback, {force: true},"remove");
       };
 
       /** @method  - update
@@ -752,6 +961,28 @@ var mongo = require("./mongoController.js");
         return self.doTask(data, callback, "remove");
       };
 
+      /** @method  - remove
+      *  @description service remove
+      *  @param {Object} data - 설정 데이터
+      *  @param {Function} callback - 클라이언트로 보낼 callback
+      *  @return {Object} dotask
+      */
+      self.update = function(data, callback){
+        console.log(data.Id);
+        var getService = (self.docker)[self.getInfo](data.Id);
+        delete data.Id
+
+        console.log(data.version);
+        console.log(getService);
+        console.log(data);
+        return getService.update( data).then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));
+        // mongo.auth.show((result)=>{
+        //   var auth = (result[0]);
+        //   console.log(auth);
+        //   // auth.version = 100;
+        //   return getService.update( data).then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));
+        // })
+      };
 
       /** @method  - inspect
       *  @description service inspect
