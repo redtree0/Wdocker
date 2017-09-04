@@ -124,11 +124,11 @@ $(function(){
   $all.form.create.$newForm =  $(".newForm");
   $all.form.create.formEvent = "CreateContainer";
   $all.form.create.portlists = [];
-  $all.form.create.$portAdd = $(".portAdd");
-  $all.form.create.$portlists = $(".portlists");
+  $all.form.create.$portAdd = $("#portAdd");
+  $all.form.create.$portlists = $("#portlists");
   $all.form.create.labellists = [];
-  $all.form.create.$labelAdd = $(".labelAdd");
-  $all.form.create.$labellists = $(".labellists");
+  $all.form.create.$labelAdd = $("#labelAdd");
+  $all.form.create.$labellists = $("#labellists");
 
   $all.form.create.initDropdown = function(self){
     var self = self.data;

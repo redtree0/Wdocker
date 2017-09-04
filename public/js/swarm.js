@@ -1,186 +1,230 @@
-"use strict";
 
-const swarmColumns = [ {
-      field: 'status',
-      title: '상태',
-      halign : "center",
-      align : "center",
-      width : "5%",
-      formatter : function (value , row, index){
-        // console.log(row);
-        var status = "<span class='glyphicon glyphicon-record text-success'></span>";
-        return status;
+
+$(function  () {
+
+
+  var hosts = [];
+  var swarmToken = {};
+  var leaderPort = null;
+  var isSwarm = false;
+
+    $("#leader").addClass("simple_with_animation");
+
+    $.getJSON("/myapp/settings/data.json", function(json, textStatus){
+      // console.log(json);
+      json.forEach((data)=>{
+        var node = data.ip + ":" + data.port;
+        hosts.push({ "ip" : data.ip , "port" : data.port });
+        var $li = $("<li/>").attr({
+          class : "highlight",
+          "data-id" : data.ip ,
+          "ip" : data.ip ,
+          "data-name" : data.port,
+          "port" : data.port
+        }).text(node);
+        $("#initlists").append($li);
+
+      })
+    });
+
+
+    var adjustment;
+
+   var group =  $("ol.simple_with_animation").sortable({
+      group: 'simple_with_animation',
+      pullPlaceholder: false,
+      delay: 500,
+
+      // animation on drop
+      isValidTarget: function  ($item, container) {
+        // console.log("isValidTarget");
+        var id = $item.attr("data-id");
+        // console.log($(container.el).attr("id"));
+        // console.log($("#managers").attr("id"));
+        // console.log($("#workers").attr("id"));
+        if($(container.el).attr("id") === $("#managers").attr("id")){
+        if($("#managers").find("li:contains("+ id +")").length >= 1){
+          return  $item.parent("ol")[0] == container.el[0];
+        }
+         }else if ($(container.el).attr("id") === $("#workers").attr("id")) {
+        if($("#workers").find("li:contains("+ id +")").length >= 1){
+          return  $item.parent("ol")[0] == container.el[0];
+        }
+        }
+        if($(container.target).attr('id')=== "leader" && $(container.target).children().length >= 1){
+          return  $item.parent("ol")[0] == container.el[0];
+        } else
+        if($item.is(".highlight"))
+          return true;
+        else  if($item.is(".placeholder")){
+          return  $item.parent("ol")[0] == container.el[0];
+        }
+        else
+          return $item.parent("ol")[0] == container.el[0];
+      },
+      onDrop: function  ($item, container, _super) {
+        var $clonedItem = $('<li/>').css({height: 0});
+        $item.before($clonedItem);
+        // console.log("onDrop");
+
+        $clonedItem.animate({'height': $item.height()});
+        // if($("#leader").find("li").length)
+        var data = group.sortable("serialize").get();
+        // console.log(data);
+        var jsonString = JSON.stringify(data, null, ' ');
+        // console.log(jsonString);
+        $item.animate($clonedItem.position(), function  () {
+          $clonedItem.detach();
+          _super($item, container);
+        });
+      },
+
+      // set $item relative to cursor position
+      onDragStart: function ($item, container, _super) {
+        var offset = $item.offset(),
+            pointer = container.rootGroup.pointer;
+        // console.log("onDragStart");
+
+        adjustment = {
+          left: pointer.left - offset.left,
+          top: pointer.top - offset.top
+        };
+
+        _super($item, container);
+      },
+      onDrag: function ($item, position) {
+        // console.log("onDrag");
+
+        $item.css({
+          left: position.left - adjustment.left,
+          top: position.top - adjustment.top
+        });
+      },
+
+      onMousedown: function ($item, _super, event) {
+        if (!event.target.nodeName.match(/^(input|select|textarea)$/i)) {
+          event.preventDefault()
+          return true
+        }
       }
-    },  {
-      field: 'ip',
-      title: '호스트 IP',
-      sortable : true,
-      halign : "center",
-      align : "center"
-    }, {
-      field: 'port',
-      title: '호스트 Port',
-      sortable : true,
-      halign : "center",
-      align : "center"
-    },{
-      title: 'Swarm Role',
-      width : "5%",
-      formatter : function (value , row, index){
-        var toggle = "<input class='joinType'"+ "id='joinType" + index  +"' type='checkbox' data-toggle='toggle'>";
+    });
 
-        return toggle;
-      }
-    }, {
-      field: 'join',
-      title: 'Swarm Join',
-      halign : "center",
-      align : "center",
-      width : "5%",
-      formatter : function (value , row, index){
-        return "<button type='button' class='btn btn-primary join'>join</button>"
-      }
-    },{
-      title: 'leave 유형',
-      width : "5%",
-      formatter : function (value , row, index){
-        var toggle = "<input class='leaveType'"+ "id='leaveType" + index  +"' type='checkbox' data-toggle='toggle'>";
-
-        return toggle;
-      }
-    }, {
-      field: 'leave',
-      title: 'Swarm Leave',
-      halign : "center",
-      align : "center",
-      width : "5%",
-      formatter : function (){
-        return "<button type='button' class='btn btn-danger leave'>leave</button>"
-
-      }
-    }];
-
-
-const nodeColumns = [{
-      checkbox: true,
-      title: 'Check'
-  },{
-      field: 'ID',
-      title: 'Node ID',
-      halign : "center",
-      align : "center"
-  }, {
-      field: 'CreatedAt',
-      title: '생성일',
-      halign : "center",
-      align : "center"
-  }, {
-      field: 'Spec.Role',
-      title: 'Role',
-      halign : "center",
-      align : "center"
-  }, {
-      field: 'Version.Index',
-      title: '버전',
-      halign : "center",
-      align : "center"
-  }, {
-      field: 'Spec.Availability',
-      title: 'Availability',
-      halign : "center",
-      align : "center"
-  }, {
-      field: 'Description.Hostname',
-      title: 'Hostname',
-      halign : "center",
-      align : "center"
-  }, {
-      field: 'Description.Platform.Architecture',
-      title: 'Architecture',
-      halign : "center",
-      align : "center"
-  }, {
-      field: 'Description.Platform.OS',
-      title: 'OS',
-      halign : "center",
-      align : "center"
-  }, {
-      field: 'ManagerStatus.Addr',
-      title: 'Manager IP',
-      halign : "center",
-      align : "center"
-  }, {
-      field: 'Status.State',
-      title: '상태',
-      halign : "center",
-      align : "center"
-  }, {
-      field: 'Status.Addr',
-      title: '호스트 IP',
-      halign : "center",
-      align : "center"
-  }];
-
-
-$(function(){
-    $('.ip_address').mask('0ZZ.0ZZ.0ZZ.0ZZ', { translation: { 'Z': { pattern: /[0-9]/, optional: true } } });
-    var $all = {};
-    var swarmToken = {};
-    var managerinfo = null;
-    $all.init = function(){
-        initDropdownArray(["Active", "Pause", "Drain"], $(".dropdown-menu") , $("#availability"));
-
-          $.getJSON('/myapp/swarm/data.json', function(json, textStatus) {
-            function addRowText( _class,  _text, _id){
-              return $('<div/>', { class: _class, text: _text, id : _id  });
+    var socket = io();
+    var Socket = require("./module/io");
+    var client = new Socket(socket, $('body'));
+    function nodeDataMapping(search){
+      var data = group.sortable("serialize").get();
+      data.splice(0,1);
+      // console.log(data);
+      for(var i in data){
+        var type = (data[i]);
+        console.log(type);
+        for(var j in type){
+          type[j].ip = type[j].id; // ip
+          type[j].nodeID = type[j].name;
+          // type[j].version = type[j].version;
+          delete type[j].id;
+          for(var k in hosts){
+            // console.log(search);
+            // console.log(type[j].ip);
+            if(hosts[k].ip === type[j].ip){
+              type[j].port = hosts[k].port;
             }
-            function addNewRow( _id ){
-              return $('<div/>', { class: "row", id : _id });
+            if (search === type[j].ip){
+             return type[j];
             }
+            // else if (search === type[j].ip){
+            //   hosts[k].nodeID = type[j].name;
+            //   return hosts[k];
+            // }
+          }
 
-            var indexCol = "col-md-2";
-            var dataCol = "col-md-10";
-            if(json.statusCode === 503){
-              alert("swarm 구성 필요합니다.");
-            }else {
-              $(".token").append(addNewRow("manager"));
-              $("#manager").append(createElement("<button/>", indexCol + " btn btn-primary", "Manager", "Manager"));
-              $("#manager").append(addRowText(dataCol, json.JoinTokens.Manager, "managerToken"));
-              $(".token").append(addNewRow("worker"));
-              $("#worker").append(createElement("<button/>", indexCol + " btn btn-default", "Worker", "Worker"));
-              $("#worker").append(addRowText(dataCol, json.JoinTokens.Worker, "workerToken"));
-              swarmToken.manager = json.JoinTokens.Manager;
-              swarmToken.worker = json.JoinTokens.Worker;
+        }
+      }
+      console.log(data);
+      return data;
+    }
 
-              $.getJSON('/myapp/node/data.json', function(json, textStatus) {
-                for(var i in json){
-                  if(json[i].hasOwnProperty("ManagerStatus")){
-                    if(json[i].ManagerStatus.Leader === true){
-                      managerinfo = (json[i].ManagerStatus.Addr);
-                    }
-                  }
-                }
-              });
+    function getLeader(){
+      var host = $("#leader").find("li").text().split(":");
+      var opts = {};
+      opts.host = host[0];
+      opts.port = host[1];
+      return opts;
+    }
+
+    $(document).on('click','.delete',function(){
+      var host = $(this).parent().text();
+      console.log(host);
+      var data = nodeDataMapping(host);
+      console.log("delete");
+      console.log(data);
+      $(this).parent().remove();
+      var leader = getLeader();
+      console.log("leader");
+      var opts = {
+        "leader" : leader,
+        "remove" : data
+      }
+      console.log(opts);
+      client.sendEvent("ThrowNode", data, (data)=>{
+        console.log("ThrowNode");
+        console.log(data);
+        client.sendEvent("RemoveNode", opts, (data)=>{
+          console.log("RemoveNode");
+          var dialog = require("./module/dialog.js");
+
+          var finished = new dialog("Swarm & Node", data);
+          finished.setDefaultButton('Close[Enker]', 'btn-primary create');
+          finished.show();
+          console.log(data);
+        });
+
+      });
+
+    });
+
+    $(".update").click(function(){
+
+
+        function getElementJson($lists){
+          var lists = [];
+          $lists.each(function(){
+            var ip = $(this).attr("ip");
+            var port = $(this).attr("port");
+            console.log(ip);
+            console.log(port);
+            if(!$(this).hasClass("loaded")){
+              lists.push({"ip" : ip , "port" : port});
             }
           });
+          return lists;
+        }
 
-    };
+        // console.log(data);
+        var opts = {
+          "leader" : getElementJson($("#leader li")),
+          "managers" : getElementJson($("#managers li")),
+          "workers" : getElementJson($("#workers li")),
+          "managerToken" : swarmToken.manager,
+          "workerToken" : swarmToken.worker,
+          "swarmPort" : leaderPort
+        }
 
+        console.log(opts);
+        client.sendEvent("UpdateSwarm", opts, (data)=>{
+          var dialog = require("./module/dialog.js");
 
-    $all.table = {};
-    $all.table.main = {
-      $table : $("#nodeTable"),
-      columns : nodeColumns,
-      hideColumns : ["CreatedAt"],
-      jsonUrl : '/myapp/node/data.json',
-      isExpend : false
-    };
-    $all.table.sub = {
-      $table : $("#swarmTable"),
-      columns : swarmColumns,
-      jsonUrl : '/myapp/settings/data.json',
-    }
-    // $all.form = {};
+          var finished = new dialog("Swarm & Node", data);
+          finished.setDefaultButton('Close[Enker]', 'btn-primary create');
+          finished.show();
+          refresh();
+          // console.log(data);
+        });
+        // console.log(hosts);
+    });
+
+    var $all = {};
     $all.event = {};
     function clickDefault(client, eventName, table){
       return function(){
@@ -195,14 +239,90 @@ $(function(){
         clickEvent : function(client, eventName, table){
           return function(){
             var $swarmPort = $("#swarmPort");
-            config.setSwarmInit({port : $swarmPort.val()});
+            var data = group.sortable("serialize").get();
+
+            var host = $("#leader").find("li").text().split(":");
+            config.setSwarmInit({"ip" : host[0], "port" : $swarmPort.val()});
             var opts = config.getSwarmInit();
-            // console.log(opts);
+
+            opts.host = host[0];
+            opts.port = host[1];
+
             client.sendEvent(eventName , opts, ()=>{
               refresh();
             });
 
           }
+        }
+    };
+
+    $all.event.load = {
+        $button : $(".load"),
+        eventName : "LoadSwarm",
+        clickEvent : function(client, eventName, table){
+          return function(){
+            // var host = $("#leader").find("li").text().split(":");
+            // var opts = {};
+            // opts.host = host[0];
+            // opts.port = host[1];
+            var leader = getLeader();
+            client.onlySendEvent(eventName , leader, (data)=>{
+              console.log("loadSwarm");
+              console.log(data.msg.JoinTokens);
+              swarmToken.manager = data.msg.JoinTokens.Manager;
+              swarmToken.worker = data.msg.JoinTokens.Worker;
+
+              // setTimeout(()=>{location.reload(true)}, 3000);
+            });
+            client.sendEvent("LoadNode" , leader, (data)=>{
+              console.log(data.msg);
+              var data = data.msg;
+              $("#managers").children().remove();
+              $("#workers").children().remove();
+              for(var i in data){
+                // console.log(data[i]);
+                var role = data[i].Spec.Role;
+                var nodeID = data[i].ID;
+                var hostname = data[i].Description.Hostname;
+                var hostIP = data[i].Status.Addr;
+                var State = data[i].Status.State;
+                var version = data[i].Version.Index;
+
+                // $("#index" + rowIndex)
+                var isLeader = false;
+                if(data[i].hasOwnProperty("ManagerStatus") && data[i].ManagerStatus.hasOwnProperty("Leader")){
+                  isLeader =  data[i].ManagerStatus.Leader;
+                  leaderPort = data[i].ManagerStatus.Addr.split(":")[1];
+                }else {
+                  isLeader = false;
+                }
+                $("#leader").removeClass("simple_with_animation");
+                // console.log(isLeader);
+                var node = null;
+                var remove = "<span class='glyphicon glyphicon-remove delete'></span>"
+                // console.log(hostIP);
+                // console.log(isLeader);
+                node = hostIP  + remove;
+                var $li = $("<li/>").attr({
+                  class : "highlight loaded",
+                  "data-id" : hostIP ,
+                  "ip" : hostIP ,
+                  "data-name" : nodeID,
+                  "nodeID" : nodeID,
+                  "version" : version
+                }).html(node);
+
+                if(isLeader && role === "manager" ){
+                }
+                else if(role === "manager" ){
+                  $("#managers").append($li);
+                }else if(role === "worker"){
+                  $("#workers").append($li);
+                }
+              }
+              // setTimeout(()=>{location.reload(true)}, 3000);
+            });
+            }
         }
     };
 
@@ -218,27 +338,6 @@ $(function(){
         }
     };
 
-    $all.event.remove = {
-        $button : $(".delete"),
-        eventName : "RemoveNode",
-        clickEvent : clickDefault
-    };
-
-    $all.event.update = {
-        $button : $(".update"),
-        eventName : "UpdateNode",
-        clickEvent : function(client, eventName, table){
-          var opts = {
-              "lists" : table.checkedRowLists,
-              "Availability" : $("#availability").text().trim()
-          };
-          return function(){
-            client.sendEventTable(eventName, table, opts);
-          }
-        }
-    };
-
-
     $all.completeEvent = function(data, callback){
       // console.log(arguments);
       if(hasValue(data)){
@@ -247,104 +346,13 @@ $(function(){
         var finished = new dialog("Swarm & Node", data);
         finished.setDefaultButton('Close[Enker]', 'btn-primary create');
         finished.show();
-        $all.table.main.$table.bootstrapTable('refresh');
         callback;
       }
     };
 
-      var main = require("./module/main.js");
-      main.init($all);
+    var main = require("./module/main.js");
+    main.init($all);
 
-
-  var swarmTable = main.getSubTable();
-  var client = main.getSocket();
-  var dialog = main.getDialog();
-
-
-  var rows = swarmTable.$table.bootstrapTable('getData');
-  rows.forEach((row)=>{
-    console.log(row);
-    var opts = {
-      host : row.ip,
-      port : row.port,
-    };
-    // client.onlySendEvent("PING", opts,(data)=>{
-    //   var status = null;
-    //   if(data.err) {
-    //     status = "<span class='glyphicon glyphicon-record text-danger'></span>";
-    //   } else {
-    //     status = "<span class='glyphicon glyphicon-record text-success'></span>";
-    //   }
-    //   console.log(data);
-    //   return status;
+    // $(".delete").click((e)=>{
     // });
-
-  });
-
-  swarmTable.$table.on("post-body.bs.table" , function(){
-    $('.joinType').bootstrapToggle({
-      on: 'Manager',
-      off: 'Worker',
-      onstyle : 'info',
-      offstyle : 'defalt'
-    });
-    $('.leaveType').bootstrapToggle({
-      on: 'Force',
-      off: 'Unforce',
-      onstyle : 'danger',
-      offstyle : 'default'
-    });
-  });
-
-    swarmTable.$table.on("click-row.bs.table", function (e, row, $element, field) {
-      var parTr =  $element.closest('[data-index]').data('index');
-      var joinType = ($("#joinType"+parTr).prop("checked") ? "manager" : "worker");
-      var leaveType = ($("#leaveType"+parTr).prop("checked") ? true : false  );
-
-      if(field === "join"){
-        if( joinType !== null){
-          var opts = {
-            ip : row.ip,
-            port : row.port,
-            managerPort : managerinfo.split(":")[1]
-          }
-          if(joinType === "worker"){
-            opts.token = swarmToken.worker;
-          }else if(joinType === "manager"){
-            opts.token = swarmToken.manager;
-          }
-
-          console.log(joinType);
-          config.setSwarmJoin(opts);
-          var opts = config.getSwarmJoin();
-          client.sendEvent("JoinSwarm" , opts, (data)=>{
-            console.log(data);
-          });
-        }
-      }else if(field === "leave"){
-        var opts = {
-          host : row.ip,
-          port : row.port,
-          type : leaveType
-        }
-        client.sendEvent("throwNode" , opts, ()=>{});
-      }
-    });
-
-  //
-  //
-
-  // $(".start").click((e)=>{
-  //     client.sendEventTable("StartNode", nodeTable);
-  // });
-  //
-  // $(".delete").click((e)=>{
-  //     client.sendEventTable("RemoveNode", nodeTable);
-  // });
-  //
-
-  //
-  //
-
-
 });

@@ -101,22 +101,22 @@ var image = function(server){
    });
 
    server.listen("PullImages", function(data, fn) {
-		 			console.log(data);
+					// 	console.log(data);
          p.image.create(data,
          function(err, stream) {
-					 console.log(stream);
+					//  console.log(stream);
            if (err) return console.log(err);
 					 var docker = require("./docker")();
-					 console.log(server);
+					//  console.log(server);
            docker.modem.followProgress(stream, onFinished, onProgress);
 
             function onFinished(err, output) {
-              console.log("onFinished");
+              // console.log("onFinished");
               server.sendEvent("progress", true);
 
             }
             function onProgress(event) {
-							   console.log(event);
+							  //  console.log(event);
                  server.sendEvent("progress", event);
              }
          });
@@ -219,7 +219,7 @@ var dockerfile = function(server) {
   });
 
   server.listen("build", function(data, fn){
-    console.log(data);
+    // console.log(data);
     p.image.build(data, function(err, stream) {
 			if(err) return fn(err);
 					// console.log(stream);
@@ -230,12 +230,12 @@ var dockerfile = function(server) {
 						docker.modem.followProgress(stream, onFinished, onProgress);
 
 						 function onFinished(err, output) {
-							 console.log("onFinished");
+							//  console.log("onFinished");
 							 server.sendEvent("buildingImage", true);
 
 						 }
 						 function onProgress(event) {
-							 console.log(event);
+							//  console.log(event);
 									server.sendEvent("buildingImage", event);
 							}
   				});
@@ -454,21 +454,22 @@ var settings = function(server){
 
 		// console.log(getServerIp());
 		var type = (data.docker);
-		console.log(data);
+		// console.log(data);
 		if(data.ip === getServerIp()) {
 			var docker = defaultDocker;
 			p[data.docker].docker = docker;
-			fn(true);
+			return fn(true);
 		}else {
 			mongo.docker.find({"ip" : data.ip}, (result)=>{
 				var opts = {
 					"host" : result.ip,
 					"port" : result.port
 				}
+				// console.log("result");
+				// console.log(result);
 				p.settings.ping(opts, (err, data)=> {
-					// fn({err : err, data: data});
-					console.log(err);
-					console.log(data);
+					// console.log(err);
+					// console.log(data);
 					if(err !== null) {
 						return fn({err : err.code});
 					}else {
@@ -526,8 +527,8 @@ var swarm = function(server){
 			return result;
 	}
 
-	server.listen("CreateSwarm", function(data , fn){
-		p.swarm.create(data, fn);
+	server.listen("UpdateSwarm", function(data , fn){
+		p.swarm.update(data, fn);
 	});
 
 	server.listen("InitSwarm", function(data , fn){
@@ -535,7 +536,6 @@ var swarm = function(server){
 	});
 
 	server.listen("LoadSwarm", function(data , fn){
-		console.log(data);
 		p.swarm.load(data, fn);
 	});
 
@@ -564,23 +564,23 @@ var node = function(server){
 	// 	// mongo.system.find()
 	// });
 	server.listen("LoadNode", function(data , fn){
-		console.log(data);
+		// console.log(data);
 		p.node.load(data, fn);
 	});
 
-	server.listen("StopNode", function(data, fn){
-		// var opts = {force : data};
-		// console.log(data);
-		// p.swarm.throwNode(data, fn);
-	});
+	// server.listen("StopNode", function(data, fn){
+	// 	// var opts = {force : data};
+	// 	// console.log(data);
+	// 	// p.swarm.throwNode(data, fn);
+	// });
 
 	server.listen("RemoveNode", function(data, fn){
 		p.node.remove(data, fn);
 	});
 
-	server.listen("UpdateNode", function(data, fn){
-		p.node.update(data, fn);
-	});
+	// server.listen("UpdateNode", function(data, fn){
+	// 	p.node.update(data, fn);
+	// });
 };
 
 var service = function(server){

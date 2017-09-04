@@ -15,7 +15,8 @@ function initDropdown(jsonUrl, $li, $button, opts) {
 
   $li.children().remove();
   $.getJSON(jsonUrl, function(json, textStatus) {
-
+    console.log(jsonUrl);
+    console.log(json);
     if(json !== false){
          json.some((data)=>{
            if(hasFilter){
@@ -64,12 +65,7 @@ function hasValue (){
   var arg = arguments;
   // console.log(arguments);
   for(var i in arg) {
-    // console.log(arg[i]);
-    // console.log(typeof arg[i]);
-    // console.log(arg[i] === null);
-    // console.log(typeof arg[i] === undefined);
-    // console.log(typeof arg[i] === null);
-    // console.log(arg[i] === "");
+
     if (arg[i] === "" || typeof arg[i] === null || arg[i] === null || typeof arg[i] === undefined  ||  arg[i] === undefined){
       console.log("c");
       return false;
@@ -96,7 +92,15 @@ function createButton( buttonid , action, color, icon){
         if( $arrays[i].val() == "on" ||  $arrays[i].val() == "off") {
           val = ( $arrays[i].prop('checked') ? "tcp" : "udp");
         }
-        json[$arrays[i].attr("id")] = val;
+
+        var key = $arrays[i].attr("id");
+        if(key === "keyNew"){
+          json["key"] = val;
+        }else if(key === "valueNew"){
+          json["value"] = val;
+        }else {
+          json[$arrays[i].attr("id")] = val;
+        }
       }
       var isOther = true;
       for (var i in lists){

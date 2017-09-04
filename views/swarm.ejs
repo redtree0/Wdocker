@@ -2,13 +2,73 @@
 <html>
   <head>
     <% include ./partials/head %>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-sortable/0.9.13/jquery-sortable-min.js"></script>
     <script src="/myapp/js/bundle/swarm.bundle.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.10/jquery.mask.js"></script>
 
   </head>
+  <style>
+  body.dragging, body.dragging * {
+  cursor: move !important;
+}
+ol.vertical {
+    margin: 0 0 9px 0;
+    /*margin: 10px;*/
+    min-height: 30px;
+}
+.dragged {
+  position: absolute;
+  opacity: 0.5;
+  z-index: 2000;
+}
+ol.simple_with_animation li, ol.serialization li, ol.default li {
+    cursor: pointer;
+}
+li.placeholder{
+  list-style-type: none;
+  position: absolute;
+}
+li.placeholder::before {
+    content: "";
+
+    border-color: transparent green;
+    border-style: solid;
+    border-width: 0.35em 0 0.35em 0.45em;
+    display: block;
+    height: 0;
+    width: 0;
+    left: -1em;
+    top: 0.9em;
+    position: absolute;
+}
 
 
+.highlight {
+  list-style-type: none;
+    background-color: white;
+    margin : 10px;
+     border-radius: 5px;
+     border-width: 2px;
+		border-color: gray;
+    border-style: groove;
+  /*.text-success;*/
+}
+
+li span{
+    display:none;
+    visibility: hidden;
+    padding:3px;
+    line-height:8px;
+    cursor:pointer;
+    position:absolute;
+    right:0px;
+    left : 20%;
+    top:0px;
+}
+li:hover span{
+  visibility: visible;
+}
+
+  </style>
 
 
   <body>
@@ -19,92 +79,91 @@
             <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
               <div class="row placeholders">
                 <div class="container">
+                  <div class="form-group row">
+                      <div class="col-md-6">
+                        <div class="panel panel-success ">
+                          <div class="panel-heading">
+                            <h4>Docker Host Lists</h4>
+                          </div>
+                          <div class="panel-body">
 
-
-
-
-                    <div class="panel panel-info row">
-                        <div class="panel-heading">
-                            <h4 class ="text-left">Swarm 관리</h4>
+                            <ol id="initlists" class='simple_with_animation vertical'>
+                            </ol>
+                          </div>
                         </div>
-                        <div class="panel-body">
-
-                                    <div class="form-group row">
-                                        <div class="form-group" >
-                                          <label for="swarmPort" class="col-sm-2 control-label">Swarm Port 초기화</label>
-                                          <div class="col-md-2 form-group">
-                                            <input type="number" class="form-control"  min="1" max="65535" name="swarmPort" id="swarmPort" >
-                                          </div>
-                                          <div class="col-md-2 form-group">
-                                            <button type="submit" class="btn btn-primary init">Init</button>
-                                          </div>
-                                        <div class="form-group">
-                                          <label for="force" class="col-sm-2 control-label">force </label>
-                                          <label class="checkbox-inline">
-                                            <input type="checkbox" id="force" checked data-toggle="toggle" data-on="unforce"
-                                            data-off="force" data-onstyle="success" data-offstyle="danger"></input>
-                                          </label>
-                                          <button class="btn btn-danger leave">Leave</button>
-                                        </div>
-                                      </div>
-
-                                    </div>
-
-                                    <div class = "form-group token">
-                                    </div>
-
-                          <table data-pagination="true" id="swarmTable" class="table table-striped jsonTable"> </table>
-                       </div>
-                     </div>
-
-
-                    <div id="toolbar" class="form-inline row" role="form">
-                      <div class="form-group">
-                        <button class="btn btn-default delete">
-                          <span class="	glyphicon glyphicon-remove"></span></button>
                       </div>
-                      <div class="form-group" style="border: 0.5px solid #48BAE4; height: auto; padding:1px;">
-                          <div class="form-group">
-                            <label class="checkbox-inline">
-                              <input type="checkbox" id="role" checked data-toggle="toggle" data-on="Manager"
-                              data-off="Worker" data-onstyle="primary" data-offstyle="default"></input>
-                            </label>
+
+
+                    <div class="form-group">
+                      <div class="col-md-6">
+                        <div class="panel panel-danger ">
+                          <div class="panel-heading">
+                            <h4>Leader</h4>
                           </div>
-                          <div class="form-group">
-                              <div class="col-sm-2">
-                                <button id="availability" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                  Availability <span class="caret"></span>
-                                </button>
-                                <ul class="dropdown-menu">
-                                </ul>
-                              </div>
+                          <div class="panel-body">
+                            <div class="form-inline  text-left">
+                              <label for="swarmPort" class="control-label">Swarm Port 초기화</label>
+                              <!-- <div class="col-md-2"> -->
+                                <input type="number" class="form-control"  min="1" max="65535" name="swarmPort" id="swarmPort" >
+                              <!-- </div> -->
+                              <!-- <div class="col-md-2 form-group"> -->
+                                <button type="submit" class="btn btn-primary init">Init</button>
+                              <!-- </div> -->
+                            </div>
+                            <br/>
+                            <div class="form-group">
+                                <div class="text-left">
+                                  <label for="force" class="control-label">force </label>
+                                  <label class="checkbox-inline">
+                                    <input type="checkbox" id="force" checked data-toggle="toggle" data-on="unforce"
+                                    data-off="force" data-onstyle="success" data-offstyle="danger"></input>
+                                  </label>
+                                  <button class="btn btn-danger leave">Leave</button>
+                                </div>
+                                <div class="text-right">
+                                  <button class="btn btn-default load ">Load</button>
+                                  <button class="btn btn-default update ">Update</button>
+                                </div>
+                            </div>
+
+                            <hr/>
+
+                            <ol id="leader" class='simple_with_animation vertical'>
+                            </ol>
                           </div>
-                          <div class="form-group">
-                              <button class="btn btn-primary update">update</button>
-                          </div>
+                        </div>
                       </div>
                     </div>
-
-                    <div class="panel panel-success row">
-                        <div class="panel-heading">
-                            <h4 class ="text-left">Node 관리</h4>
-                        </div>
-                        <div class="panel-body">
-                           <table data-toolbar="#toolbar"  data-pagination="true"  id="nodeTable"  class="table table-striped jsonTable">
-                           </table>
-                           <p><span class="glyphicon glyphicon-exclamation-sign"></span>
-                             해당 호스트가 swarm 구성이 되있을 경우, 재 기능을 안할 수 있습니다.
-                         </p>
-
-                       </div>
+                  </div>
+                  <div class="form-group row">
+                      <div class="col-md-6">
+                          <div class="panel panel-info ">
+                              <div class="panel-heading">
+                                  <h4>Managers</h4>
+                              </div>
+                              <div class="panel-body">
+                                <ol id="managers" class='simple_with_animation vertical'>
+                                </ol>
+                              </div>
+                          </div>
+                      </div>
+                      <div class="col-md-6">
+                          <div class="panel panel-warning">
+                              <div class="panel-heading">
+                                  <h4>Workers</h4>
+                              </div>
+                              <div class="panel-body">
+                                <ol id="workers" class='simple_with_animation vertical'>
+                                </ol>
+                              </div>
+                           </div>
                      </div>
-
-                </div>
-
+                  </div>
 
               </div>
             </div>
           </div>
+        </div>
     </div>
 
   </body>

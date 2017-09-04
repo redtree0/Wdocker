@@ -109,7 +109,7 @@ $(function(){
           user : $("#user").val(),
           password : $("#password").val()
         }
-          client.sendEvent("authCheck", opts, (err, data)=>{
+          client.sendEvent("authCheck", opts, (data)=>{
             var finished = new dialog("작업 완료",  data);
             finished.show();
           });

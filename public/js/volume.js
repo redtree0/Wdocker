@@ -72,8 +72,8 @@ $(function(){
   $all.form.create.formName = "볼륨 생성";
   $all.form.create.formEvent = "CreateVolume";
   $all.form.create.labellists = [];
-  $all.form.create.$labelAdd = $(".labelAdd");
-  $all.form.create.$labellists = $(".labellists");
+  $all.form.create.$labelAdd = $("#labelAdd");
+  $all.form.create.$labellists = $("#labellists");
 
   //  $all.form.create.dropDown =  {
   //    $dropDown : $('#driverDropDown'),

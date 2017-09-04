@@ -184,7 +184,6 @@ $(function(){
       initPortLists(self.$portlists, self.portlistsNew, self.$portAdd,  $dataLists );
 
       $("#update").click((e)=>{
-        console.log("do");
         var config = require("./module/config");
         // var socket = io();
         // var Socket = require("./module/io");
@@ -205,6 +204,9 @@ $(function(){
         });
       });
   }
+
+  $all.connect = {};
+  $all.connect.dockerinfo = "service";
 
 
   $all.table = {};

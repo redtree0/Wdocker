@@ -1,5 +1,23 @@
 
 var config = (function(){
+  function insertLabel(opts, labellists){
+    // if(labellists.length === 0){
+      opts.Labels = {};
+    // }else {
+        var key = null;
+        var value = null;
+        console.log(opts);
+        for ( var i in labellists) {
+          key = labellists[i].key;
+          value = labellists[i].value;
+          console.log(key);
+          console.log(value);
+
+          opts.Labels[key] = value;
+        }
+    // }
+  }
+
   var container = {
         "Image" : "",
         "name" : "",
@@ -56,24 +74,30 @@ var config = (function(){
       }];
     }
     if(filter.hasOwnProperty("network")){
+
       opts.NetworkingConfig.EndpointsConfig.network = {};
       opts.NetworkingConfig.EndpointsConfig.network.NetworkID = filter.networkID;
 
     }
 
+    if(portArray.length === 0){
 
-    for ( var i in portArray) {
-      var portinfo = portArray[i].containerPort +"/"+ portArray[i].protocol;
-      opts.ExposedPorts[portinfo] = {};
-        opts.HostConfig.PortBindings[portinfo] = [{ "HostPort" : portArray[i].hostPort}];
-    }
-    var key = null;
-    for ( var i in labellists) {
-      key = labellists[i].key;
-      opts.Labels[key] = labellists[i].value;
-    }
+      opts.HostConfig.PortBindings = {};
+      opts.ExposedPorts = {};
 
-    // console.log(opts);
+    }else {
+
+        for ( var i in portArray) {
+
+            var portinfo = portArray[i].containerPort +"/"+ portArray[i].protocol;
+            opts.ExposedPorts[portinfo] = {};
+              opts.HostConfig.PortBindings[portinfo] = [{ "HostPort" : portArray[i].hostPort}];
+
+        }
+
+    }
+    insertLabel(opts, labellists);
+
   };
 
   var network = {
@@ -84,14 +108,14 @@ var config = (function(){
           "Attachable" : false,
           "Labels" : {},
           "IPAM" : {
-            "Config": [
-                  {
-                      // "Subnet" : "",
-                      // "IPRange" : "",
-                      // "Gateway" : ""
-                  }
-                ]
-                ,
+            // "Config": [
+            //       {
+            //           // "Subnet" : "",
+            //           // "IPRange" : "",
+            //           // "Gateway" : ""
+            //       }
+            //     ]
+            //     ,
                 "Options" : {
                   // "parent" : "wlan0"
                 }
@@ -115,17 +139,20 @@ var config = (function(){
     opts.Name = filter.Name;
     opts.Driver = filter.Driver;
     opts.internal = filter.internal;
-    opts.IPAM.Config = [{
-      "Subnet" : filter.subnet,
-      "IPRange" : filter.ipRange,
-      "Gateway" : filter.gateway
-    }]
+    if(filter.ipRange && filter.subnet && filter.gateway ){
 
-    var key = null;
-    for ( var i in labellists) {
-      key = labellists[i].key;
-      opts.Labels[key] = labellists[i].value;
+      opts.IPAM.Config = [{
+        "Subnet" : filter.subnet,
+        "IPRange" : filter.ipRange,
+        "Gateway" : filter.gateway
+      }]
     }
+    insertLabel(opts, labellists);
+    // var key = null;
+    // for ( var i in labellists) {
+    //   key = labellists[i].key;
+    //   opts.Labels[key] = labellists[i].value;
+    // }
   }
 
   var image = {
@@ -139,6 +166,7 @@ var config = (function(){
   };
 
   var getImage = function(){
+    console.log(image);
     return image;
   };
 
@@ -148,13 +176,15 @@ var config = (function(){
     opts.limit = filter.limit;
     opts.filters["is-automated"] = [filter["is-automated"]];
     opts.filters["is-official"] = [filter["is-official"]];
-    if(filter.stars) {
-      opts.filters["stars"] = filter.stars;
-    }
+    // image = opts
+    // if(filter.stars) {
+    //   opts.filters["stars"] = filter.stars;
+    // }
   };
 
   var volume = {
     "Name" : "",
+    "Labels" : {},
     "Driver" : ""
     // , "DriverOpts"  : ""
   };
@@ -167,11 +197,8 @@ var config = (function(){
     opts.Name = filter.Name;
     opts.Driver = filter.Driver;
 
-    var key = null;
-    for ( var i in labellists) {
-      key = labellists[i].key;
-      opts.Labels[key] = labellists[i].value;
-    }
+    insertLabel(opts, labellists);
+
   }
 
   var service = {
@@ -265,24 +292,26 @@ var config = (function(){
         opts.EndpointSpec.Ports.push(portinfo);
       }
 
-      var key = null;
-      for ( var i in labellists) {
-
-        if(labellists[i].hasOwnProperty("keyNew") && labellists[i].hasOwnProperty("valueNew")){
-          key = labellists[i].keyNew;
-          opts.Labels[key] = labellists[i].valueNew;
-        }else{
-          key = labellists[i].key;
-          opts.Labels[key] = labellists[i].value;
-        }
-
-      }
+      // var key = null;
+      // for ( var i in labellists) {
+      //
+      //   if(labellists[i].hasOwnProperty("keyNew") && labellists[i].hasOwnProperty("valueNew")){
+      //     key = labellists[i].keyNew;
+      //     opts.Labels[key] = labellists[i].valueNew;
+      //   }else{
+      //     key = labellists[i].key;
+      //     opts.Labels[key] = labellists[i].value;
+      //   }
+      //
+      // }
+        insertLabel(opts, labellists);
 
       console.log(opts);
       // service = opts;
     };
     var swarmInit = {
-      "AdvertiseAddr" : window.location.hostname,
+      // "AdvertiseAddr" : window.location.hostname,
+      "AdvertiseAddr" : "",
       "ListenAddr" :   "0.0.0.0:2377",
       "ForceNewCluster" : true
     };
@@ -293,6 +322,7 @@ var config = (function(){
 
     var setSwarmInit = function (filter, labellists, portlists){
       var opts = swarmInit;
+      opts.AdvertiseAddr = filter.ip;
       opts.ListenAddr = "0.0.0.0:" + filter.port;
       swarmInit = opts;
     };

@@ -126,11 +126,11 @@ $(function(){
   $all.form.create.formEvent = "CreateNetwork";
   $all.form.create.$newForm =  $(".newForm");
   $all.form.create.portlists = [];
-  $all.form.create.$portAdd = $(".portAdd");
-  $all.form.create.$portlists = $(".portlists");
+  $all.form.create.$portAdd = $("#portAdd");
+  $all.form.create.$portlists = $("#portlists");
   $all.form.create.labellists = [];
-  $all.form.create.$labelAdd = $(".labelAdd");
-  $all.form.create.$labellists = $(".labellists");
+  $all.form.create.$labelAdd = $("#labelAdd");
+  $all.form.create.$labellists = $("#labellists");
   // $all.form.create.dropDown =  {
   //   $dropDown : $('#driverDropDown'),
   //   default : "driver"
@@ -283,7 +283,7 @@ $(function(){
               $table.find('td:nth-child(2)').filter(function() {
                   return $(this).text() === data.Name ;
               }).parent().addClass(_class);
-          
+
               // $table.find("td:contains("+ data.Id + ")").parent().addClass(_class);
             }
           }

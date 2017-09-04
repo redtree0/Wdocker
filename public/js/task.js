@@ -47,103 +47,96 @@ $(function(){
   var $all = {};
   $all.init = function(){
     isSwarm();
+    loadTask();
+
   };
 
-  // $all.connect = {};
-  // $all.connect.dockerinfo = "task";
+  $all.connect = {};
+  $all.connect.dockerinfo = "task";
+
   $all.table = {};
   $all.table.main = {
     $table : $(".jsonTable"),
-    // hideColumns : ["Id", "ImageID", "Ports", "Mounts", "HostConfig", "NetworkingSettings"],
     columns : columns,
     jsonUrl : '/myapp/task/data.json',
   };
   var main = require("./module/main.js");
   main.init($all);
 
+  $("#refresh").click((e)=>{
+      loadTask();
+  });
+  function loadTask() {
+    $(".dockerNode").children().remove();
 
     $.getJSON("/myapp/node/data.json", (data)=>{
       // console.log(data.length);
-      var col = null;
-      if(data.length === 1) {
-         col = "col-md-12";
-      } else if(data.length === 2 || data.length === 4) {
-         col = "col-md-6";
-      } else if(data.length === 3 || data.length >= 5) {
-         col = "col-md-4";
-      }
 
-      var rowIndex = 0;
       var data = (data.sort(function(a, b) {
-            var nameA = a.Spec.Role.toUpperCase(); // ignore upper and lowercase
-            var nameB = b.Spec.Role.toUpperCase(); // ignore upper and lowercase
-            if (nameA < nameB) {
-              return -1;
-            }
-            if (nameA > nameB) {
-              return 1;
-            }
-
-            // names must be equal
-            return 0;
-      }));
-        for(var i in data){
-          rowIndex = rowIndex++ / 3;
-          // console.log(data[i]);
-          var role = data[i].Spec.Role;
-          var nodeID = data[i].ID;
-          var hostname = data[i].Description.Hostname;
-          var hostIP = data[i].Status.Addr;State
-          var State = data[i].Status.State;
-          // $("#index" + rowIndex)
-          var msg =  "[Node]"
-              + " <br/> Role : "+ role
-              + " <br/> NodeID : "+ nodeID
-              + " <br/> Host : " + hostname
-              + " <br/> IP : "+ hostIP
-              + " <br/> State : " + State;
-
-          $(".dockerNode").append($("<div/>").attr({
-            class : "form-group alert alert-success node  text-left " + col,
-            id : nodeID
-          }).html(msg) );
+        var nameA = a.Spec.Role.toUpperCase(); // ignore upper and lowercase
+        var nameB = b.Spec.Role.toUpperCase(); // ignore upper and lowercase
+        if (nameA < nameB) {
+          return -1;
         }
-        $.getJSON("/myapp/task/data.json", (data)=>{
-            // var before = 0;
-            // function getMax(arr, prop) {
-            //     var max;
-            //     for (var i=0 ; i<arr.length ; i++) {
-            //         if (!max || parseInt(arr[i][prop]) > parseInt(max[prop]))
-            //             max = arr[i];
-            //     }
-            //     return max;
-            // }
-            //
-            // var maxVersion = getMax(data, "Version.Index");
-            for(var i in data){
-              var taskinfo =   data[i];
+        if (nameA > nameB) {
+          return 1;
+        }
+        // names must be equal
+        return 0;
+      }));
+      for(var i in data){
+        // console.log(data[i]);
+        var role = data[i].Spec.Role;
+        var nodeID = data[i].ID;
+        var hostname = data[i].Description.Hostname;
+        var hostIP = data[i].Status.Addr;
+        var State = data[i].Status.State;
 
-              // if(maxVersion.Version.Index === taskinfo.Version.Index ){
-                    var nodeID =taskinfo.NodeID;
+        var msg =  "[Node]"
+        + " <br/> Role : "+ role
+        + " <br/> NodeID : "+ nodeID
+        + " <br/> Host : " + hostname
+        + " <br/> IP : "+ hostIP
+        + " <br/> State : " + State;
+          // text-left form-group
+        $(".dockerNode").append($("<div/>").attr({
+          class : "alert alert-success node col-md-4",
+          id : nodeID
+        }).html(msg) );
+      }
+      $.getJSON("/myapp/task/data.json", (data)=>{
+        // console.log(data);
+        if(data.hasOwnProperty("json") && data.json.hasOwnProperty("message")){
 
-                    var insert = "[Task]"
-                    + " <br/> Image : " + taskinfo.Spec.ContainerSpec.Image.split("@")["0"]
-                    + " <br/> Version : " + taskinfo.Version.Index
-                    + " <br/> Command : " + taskinfo.Spec.ContainerSpec.Command
-                    +  " <br/> State : " + taskinfo.Status.State
-                    + " <br/> IP : " + taskinfo.NetworksAttachments["0"].Addresses["0"]
-                    + "<br/> Network : " + taskinfo.NetworksAttachments["0"].Network.Spec.Name;
-                    var task = $("<div/>").attr({
-                      class : "alert alert-info text-left disabled",
-                    }).html(insert);
-                    $("#" + nodeID).append(task);
-                    if($("#" + nodeID).children().length > 0){
-                      $("#" + nodeID).css("height", "auto");
-                    }
-              // }
+          $(".dockerNode").text(data.json.message);
+
+        }else {
+
+          for(var i in data){
+            var taskinfo =   data[i];
+
+            var nodeID =taskinfo.NodeID;
+
+            var insert = "[Task]"
+            + " <br/> Image : " + taskinfo.Spec.ContainerSpec.Image.split("@")["0"]
+            + " <br/> Version : " + taskinfo.Version.Index
+            + " <br/> Command : " + taskinfo.Spec.ContainerSpec.Command
+            +  " <br/> State : " + taskinfo.Status.State
+            + " <br/> IP : " + taskinfo.NetworksAttachments["0"].Addresses["0"]
+            + "<br/> Network : " + taskinfo.NetworksAttachments["0"].Network.Spec.Name;
+            var task = $("<div/>").attr({
+              class : "alert alert-info",
+            }).html(insert);
+            $("#" + nodeID).append(task);
+            if($("#" + nodeID).children().length > 0){
+              $("#" + nodeID).css("height", "auto");
             }
-        });
+            // }
+          }
+        }
+      });
 
     });
+  }
 
 });

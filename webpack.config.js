@@ -13,8 +13,7 @@ module.exports = {
     terminal : './public/js/terminal.js',
     swarm : './public/js/swarm.js',
     service : './public/js/service.js',
-    task : './public/js/task.js',
-    test : './public/js/test.js'
+    task : './public/js/task.js'
   },
   output: {
     path: __dirname + '/public/js/bundle',

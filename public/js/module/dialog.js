@@ -21,18 +21,30 @@ function makeBootstrapDialog(title, message, button){
   //            BootstrapDialog.TYPE_DANGER];
   var msg = null;
   var isError = false;
+  var statusCode = "";
   if(message.hasOwnProperty("statusCode")){
+    statusCode = "[statusCode] " + message.statusCode;
     if(message.statusCode === 200){
       msg = "작업완료"
     }else if(message.statusCode !== 200) {
-      
-      title = "에러발생"
-      if(message.error === undefined){
-        msg = message.msg;
-      }else if (message.msg === undefined) {
-        msg = message.error;
-      }
 
+      title = "에러발생"
+    if(message.hasOwnProperty("error")){
+          msg = message.error;
+    }
+    else if(message.hasOwnProperty("msg")){
+      msg = message.msg;
+    }
+     else if (message.hasOwnProperty("json")) {
+        msg = message.json.message;
+    }
+      // if (message.msg === undefined) {
+      //    msg = message.error;
+      //  }
+      // else  if(message.error === undefined){
+      //     msg = message.msg;
+      // }
+      msg = statusCode + "\n"+ msg;
       isError = true;
     }
   }else {

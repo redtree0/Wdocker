@@ -15,6 +15,10 @@
       margin-left : 5px;
       margin-top : 10px;
      }
+
+     div .dockerNode{
+       margin-left: 25px;
+     }
 </style>
   <body>
     <% include ./partials/topnav %>
@@ -23,6 +27,7 @@
             <% include ./partials/nav %>
             <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
               <div class="row placeholders">
+                <% include ./partials/connectDocker %>
                 <div class="panel panel-success row">
                     <div class="panel-heading">
                         <h4 class ="text-left">Task 관리</h4>
@@ -34,8 +39,14 @@
                           해당 호스트가 swarm 구성이 되있을 경우, 재 기능을 안할 수 있습니다.
                           다른 node 상태 확인하시오.
                       </p>
-                        <div class="form-inline row dockerNode " role="form">
-                        </div>
+                      <div class="row text-left" style="margin-left : 10px;">
+                        <button  onclick=" return false;"  type="button" class="btn btn-default" id = "refresh">
+                          <span class="glyphicon glyphicon-refresh"></span>Refresh
+                        </button>
+                      </div>
+                      <div class="form-inline row dockerNode text-left" role="form">
+                      <!-- <div class="row dockerNode text-left"> -->
+                      </div>
                     </div>
                 </div>
               </div>

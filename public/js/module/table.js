@@ -5,7 +5,7 @@ var table = (function Table($table, columns){
   this.columns = columns;
   this.opts = {
     columns : this.columns, /// 테이블 컬럼 json
-    silent: true,
+    silentSort : true,
     search : true, /// 테이블 검색 기능 활성화
     detailView : false, /// 테이블 ExpandRow 활성화
     pageSize : 5, /// 테이블 Row 최대 수

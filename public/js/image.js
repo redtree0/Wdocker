@@ -75,14 +75,14 @@ $(function(){
     get : "getImage",
     set : "setImage"
   };
-  $all.form.getSettingValue = function() {
-    var self = this.data ;
+  $all.form.getSettingValue = function(self) {
+    var self = self.data ;
     return {
       "term" : self.$term.val(),
       "limit" : self.$limit.val(),
       "is-automated" : self.$is_automated.prop("checked").toString(),
-      "is-official" : self.$is_official.prop("checked").toString(),
-      "stars" :self.$stars.val()
+      "is-official" : self.$is_official.prop("checked").toString()
+      // ,"stars" :self.$stars.val()
     }
   };
 
@@ -99,11 +99,12 @@ $(function(){
   $all.form.create.formName = "이미지 생성";
   $all.form.create.formEvent = "SearchImages";
   $all.form.create.labellists = [];
-  $all.form.create.$labelAdd = $(".labelAdd");
-  $all.form.create.$labellists = $(".labellists");
+  $all.form.create.$labelAdd = $("#labelAdd");
+  $all.form.create.$labellists = $("#labellists");
   $all.form.create.callback = function(data){
-            var row = data ;
-            $all.table.sub.$table.bootstrapTable('load', data);
+            var row = data.msg ;
+            console.log(row);
+            $all.table.sub.$table.bootstrapTable('load', row);
 
             $(".results").show();
   }
@@ -189,6 +190,16 @@ $(function(){
               });
             };
           });
+
+        searchTable.$table.on("check.bs.table",  function (e, row, $element) {  /// 테이블 한 Row check box 선택 시
+          $(':checkbox').not(this).prop('checked', false);
+          $element.prop('checked', true);
+        });
+
+        searchTable.$table.on("check-all.bs.table",  function (e, row, $element) {  /// 테이블 한 Row check box 선택 시
+          $(':checkbox').prop('checked', false);
+        });
+
         var $msgdiag = $("#msgdiag");
         $msgdiag.hide();
         $(".download").click((e)=> {
