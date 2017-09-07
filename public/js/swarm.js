@@ -9,11 +9,13 @@ $(function  () {
   var isSwarm = false;
 
     $("#leader").addClass("simple_with_animation");
+    $(".update").hide();
+    $("#leave").hide();
 
     $.getJSON("/myapp/settings/data.json", function(json, textStatus){
       // console.log(json);
       json.forEach((data)=>{
-        var node = data.ip + ":" + data.port;
+        var node = data.ip ;
         hosts.push({ "ip" : data.ip , "port" : data.port });
         var $li = $("<li/>").attr({
           class : "highlight",
@@ -112,38 +114,6 @@ $(function  () {
     var socket = io();
     var Socket = require("./module/io");
     var client = new Socket(socket, $('body'));
-    function nodeDataMapping(search){
-      var data = group.sortable("serialize").get();
-      data.splice(0,1);
-      // console.log(data);
-      for(var i in data){
-        var type = (data[i]);
-        console.log(type);
-        for(var j in type){
-          type[j].ip = type[j].id; // ip
-          type[j].nodeID = type[j].name;
-          // type[j].version = type[j].version;
-          delete type[j].id;
-          for(var k in hosts){
-            // console.log(search);
-            // console.log(type[j].ip);
-            if(hosts[k].ip === type[j].ip){
-              type[j].port = hosts[k].port;
-            }
-            if (search === type[j].ip){
-             return type[j];
-            }
-            // else if (search === type[j].ip){
-            //   hosts[k].nodeID = type[j].name;
-            //   return hosts[k];
-            // }
-          }
-
-        }
-      }
-      console.log(data);
-      return data;
-    }
 
     function getLeader(){
       var host = $("#leader").find("li").text().split(":");
@@ -152,40 +122,44 @@ $(function  () {
       opts.port = host[1];
       return opts;
     }
-
+     var dialog = require("./module/dialog.js");
     $(document).on('click','.delete',function(){
-      var host = $(this).parent().text();
-      console.log(host);
-      var data = nodeDataMapping(host);
+
       console.log("delete");
-      console.log(data);
-      $(this).parent().remove();
-      var leader = getLeader();
-      console.log("leader");
+      var node = $(this).parent();
+      var nodeType = (node.closest('ol').attr("id"));
       var opts = {
-        "leader" : leader,
-        "remove" : data
+        "host" : node.attr("ip"),
+        "port" : node.attr("port"),
+        "nodeID" : node.attr("nodeID"),
+        "Version" : node.attr("version"),
+        "Availability" : node.attr("availability")
       }
       console.log(opts);
-      client.sendEvent("ThrowNode", data, (data)=>{
-        console.log("ThrowNode");
-        console.log(data);
-        client.sendEvent("RemoveNode", opts, (data)=>{
-          console.log("RemoveNode");
-          var dialog = require("./module/dialog.js");
+      node.remove();
+      var leader = getLeader();
+      var removeOpts = {
+        "leader" : leader,
+        "remove" : opts
+      }
 
-          var finished = new dialog("Swarm & Node", data);
-          finished.setDefaultButton('Close[Enker]', 'btn-primary create');
-          finished.show();
-          console.log(data);
-        });
+      // console.log($(this));
 
-      });
+      client.sendEvent("RemoveNode", removeOpts, (data)=>{
+
+           client.sendEvent("ThrowNode", opts, (data)=>{
+               console.log(data);
+               console.log(nodeType);
+               var finished = new dialog("Swarm & Node", data);
+               finished.setDefaultButton('Close[Enker]', 'btn-primary create');
+               finished.show();
+           });
+
+       });
 
     });
 
     $(".update").click(function(){
-
 
         function getElementJson($lists){
           var lists = [];
@@ -213,7 +187,7 @@ $(function  () {
 
         console.log(opts);
         client.sendEvent("UpdateSwarm", opts, (data)=>{
-          var dialog = require("./module/dialog.js");
+          // var dialog = require("./module/dialog.js");
 
           var finished = new dialog("Swarm & Node", data);
           finished.setDefaultButton('Close[Enker]', 'btn-primary create');
@@ -239,9 +213,8 @@ $(function  () {
         clickEvent : function(client, eventName, table){
           return function(){
             var $swarmPort = $("#swarmPort");
-            var data = group.sortable("serialize").get();
 
-            var host = $("#leader").find("li").text().split(":");
+            var host = $("#leader").find("li").text();
             config.setSwarmInit({"ip" : host[0], "port" : $swarmPort.val()});
             var opts = config.getSwarmInit();
 
@@ -261,10 +234,11 @@ $(function  () {
         eventName : "LoadSwarm",
         clickEvent : function(client, eventName, table){
           return function(){
-            // var host = $("#leader").find("li").text().split(":");
-            // var opts = {};
-            // opts.host = host[0];
-            // opts.port = host[1];
+            $(".load").hide();
+            $(".update").show();
+            $("#leave").show();
+            $("#init").hide();
+
             var leader = getLeader();
             client.onlySendEvent(eventName , leader, (data)=>{
               console.log("loadSwarm");
@@ -275,10 +249,12 @@ $(function  () {
               // setTimeout(()=>{location.reload(true)}, 3000);
             });
             client.sendEvent("LoadNode" , leader, (data)=>{
-              console.log(data.msg);
+              // console.log(data.msg);
               var data = data.msg;
               $("#managers").children().remove();
               $("#workers").children().remove();
+
+
               for(var i in data){
                 // console.log(data[i]);
                 var role = data[i].Spec.Role;
@@ -287,7 +263,7 @@ $(function  () {
                 var hostIP = data[i].Status.Addr;
                 var State = data[i].Status.State;
                 var version = data[i].Version.Index;
-
+                var availability = data[i].Spec.Availability;
                 // $("#index" + rowIndex)
                 var isLeader = false;
                 if(data[i].hasOwnProperty("ManagerStatus") && data[i].ManagerStatus.hasOwnProperty("Leader")){
@@ -303,13 +279,19 @@ $(function  () {
                 // console.log(hostIP);
                 // console.log(isLeader);
                 node = hostIP  + remove;
+                var port = null;
+                for(var i in hosts){
+                  if(hosts[i].ip === hostIP){
+                    port = hosts[i].port;
+                  }
+                }
                 var $li = $("<li/>").attr({
                   class : "highlight loaded",
-                  "data-id" : hostIP ,
                   "ip" : hostIP ,
-                  "data-name" : nodeID,
+                  "port" : port,
                   "nodeID" : nodeID,
-                  "version" : version
+                  "version" : version,
+                  "availability" : availability
                 }).html(node);
 
                 if(isLeader && role === "manager" ){
@@ -331,9 +313,9 @@ $(function  () {
         eventName : "LeaveSwarm",
         clickEvent : function(client, eventName, table){
           return function(){
-            client.sendEvent(eventName , true, ()=>{
-              setTimeout(()=>{location.reload(true)}, 3000);
-            });
+              client.sendEvent(eventName , true, ()=>{
+                refresh();
+              });
             }
         }
     };
@@ -353,6 +335,4 @@ $(function  () {
     var main = require("./module/main.js");
     main.init($all);
 
-    // $(".delete").click((e)=>{
-    // });
 });

@@ -101,7 +101,7 @@ li:hover span{
                             <h4>Leader</h4>
                           </div>
                           <div class="panel-body">
-                            <div class="form-inline  text-left">
+                            <div class="form-inline  text-left" id="init">
                               <label for="swarmPort" class="control-label">Swarm Port 초기화</label>
                               <!-- <div class="col-md-2"> -->
                                 <input type="number" class="form-control"  min="1" max="65535" name="swarmPort" id="swarmPort" >
@@ -112,7 +112,7 @@ li:hover span{
                             </div>
                             <br/>
                             <div class="form-group">
-                                <div class="text-left">
+                                <div class="text-left" id="leave">
                                   <label for="force" class="control-label">force </label>
                                   <label class="checkbox-inline">
                                     <input type="checkbox" id="force" checked data-toggle="toggle" data-on="unforce"
