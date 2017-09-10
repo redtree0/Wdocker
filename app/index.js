@@ -1,22 +1,38 @@
 //index.js
-
+//////////////// EXPRESS SET UP ///////////////////////////////////////
 
 var express = require('express'); // express
-var bodyParser = require('body-parser'); // ajax - json
-var path = require("path"); // 경로 경우의 수? a/ /b or a/b를 같게 ??
+var bodyParser = require('body-parser');
+var path = require("path");
 var ejs = require('ejs');
 var SocketIo = require('socket.io');
 var app = express();
 
+////////////////////////////////////////////////////////////////////////////
+
+//////////////// WEBSOCKEFIY SET UP ///////////////////////////////////////
+
+var websockify = require("nodev6-websockify");
+var server  = require('http').Server(app)
+var spawn   = require('child_process').spawn
+var fs      = require('fs')
+var ws      = require('websocket').server
+var args    = require('yargs').argv
+// var path    = require('path')
+// var port    = args.port || process.env.LINUX_DASH_SERVER_PORT || 3000
+
+////////////////////////////////////////////////////////////////////////////
+
+//////////////// SOCKET IO SERVICE ///////////////////////////////////////
 
 var socketEvents  = require('./js/event');
-//var mongo = require('./mongo');
 
-var staticPath = '/myapp';
+////////////////////////////////////////////////////////////////////////////
+const WEBPATH = '/myapp';
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use(staticPath, express.static(path.join(__dirname, '/../public')));
+app.use(WEBPATH, express.static(path.join(__dirname, '/../public')));
 
 app.set('views', path.join(__dirname, '/../views'));
 app.set('view engine', 'ejs');
@@ -26,32 +42,26 @@ app.route('/')
   .get( (req, res) => { res.redirect('/myapp/index'); }
 );
 
-var route = require('./route/droute.js');
+
+//////////////////////// ROUTE /////////////////////////////////////////////////////
+var web = require('./route/webRoute.js');
 var json = require("./route/jsonRoute.js");
 
 var dbLists = require("./js/mongo.js");
 var dbRoute = require("./route/dbRoute.js")( dbLists );
-app.use(staticPath, dbRoute);
-app.use(staticPath, json);
-app.use(staticPath, route);
+app.use(WEBPATH, dbRoute);
+app.use(WEBPATH, json);
+app.use(WEBPATH, web);
 
-const port = 3000;
-var websockify = require("nodev6-websockify");
-websockify({
+//////////////////////////////////////////////////////////////////////////////////////
+
+//////////////////////// WEBSOCKEFIY /////////////////////////////////////////////////
+const websockifyConfig = {
   source: '192.168.0.108:9000',
   target: '192.168.0.108:5901',
   web : "../views/"
-});
-
-
-
-// var path    = require('path')
-var server  = require('http').Server(app)
-var spawn   = require('child_process').spawn
-var fs      = require('fs')
-var ws      = require('websocket').server
-var args    = require('yargs').argv
-// var port    = args.port || process.env.LINUX_DASH_SERVER_PORT || 3000
+}
+websockify(websockifyConfig);
 
 
 app.get('/websocket', function (req, res) {
@@ -113,6 +123,9 @@ app.get('/server/', function (req, res) {
   getPluginData(req.query.module, respondWithData)
 })
 
+///////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////// PAGE NOT FOUND //////////////////////////////////////////////
 app.route('*')
   .get( (req, res) => {
     // console.log(req.originalUrl);
@@ -120,9 +133,19 @@ app.route('*')
       res.render("404.ejs");
     }
 });
+///////////////////////////////////////////////////////////////////////////////////
 
-const node = server.listen(port, () => {
-    console.log("Express server has started on port " + port);
+
+///////////////////////// WEB SERVICE //////////////////////////////////////////////
+
+const PORT = 3000;
+const EXPRESS = server.listen(PORT, () => {
+    console.log("Express server has started on port " + PORT);
 });
-const io = new SocketIo(node);
-socketEvents(io);
+///////////////////////////////////////////////////////////////////////////////////
+///////////////////////// SOCKET IO //////////////////////////////////////////////
+
+const SOCKET = new SocketIo(EXPRESS);
+socketEvents(SOCKET);
+
+///////////////////////////////////////////////////////////////////////////////////

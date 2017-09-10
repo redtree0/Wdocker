@@ -7,8 +7,8 @@
 
   router.use(function timeLog(req, res, next) {
     // console.log('Time: ', Date.now());
-    res.setHeader("Content-Type", "text/html");
 
+    res.setHeader("Content-Type", "text/html"); //// res type 지정
     next();
   });
   var path = require('path');
@@ -73,22 +73,18 @@
   });
 
   router.get('/vnc' , (req, res) => {
-    // res.redirect('http://192.168.0.108:3000/myapp/vnc_core.ejs');
         res.render("vnc.ejs");
   });
 
+  ////// html에서 외부 html 파일 로딩하기 위해  iframe 활용
   router.get('/vnc_core.ejs' , (req, res) => {
         res.render("./iframe/vnc_core.ejs");
   });
 
+  ////// html에서 외부 html 파일 로딩하기 위해  iframe 활용
   router.get('/dashboard.ejs' , (req, res) => {
         res.render("./iframe/dashboard.ejs");
   });
-
-  // router.get('*' , (req, res) => {
-  //       res.render("404.ejs");
-  // });
-
 
 
 module.exports = router;

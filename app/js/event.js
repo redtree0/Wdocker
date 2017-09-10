@@ -2,14 +2,15 @@
 
 var Socket = require("./socket");
 
-var p = require('./p');
+var p = require('./dockerEvent');
 var mongo = require("./mongoController");
+var os = require("os");
 
 const eventName = {
 	STARTCONTAINER : 'StartContainer',
 	STOPCONTAINER: 'StopContainer'
 }
-var defaultDocker = require("./docker")();
+
 
 var eventLists = function(io){
   io.on('connection', onConnect);
@@ -43,102 +44,92 @@ var eventLists = function(io){
   }
 
   var container = function(server){
+		var container = p.container;
 		server.listen('CreateContainer', function(data, fn){
-				 p.container.create(data, fn);
+					container.create(data, fn);
 		});
       server.listen('StartContainer', function(data, fn){
-           p.container.start(data, fn);
+           container.start(data, fn);
       });
 
       server.listen("StopContainer", function(data, fn){
-           p.container.stop(data, fn);
+           container.stop(data, fn);
       });
 
       server.listen("RemoveContainer", function(data, fn){
-          p.container.remove(data, fn);
+          container.remove(data, fn);
       });
       server.listen("KillContainer", function(data, fn){
-          p.container.kill(data, fn);
+          container.kill(data, fn);
       });
       server.listen("PauseContainer", function(data, fn){
-          p.container.pause(data, fn);
+          container.pause(data, fn);
       });
       server.listen("UnpauseContainer", function(data, fn){
-          p.container.unpause(data, fn);
+          container.unpause(data, fn);
       });
       server.listen("StatsContainer", function(data, fn){
-          p.container.stats(data, fn);
+          container.stats(data, fn);
       });
       server.listen("ArchiveContainer", function(data, fn){
-          p.container.getArchive(data, fn);
+          container.getArchive(data, fn);
       });
   };
   // });
 
 
 var network = function(server){
-
+		var network = p.network;
     server.listen("ConnectNetwork", function(data, fn){
-          p.network.connect(data, fn);
+          network.connect(data, fn);
     });
 
     server.listen("DisconnectNetwork", function(data, fn){
-          p.network.disconnect(data, fn);
+          network.disconnect(data, fn);
     });
 
     server.listen('CreateNetwork', function(data, fn) {
-        p.network.create(data, fn);
+        	network.create(data, fn);
     });
 
     server.listen('RemoveNetwork', function(data, fn) {
-          p.network.remove(data, fn);
+          network.remove(data, fn);
     });
 };
 
 var image = function(server){
-  server.listen("SearchImages", function(data, fn){
-     p.image.search(data, fn);
-   });
+	 	 var image = p.image;
+	   server.listen("SearchImages", function(data, fn){
+	     		image.search(data, fn);
+	   });
 
-   server.listen("PullImages", function(data, fn) {
-					// 	console.log(data);
-         p.image.create(data,
-         function(err, stream) {
-					//  console.log(stream);
-           if (err) return console.log(err);
-					 var docker = require("./docker")();
-					//  console.log(server);
-           docker.modem.followProgress(stream, onFinished, onProgress);
+	   server.listen("PullImages", function(data, fn) {
+						// 	console.log(data);
+					function onProgress(progress){
+							server.sendEvent("progress", progress);
+					}
 
-            function onFinished(err, output) {
-              // console.log("onFinished");
-              server.sendEvent("progress", true);
+					image.create(data, onProgress);
 
-            }
-            function onProgress(event) {
-							  //  console.log(event);
-                 server.sendEvent("progress", event);
-             }
-         });
      });
 
      server.listen("RemoveImages", function(data, fn) {
-       p.image.remove(data, fn);
+       		image.remove(data, fn);
      });
 
 		 server.listen("PushImages", function(data, fn) {
-			 p.image.push(data, fn);
+			 		image.push(data, fn);
 		 });
 };
 
 var volume = function(server){
-
+		var volume = p.volume
      server.listen("CreateVolume", function(data, fn){
-          p.volume.create(data, fn);
+          volume.create(data, fn);
     });
 
      server.listen("RemoveVolume", function(data, fn){
-        p.volume.remove(data, fn);
+        volume.remove(data, fn);
     });
 };
 
@@ -157,7 +148,7 @@ var dockerfile = function(server) {
 
   server.listen("CreateFile", function(data, fn){
    var jsonPath = path.join(data.path, data.name);
-	 var space  = ""
+	 var space  = "";
     fs.writeFile(jsonPath, space, 'utf8', function(err) {
         // fn(true);
     });
@@ -214,13 +205,12 @@ var dockerfile = function(server) {
    	var renew = path.join(data.renew);
 
     fs.rename(origin, renew, function(err) {
-        // fn(true);
     });
   });
 
   server.listen("build", function(data, fn){
     // console.log(data);
-    p.image.build(data, function(err, stream) {
+    self.build(data, function(err, stream) {
 			if(err) return fn(err);
 					// console.log(stream);
 					// 	var docker = require("./docker")();
@@ -290,13 +280,10 @@ var dockerfile = function(server) {
 	            }();
 
 	        if(parentid === null) {
-	            // var splitPath = json.path.split("/").filter((val)=>{if(val) {return val;}});
-	            // splitPath.pop();
-	            // var parentPath = splitPath.join("/");
+
 	            var parentPath = path.dirname(json.path);
 	            var parentDir = tree.setLeaf(ID(".."), "..","#", "directory", parentPath);
-	            // console.log(data.getId());
-	            // console.log(parentDir);
+
 	            var id = ID(json.name);
 	            var workingDir = tree.setLeaf(id, json.name,"#", "directory", json.path);
 
@@ -334,11 +321,8 @@ var dockerfile = function(server) {
 					var home = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
 					var workspace = path.join(home, "dockerfile");
 
-					if(fs.existsSync(workspace)){
-					}else {
-						fs.mkdir(workspace, function(err) {
-							// fn(true);
-						});
+					if(!fs.existsSync(workspace)){
+						fs.mkdir(workspace, function(err) {});
 					}
 	        if (data === ""){
 
@@ -399,21 +383,16 @@ var terminal = function (server) {
 }
 
 var settings = function(server){
+	var settings = p.settings;
 	server.listen('PING', function(data, fn) {
-
-			p.settings.ping(data, (err, data)=> {
-				fn({err : err, data: data});
-			});
-
+			settings.ping(data, fn);
 	});
 
 	server.listen('DELETE', function(data, fn) {
-
-			p.settings.delete(data, fn);
-
+			settings.delete(data, fn);
 	});
+
 	function getServerIp() {
-			var os = require("os");
 			var ifaces = os.networkInterfaces();
 			var result = '';
 			for (var dev in ifaces) {
@@ -427,60 +406,30 @@ var settings = function(server){
 						});
 					}
 			}
-
 			return result;
 	}
+
 	server.listen('IsConnected', function(data, fn) {
-
-
-			if(data.ip === getServerIp() || data.ip === "default" ) {
-				var docker = defaultDocker;
-				fn(true);
-			}else {
-				mongo.docker.find({"ip" : data.ip}, (result)=>{
-
-					var opts = {
-						"host" : result.ip,
-						"port" : result.port
-					}
-					p.settings.ping(opts, (err, data)=> {
-						fn({err : err, data: data});
-					});
-				});
-			}
+		settings.isConnected(data, fn);
+			// if(data.ip === getServerIp() || data.ip === "default" ) {
+			// 	var docker = defaultDocker;
+			// 	fn(true);
+			// }else {
+			// 	mongo.docker.find({"ip" : data.ip}, (result)=>{
+			//
+			// 		var opts = {
+			// 			"host" : result.ip,
+			// 			"port" : result.port
+			// 		}
+			// 		settings.ping(opts, fn);
+			// 	});
+			// }
 	});
 
 	server.listen('ConnectDocker', function(data, fn) {
 
-		// console.log(getServerIp());
-		var type = (data.docker);
-		// console.log(data);
-		if(data.ip === getServerIp()) {
-			var docker = defaultDocker;
-			p[data.docker].docker = docker;
-			return fn(true);
-		}else {
-			mongo.docker.find({"ip" : data.ip}, (result)=>{
-				var opts = {
-					"host" : result.ip,
-					"port" : result.port
-				}
-				// console.log("result");
-				// console.log(result);
-				p.settings.ping(opts, (err, data)=> {
-					// console.log(err);
-					// console.log(data);
-					if(err !== null) {
-						return fn({err : err.code});
-					}else {
-						var docker = p.settings.setDocker(opts);
-						p[type].docker = docker;
-						return fn(true);
-					}
-				});
-				// fn(true);
-			});
-		}
+		settings.connectDocker(data, fn);
+
 	});
 
 	server.listen('GetThisDocker', function(data, fn) {
@@ -500,61 +449,43 @@ var settings = function(server){
 	});
 
 	server.listen('authCheck', function(data, fn) {
-		p.settings.authCheck(data, fn);
+		settings.authCheck(data, fn);
 	});
 }
 
 
 
 var swarm = function(server){
-
-	function getServerIp() {
-			var os = require("os");
-			var ifaces = os.networkInterfaces();
-			var result = '';
-			for (var dev in ifaces) {
-					var alias = 0;
-					if(dev === "eth0"){
-						ifaces[dev].forEach(function(details) {
-							if (details.family == 'IPv4' && details.internal === false) {
-								result = details.address;
-								++alias;
-							}
-						});
-					}
-			}
-
-			return result;
-	}
+	var swarm = p.swarm;
 
 	server.listen("UpdateSwarm", function(data , fn){
-		p.swarm.update(data, fn);
+		swarm.update(data, fn);
 	});
 
 	server.listen("InitSwarm", function(data , fn){
-		p.swarm.init(data, fn);
+		swarm.init(data, fn);
 	});
 
 	server.listen("LoadSwarm", function(data , fn){
-		p.swarm.load(data, fn);
+		swarm.load(data, fn);
 	});
-
 
 	server.listen("LeaveSwarm", function(data, fn){
 		var opts = {force : data};
-		p.swarm.leave(opts, fn);
+		swarm.leave(opts, fn);
 	});
-
-	server.listen("JoinSwarm", function(data, fn){
-		p.swarm.join(data, fn);
-	});
+	//
+	// server.listen("JoinSwarm", function(data, fn){
+	// 	p.swarm.join(data, fn);
+	// });
 
 	server.listen("ThrowNode", function(data, fn){
-		p.swarm.throwNode(data, fn);
+		swarm.throwNode(data, fn);
 	});
 }
 
 var node = function(server){
+	var node = p.node;
 	// server.listen("StartNode", function(data, fn){
 	// 	// var opts = {force : data};
 	// 	// console.log(data);
@@ -565,7 +496,7 @@ var node = function(server){
 	// });
 	server.listen("LoadNode", function(data , fn){
 		// console.log(data);
-		p.node.load(data, fn);
+		node.load(data, fn);
 	});
 
 	// server.listen("StopNode", function(data, fn){
@@ -575,7 +506,7 @@ var node = function(server){
 	// });
 
 	server.listen("RemoveNode", function(data, fn){
-		p.node.remove(data, fn);
+		node.remove(data, fn);
 	});
 
 	// server.listen("UpdateNode", function(data, fn){
@@ -584,18 +515,18 @@ var node = function(server){
 };
 
 var service = function(server){
+	var service = p.service;
 
 	server.listen("CreateService", function(data, fn){
-		p.service.create(data, fn);
+		service.create(data, fn);
 	});
 
 	server.listen("RemoveService", function(data, fn){
-		p.service.remove(data, fn);
+		service.remove(data, fn);
 	});
 
 	server.listen("UpdateService", function(data, fn){
-		console.log(data);
-		p.service.update(data, fn);
+		service.update(data, fn);
 	});
 }
 

@@ -137,7 +137,7 @@ function createList ( $list, array ) {
     console.log(data);
     for (var index in data ) {
       console.log(data[index]);
-        $row.append(createElement("<div/>", "col-sm-4 text-center " + index, data[index]));
+        $row.append(createElement("<div/>", "col-sm-3 text-center " + index, data[index]));
     }
     // for (var i in $elements) {
     // }

@@ -59,10 +59,10 @@ var serversocket = (function serversocket(socket) {
     socket.emit(eventName, data, callback);
   }
 
-  this.errTransmit = function(eventName, data, callback) {
-    var socket =  this.socket;
-    socket.emit("errTransmit", data, callback);
-  }
+  // this.errTransmit = function(eventName, data, callback) {
+  //   var socket =  this.socket;
+  //   socket.emit("errTransmit", data, callback);
+  // }
 
 }).call(serversocket.prototype);
 

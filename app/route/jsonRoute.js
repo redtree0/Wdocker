@@ -3,7 +3,7 @@
   var router = express.Router();
 
   var docker = require('../js/docker')();
-  var p = require("../js/p");
+  var p = require("../js/dockerEvent");
 
 
   router.use(function timeLog(req, res, next) { /// 라우터 요정 왔을때 언제 도달했는지 확인

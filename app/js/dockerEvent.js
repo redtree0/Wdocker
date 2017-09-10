@@ -1,7 +1,7 @@
 
 var mongo = require("./mongoController.js");
 
-  var p = function( docker){
+  var Common = function( docker){
     this.docker = docker; /// docker modem 겍체 설정
     this.getInfo = null; /// docker get method 설정
     this.getLists = null; /// docker getlists method 설정
@@ -18,7 +18,7 @@ var mongo = require("./mongoController.js");
     *  @param {Object} data - promise 데이터
     *  @return {Function} callback - 콜백 함수
     */
-    this.successCallback = function (callback, data){
+    self.successCallback = function (callback, data){
       console.log("success");
       // console.log(arguments);
       // console.log(data);
@@ -36,7 +36,7 @@ var mongo = require("./mongoController.js");
     *  @param {Object} data - promise 데이터
     *  @return {Function} callback - 콜백 함수
     */
-    this.failureCallback = function (callback, err){
+    self.failureCallback = function (callback, err){
       console.log("failed");
       console.log(err);
       var result = {
@@ -56,7 +56,7 @@ var mongo = require("./mongoController.js");
     *  @param {String} method - docker에서 실행할 메소드
     *  @return {Array} lists - Promise Array
     */
-    this.get = function (data, opts, method) {
+    self.get = function (data, opts, method) {
       var self = this;
       var hasOpts = true;
       var hasGetInfo = false;
@@ -69,10 +69,10 @@ var mongo = require("./mongoController.js");
         hasOpts = false;
       }
       var list = [];
-
+      var dockerInfo = null;
       for(var i in data) {
         if(hasGetInfo){  /// getInfo 있는지 여부
-          var dockerInfo = self.docker[self.getInfo](data[i][(self.attr)]);
+          dockerInfo = self.docker[self.getInfo](data[i][(self.attr)]);
         }else {
           return ;
         }
@@ -95,8 +95,9 @@ var mongo = require("./mongoController.js");
     *  @param {Function} callback - client로 보낼 콜백함수
     *  @return {Object} Promise
     */
-    this.dockerPromiseEvent = function(promiselist, callback) {
-        return Promise.all(promiselist).then(this.successCallback.bind(null, callback) , this.failureCallback.bind(null, callback));
+    self.dockerPromiseEvent = function(promiselist, callback) {
+        var self = this;
+        return Promise.all(promiselist).then(self.successCallback.bind(null, callback) , self.failureCallback.bind(null, callback));
     }
 
 
@@ -108,7 +109,7 @@ var mongo = require("./mongoController.js");
     *  @param {String} method - 실행할 메소드
     *  @return {Function} callback - client로 보낼 콜백함수
     */
-    this.doTask = function(data, callback, opts, method){
+    self.doTask = function(data, callback, opts, method){
       var self = this ;
 
       var promiseList = null;
@@ -128,7 +129,7 @@ var mongo = require("./mongoController.js");
     *  @param {Function} callback - client로 보낼 콜백함수
     *  @return {Function} callback - res로 보낼 콜백함수
     */
-    this.getAllLists = function (opts, successCallback, failCallback){
+    self.getAllLists = function (opts, successCallback, failCallback){
       var self = this;
 
       if(self.getLists !== null){
@@ -145,35 +146,37 @@ var mongo = require("./mongoController.js");
     *  @description 다른 호스트의 도커에 접속하기 위한 값 설정, p 객체에 remotedocker SET
     *  @param {Object} config - 원격 docker 접속 시 필요한 옵션
     */
-    this.setRemoteDocker = function (config) {
-      this.remoteDocker = require("./docker")(config);
+    self.setRemoteDocker = function (config) {
+      var self = this;
+      self.remoteDocker = require("./docker")(config);
     }
 
-    /** @method  - setDocker
-    *  @description 다른 호스트의 도커에 접속하기 위한 값 설정
-    *  @return {Object} 원격 docker 리턴
-    */
-    this.setDocker = function (config) {
-      // this.docker = require("./docker")(data);
-      return require("./docker")(config);
-    }
+    // /** @method  - setDocker
+    // *  @description 다른 호스트의 도커에 접속하기 위한 값 설정
+    // *  @return {Object} 원격 docker 리턴
+    // */
+    // self.setDocker = function (config) {
+    //   // this.docker = require("./docker")(data);
+    //   return require("./docker")(config);
+    // }
 
     /** @method  - getDocker
     *  @description docker modem 객체 GET
     *  @return {Object} docker modem 객체
     */
-    this.getDocker = function () {
+    self.getDocker = function () {
+      var self = this;
       // this.docker = require("./docker")(data);
-      return this.docker;
+      return self.docker;
     }
 
-  }).call(p.prototype);
+  }).call(Common.prototype);
 
   var docker = require("./docker")();
 
-  var test = new p(docker);
+  var common = new Common(docker);
 
-   var container = Object.create(test);
+   var Container = Object.create(common);
 
    (function(){
      var self = this;
@@ -306,9 +309,9 @@ var mongo = require("./mongoController.js");
        });
      }
 
-   }).call(container);
+   }).call(Container);
 
-   var network = Object.create(test);
+   var Network = Object.create(common);
 
    (function(){
      var self = this;
@@ -401,10 +404,10 @@ var mongo = require("./mongoController.js");
 
      };
 
-   }).call(network);
+   }).call(Network);
 
 
-  var image = Object.create(test);
+  var Image = Object.create(common);
 
   (function(){
     var self = this;
@@ -478,7 +481,21 @@ var mongo = require("./mongoController.js");
       */
       self.create = function (data,  callback) {
         data.forEach( (images) => {
-          (self.docker).createImage({ "fromImage" : images.name , "tag" : "latest"}, callback);
+          (self.docker).createImage({ "fromImage" : images.name , "tag" : "latest"},
+                function(err, stream) {
+                 //  console.log(stream);
+                  if (err) return console.log(err);
+                  var docker = self.docker;
+                 //  console.log(server);
+                  docker.modem.followProgress(stream, onFinished, onProgress);
+
+                   function onFinished(err, output) {
+                      callback(true);
+                   }
+                   function onProgress(event) {
+                      callback(event);
+                   }
+              });
         });
       };
 
@@ -511,10 +528,10 @@ var mongo = require("./mongoController.js");
 
       };
 
-  }).call(image);
+  }).call(Image);
 
 
-    var volume = Object.create(test);
+    var Volume = Object.create(common);
     (function(){ /// this =  volume
       var self = this;
       self.getInfo = "getVolume";
@@ -540,10 +557,10 @@ var mongo = require("./mongoController.js");
       self.remove = function (data, callback) {
         return self.doTask(data, callback, "remove");
       }
-    }).call(volume);
+    }).call(Volume);
 
 
-    var settings = Object.create(test);
+    var Settings = Object.create(common);
 
     (function(){
       var self = this;
@@ -554,11 +571,20 @@ var mongo = require("./mongoController.js");
       *  @param {Function} callback - 클라이언트로 보낼 callback
       */
       self.ping = function (data, callback) {
+        console.log(data);
 
         if(data.hasOwnProperty("host") && data.hasOwnProperty("port")){
           var docker = require("./docker")(data);
           docker.ping((err,data)=>{
-            callback(err, data);
+              // callback(err, data);
+              console.log(data);
+              console.log(err);
+              if(err !== null){
+                  callback({err : err, data: data, statusCode : 500});
+              }else {
+                  callback({err : err, data: data});
+              }
+
           });
         }else {
           callback({data : "IP or Port is null"});
@@ -581,6 +607,26 @@ var mongo = require("./mongoController.js");
           callback(true);
         });
       };
+var defaultDocker = require("./docker")();
+      self.isConnected = function(data, callback){
+            console.log(data);
+            if(data.ip !== getServerIp()) {
+
+              mongo.docker.find({"ip" : data.ip}, (result)=>{
+
+                var opts = {
+                  "host" : result.ip,
+                  "port" : result.port
+                }
+                self.ping(opts, callback);
+              });
+          }else {
+
+            var docker = defaultDocker;
+            callback(true);
+          }
+      }
+
 
       /** @method  - connectDocker
       *  @description docker host 원격 연결
@@ -588,16 +634,47 @@ var mongo = require("./mongoController.js");
       *  @return {Object} setRemoteDocker -> return remotedocker
       */
       self.connectDocker = function (data, callback) {
-        return self.setRemoteDocker(data);
+        var type = (data.docker);
+
+        var findDocker= new Promise(function(resolve, reject){
+              mongo.docker.find({"ip" : data.ip}, (result)=>{
+                var opts = {
+                  "host" : result.ip,
+                  "port" : result.port
+                }
+                resolve(opts);
+
+            })
+        })
+
+        Promise.all([findDocker]).then((data)=>{
+
+          var hostconfig = data[0];
+          var docker = require("./docker")(hostconfig);
+          docker.ping((err,data)=>{
+            // console.log(err);
+            // console.log(data);
+            if(err !== null) {
+              callback({err : err.code, statusCode : 500});
+            }else {
+              self.setRemoteDocker(hostconfig);
+              // console.log(self.remoteDocker);
+              lists[type].docker = self.remoteDocker;
+              // console.log(lists[type].docker);
+              callback({statusCode : 200});
+            }
+          })
+        });
+
+
       };
 
       self.authCheck = function(data, callback){
-        mongo.auth.find(data, (result)=>{
-          self.docker.checkAuth(result).then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));
-
-        });
+          mongo.auth.find(data, (result)=>{
+            self.docker.checkAuth(result).then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));
+          });
       }
-    }).call(settings);
+    }).call(Settings);
 
 
     var os = require("os");
@@ -619,25 +696,7 @@ var mongo = require("./mongoController.js");
         return result;
     }
 
-    var swarm = Object.create(test);
-    var os = require("os");
-    function getServerIp() {
-        var ifaces = os.networkInterfaces();
-        var result = '';
-        for (var dev in ifaces) {
-            var alias = 0;
-            if(dev === "eth0"){
-              ifaces[dev].forEach(function(details) {
-                if (details.family == 'IPv4' && details.internal === false) {
-                  result = details.address;
-                  ++alias;
-                }
-              });
-            }
-        }
-
-        return result;
-    }
+    var Swarm = Object.create(common);
 
     function getSwarmDocker(self, host, hostconfig){
       var docker = null;
@@ -842,9 +901,9 @@ var mongo = require("./mongoController.js");
         docker.swarmLeave({force : true}).then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));
       };
 
-    }).call(swarm);
+    }).call(Swarm);
 
-    var node = Object.create(test);
+    var Node = Object.create(common);
     (function(){
       var self = this;
       self.getInfo = "getNode";
@@ -928,9 +987,9 @@ var mongo = require("./mongoController.js");
       //   }
       // }
 
-    }).call(node);
+    }).call(Node);
 
-    var service = Object.create(test);
+    var Service = Object.create(common);
 
     (function(){
       var self = this;
@@ -991,9 +1050,9 @@ var mongo = require("./mongoController.js");
         return self.doTask(data, callback, "inspect");
       };
 
-    }).call(service);
+    }).call(Service);
 
-    var task = Object.create(test);
+    var Task = Object.create(common);
     (function(){
         var self = this;
         self.getInfo = "getTask";
@@ -1009,20 +1068,20 @@ var mongo = require("./mongoController.js");
             return self.doTask(data, callback, "inspect");
         };
 
-   }).call(task);
+   }).call(Task);
 
 
 
    var lists = {
-     "container" : container,
-     "network" : network,
-     "image" : image,
-     "volume" : volume,
-     "settings" : settings,
-     "swarm" : swarm,
-     "node" : node,
-     "service" : service,
-     "task" : task
+     "container" : Container,
+     "network" : Network,
+     "image" : Image,
+     "volume" : Volume,
+     "settings" : Settings,
+     "swarm" : Swarm,
+     "node" : Node,
+     "service" : Service,
+     "task" : Task
    }
 
 module.exports = lists;
