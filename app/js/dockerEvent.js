@@ -1,5 +1,7 @@
 
-var mongo = require("./mongoController.js");
+  var mongo = require("./mongoController.js");
+  var path = require("path");
+  var Docker = require("./docker");
 
   var Common = function( docker){
     this.docker = docker; /// docker modem 겍체 설정
@@ -151,14 +153,6 @@ var mongo = require("./mongoController.js");
       self.remoteDocker = require("./docker")(config);
     }
 
-    // /** @method  - setDocker
-    // *  @description 다른 호스트의 도커에 접속하기 위한 값 설정
-    // *  @return {Object} 원격 docker 리턴
-    // */
-    // self.setDocker = function (config) {
-    //   // this.docker = require("./docker")(data);
-    //   return require("./docker")(config);
-    // }
 
     /** @method  - getDocker
     *  @description docker modem 객체 GET
@@ -172,7 +166,7 @@ var mongo = require("./mongoController.js");
 
   }).call(Common.prototype);
 
-  var docker = require("./docker")();
+  var docker = new Docker();
 
   var common = new Common(docker);
 
@@ -308,7 +302,52 @@ var mongo = require("./mongoController.js");
          resolve(container.logs ({ "stdout" : true}));
        });
      }
+     self.attach = function(data, stdin, stdout, stderr){
+       var docker = self.docker;
+       var container = docker.getContainer(data);
+       return stdin((data)=>{
 
+         var options = {
+           Cmd: data.split(" "),
+           AttachStdin: true,
+           AttachStdout: true,
+           AttachStderr: true,
+           DetachKeys: "ctrl-c",
+           Tty : true
+         };
+
+         container.exec(options, function(err, exec) {
+          //  console.log(exec);
+           if (err) return;
+          // console.log(exec);
+           exec.start({hijack: true, stdin: true, Tty : true, Detach : false},function(err, stream) {
+                  //  console.log(err);
+                  if(data === "exit"){
+                    console.log(data);
+                    // stream.end();
+                    container.stop();
+                  }
+
+                  stream.setEncoding('utf8');
+                   stderr(stream);
+                   stdout(stream);
+                   // stdin(stream);
+                   docker.modem.demuxStream(stream, process.stdout, process.stderr);
+           });
+
+         });
+       });
+      //  container.attach({ stream: true, stdin: true, stdout: true, stderr: true}, function (err, stream) {
+       //
+      //      if(err) {
+      //        stderr(stream, err);
+      //      }
+      //     //  console.log(process.stdout);
+      //      stdin(stream);
+      //      stdout(stream);
+       //
+      //  });
+     };
    }).call(Container);
 
    var Network = Object.create(common);
@@ -375,16 +414,16 @@ var mongo = require("./mongoController.js");
      *  @return {object} Promise
      */
      self.connect =  function (data, callback) {
-
-       var lists = data.checkedRowLists;
-       var container = (data.opts.container);
-       var opts = {
-         "Container" : container,
-         "EndpointConfig" : {"NetworkID" : ""}
-       };
-      //  console.log(opts);
-       var promiseList = self.get( lists, opts, "connect");
-       return self.dockerPromiseEvent(promiseList, callback);
+       console.log(data);
+      //  var lists = data.checkedRowLists;
+      //  var container = (data.opts.container);
+      //  var opts = {
+      //    "Container" : container,
+      //    "EndpointConfig" : {"NetworkID" : ""}
+      //  };
+      // //  console.log(opts);
+      //  var promiseList = self.get( lists, opts, "connect");
+      //  return self.dockerPromiseEvent(promiseList, callback);
 
      }
 
@@ -415,6 +454,22 @@ var mongo = require("./mongoController.js");
     self.getLists = "listImages";
     self.attr = "Id";
 
+
+    function dockerStream(callback, err, stream){
+          if (err) return callback(err);
+          var docker = self.docker;
+         //  console.log(server);
+          docker.modem.followProgress(stream, onFinished, onProgress);
+
+           function onFinished(err, output) {
+            //  console.log("finished");
+              callback(true);
+           }
+           function onProgress(event) {
+              callback(event);
+           }
+    }
+
     /** @method  - search
     *  @description hub.docker.com에 있는 이미지 검색
     *  @param {Object} filters - 검색할 데이터
@@ -442,35 +497,17 @@ var mongo = require("./mongoController.js");
     *  @param {Function} callback - 클라이언트로 보낼 callback
     *  @return {Function} doTask
     */
-      self.push = function (opts, callback) {
+      self.push = function (opts, onProgress, callback) {
           if(opts){
             var image = self.docker.getImage(opts.name);
             mongo.auth.show((result)=>{
               var auth = (result[0]);
 
-              // return new Promise(function(resolve, reject){
-              // resolve(image.push(opts, undefined,auth))
-              image.push(opts,
-                  function(err, stream) {
-                    // console.log(stream);
-                    if (err) return self.failureCallback(callback, err) ;
-                    // var docker = require("./docker")();
-                    self.docker.modem.followProgress(stream, onFinished, onProgress);
-
-                    function onFinished(err, output) {
-                      console.log("onFinished");
-                      return self.successCallback(callback, output);
-                    }
-                    function onProgress(event) {
-                      // console.log("onProgress");
-                      // console.log(event);
-                    }
-                  },
-
-                auth);
+              image.push(opts, dockerStream.bind(null, onProgress), auth);
 
             });
           }
+          callback(true);
         //  self.doTask(data, callback, opts ,"push");
       };
 
@@ -479,24 +516,14 @@ var mongo = require("./mongoController.js");
       *  @param {Object} data - 설정 데이터
       *  @param {Function} callback - 클라이언트로 보낼 callback
       */
-      self.create = function (data,  callback) {
-        data.forEach( (images) => {
-          (self.docker).createImage({ "fromImage" : images.name , "tag" : "latest"},
-                function(err, stream) {
-                 //  console.log(stream);
-                  if (err) return console.log(err);
-                  var docker = self.docker;
-                 //  console.log(server);
-                  docker.modem.followProgress(stream, onFinished, onProgress);
+      self.create = function (data,  onProgress, callback) {
+          data.forEach( (images) => {
+            (self.docker).createImage({ "fromImage" : images.name , "tag" : "latest"},
+                      dockerStream.bind(null, onProgress)
+                );
+          });
+          callback(true);
 
-                   function onFinished(err, output) {
-                      callback(true);
-                   }
-                   function onProgress(event) {
-                      callback(event);
-                   }
-              });
-        });
       };
 
       /** @method  - build
@@ -505,26 +532,24 @@ var mongo = require("./mongoController.js");
       *  @param {Function} callback - 클라이언트로 보낼 callback
       *  @return {Function} doTask
       */
-      self.build = function(data, callback) {
-        var path = require("path");
+      self.build = function(data,  onProgress) {
 
-        var filePath = data.path + ".tgz";
-        var fileName = path.basename(data.path);
-        var dirPath = path.dirname(filePath);
-        var imageTag = data.imageTag;
-        if(imageTag === null || imageTag === "") {
-          imageTag = "default"
-        }
+            // console.log(data);
+            var filePath = data.path + ".tgz";
+            var fileName = path.basename(data.path);
+            var dirPath = path.dirname(filePath);
+            var imageTag = data.imageTag;
+            if(imageTag === null || imageTag === "") {
+              imageTag = "default"
+            }
 
-        console.log(dirPath);
-        console.log(imageTag);
-      return  (self.docker).buildImage( {
-          context :  dirPath,
-          src : [fileName]
-        }, {
-          "dockerfile" : fileName,
-          "t" : imageTag.toString()
-        }, callback);
+            return  (self.docker).buildImage( {
+                  context :  dirPath,
+                  src : [fileName]
+                }, {
+                  "dockerfile" : fileName,
+                  "t" : imageTag.toString()
+                }, dockerStream.bind(null, onProgress));
 
       };
 
@@ -607,10 +632,10 @@ var mongo = require("./mongoController.js");
           callback(true);
         });
       };
-var defaultDocker = require("./docker")();
+      var defaultDocker = require("./docker")();
       self.isConnected = function(data, callback){
             console.log(data);
-            if(data.ip !== getServerIp()) {
+            if(data.ip !== getServerIp()  && data.ip !== "default") {
 
               mongo.docker.find({"ip" : data.ip}, (result)=>{
 
@@ -648,22 +673,30 @@ var defaultDocker = require("./docker")();
         })
 
         Promise.all([findDocker]).then((data)=>{
+              var docker = null;
+              var hostconfig = data[0];
 
-          var hostconfig = data[0];
-          var docker = require("./docker")(hostconfig);
-          docker.ping((err,data)=>{
-            // console.log(err);
-            // console.log(data);
-            if(err !== null) {
-              callback({err : err.code, statusCode : 500});
-            }else {
-              self.setRemoteDocker(hostconfig);
-              // console.log(self.remoteDocker);
-              lists[type].docker = self.remoteDocker;
-              // console.log(lists[type].docker);
-              callback({statusCode : 200});
-            }
-          })
+              if(hostconfig.host !== getServerIp()  && hostconfig.host !== "default") {
+                self.setRemoteDocker(hostconfig)
+                docker = self.remoteDocker;
+              }else {
+                docker = defaultDocker;
+              }
+
+              docker.ping((err,data)=>{
+                // console.log(err);
+                // console.log(data);
+                    if(err !== null) {
+
+                      callback({err : err.code, statusCode : 500});
+
+                    }else {
+
+                      lists[type].docker = docker;
+                      callback({statusCode : 200});
+
+                    }
+              })
         });
 
 
@@ -699,18 +732,18 @@ var defaultDocker = require("./docker")();
     var Swarm = Object.create(common);
 
     function getSwarmDocker(self, host, hostconfig){
-      var docker = null;
-      if(host === null){
-        console.log("host is null");
-        return ;
-      }
-      if(host === getServerIp()){
-        docker = self.docker;
-      }else{
-        self.setRemoteDocker(hostconfig);
-        docker = self.remoteDocker;
-      }
-      return docker
+        var docker = null;
+        if(host === null){
+          console.log("host is null");
+          return ;
+        }
+        if(host === getServerIp()){
+          docker = self.docker;
+        }else{
+          self.setRemoteDocker(hostconfig);
+          docker = self.remoteDocker;
+        }
+        return docker;
     }
 
     (function(){
@@ -723,41 +756,24 @@ var defaultDocker = require("./docker")();
           var dockerInfo = self.docker[self.getLists]();
         }
         mongo.docker.show( (result)=>{
-          // callback(result);
-          // console.log(result);
-          for(var i in result){
-            // console.log(result[i]);
-            var hostconfig = {
-              host : result[i].ip,
-              port : result[i].port
-            }
-            if(getServerIp() === result[i].ip){
-              // console.log(hostconfig.host);
-              var dockerInfo = self.docker[self.getLists]();
-              dockerInfo.then((data)=>{
-                callback(data);
 
-              }).catch((err)=>{
-                // console.log(err);
-              });
-            }else {
-              // console.log("else");
-              // console.log(hostconfig.host);
-
-              self.setRemoteDocker(hostconfig);
-              var dockerInfo = self.remoteDocker[self.getLists]();
+            for(var i in result){
+                  // console.log(result[i]);
+                  var hostconfig = {
+                    host : result[i].ip,
+                    port : result[i].port
+                  }
+                  var docker = getSwarmDocker(self, hostconfig.host, hostconfig);
+                  var dockerInfo = self.docker[self.getLists]();
                   dockerInfo.then((data)=>{
                     callback(data);
+
                   }).catch((err)=>{
                     // console.log(err);
                   });
 
             }
-          }
         });
-        // return new Promise(function(resolve, reject){
-        //   resolve(dockerInfo);
-        // }).then(successCallback, failCallback);
 
       };
 
@@ -774,7 +790,9 @@ var defaultDocker = require("./docker")();
         function setSwarm(node, token){
           var hostconfig = {};
           hostconfig.host = node.ip;
-          hostconfig.port = node.port;
+          if(node.hasOwnProperty("port")){
+              hostconfig.port = node.port;
+          }
 
           swarmJoin.AdvertiseAddr = node.ip;
           swarmJoin.JoinToken = token;
@@ -813,10 +831,9 @@ var defaultDocker = require("./docker")();
       *  @param {Function} callback - 클라이언트로 보낼 callback
       */
       self.init = function (data, callback) {
-        var hostconfig = {
-          host : data.host,
-          port : data.port
-        }
+        var hostconfig = data;
+        console.log(hostconfig);
+
         var docker = getSwarmDocker(self, data.host, hostconfig);
 
         return docker.swarmInit(data).then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));
@@ -830,10 +847,12 @@ var defaultDocker = require("./docker")();
       *  @return {Object} promise
       */
       self.load = function (data, callback){
+
         var hostconfig = {
           host : data.host,
           port : data.port
         }
+        console.log(data);
         var docker =  getSwarmDocker(self, data.host, hostconfig);
 
         return docker.swarmInspect().then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));
@@ -921,12 +940,6 @@ var defaultDocker = require("./docker")();
         // self.setRemoteDocker(hostconfig);
         var hostconfig = data;
         var docker = getSwarmDocker(self, data.host, hostconfig);
-        // if(data.host === getServerIp()){
-        //   docker = self.docker;
-        // }else{
-        //   var hostconfig = data;
-        //   docker = self.setRemoteDocker(hostconfig);
-        // }
 
         return new Promise(function(resolve, reject){
           resolve(docker.listNodes())
@@ -1024,20 +1037,12 @@ var defaultDocker = require("./docker")();
       *  @return {Object} dotask
       */
       self.update = function(data, callback){
-        console.log(data.Id);
+
         var getService = (self.docker)[self.getInfo](data.Id);
         delete data.Id
 
-        console.log(data.version);
-        console.log(getService);
-        console.log(data);
         return getService.update( data).then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));
-        // mongo.auth.show((result)=>{
-        //   var auth = (result[0]);
-        //   console.log(auth);
-        //   // auth.version = 100;
-        //   return getService.update( data).then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));
-        // })
+
       };
 
       /** @method  - inspect
@@ -1057,6 +1062,20 @@ var defaultDocker = require("./docker")();
         var self = this;
         self.getInfo = "getTask";
         self.getLists = "listTasks";
+
+        self.getAllLists = function (opts, successCallback, failCallback){
+          var self = this;
+          self.docker = Node.docker;
+          if(self.getLists !== null){
+            var dockerInfo = self.docker[self.getLists](opts);
+          }
+          return new Promise(function(resolve, reject){
+            resolve(dockerInfo);
+          }).then(successCallback, failCallback);
+
+
+        };
+
 
         /** @method  - inspect
         *  @description task inspect

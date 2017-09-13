@@ -1,6 +1,11 @@
 "use strict";
 
 $(function(){
+  const COMPLETE = {
+    DO : true,
+    NOT : false
+  }
+
   var filePath = null;
   var $path = $("#path");
   var $fileName = $("#filename");
@@ -57,7 +62,7 @@ function reportMenu ($node) {
                            path : parentPath,
                            name : newDirectory
                          }
-                         client.sendEvent("CreateDirectory", opts);
+                         client.sendEvent(COMPLETE.NOT, "CreateDirectory", opts);
                          socket.emit("dirtree", "", (data)=>{
                             jstreeRefresh($jstree, data);
                          });
@@ -84,7 +89,7 @@ function reportMenu ($node) {
                            path : parentPath,
                            name : newFile
                          }
-                         client.sendEvent("CreateFile", opts);
+                         client.sendEvent(COMPLETE.NOT, "CreateFile", opts);
                            socket.emit("dirtree", "", (data)=>{
                               jstreeRefresh($jstree, data);
                            });
@@ -111,7 +116,7 @@ function reportMenu ($node) {
                            origin : originPath,
                            renew : renewPath
                          }
-                          client.sendEvent("RenameFile", opts);
+                          client.sendEvent(COMPLETE.NOT, "RenameFile", opts);
                        });
                    }
                },
@@ -140,7 +145,7 @@ function reportMenu ($node) {
   var lists = [];
   lists = initJstree(lists);
   function initJstree(lists){
-    client.sendEvent("dirtree", "", (data)=>{
+    client.sendEvent(COMPLETE.NOT, "dirtree", "", (data)=>{
               lists = data;
               console.log(JSON.stringify(lists));
               $('#jstree').jstree({
@@ -190,11 +195,11 @@ function jstreeRefresh($jstree, newTree){
         var path = node.path;
         var type = node.type;
         if(type === "file"){
-          client.sendEvent("ReadFile", path, (data)=>{
+          client.sendEvent(COMPLETE.NOT, "ReadFile", path, (data)=>{
               editor.setValue(data);
           });
         }else if (type === "directory") {
-          client.sendEvent("dirtree", path , (data)=>{
+          client.sendEvent(COMPLETE.NOT, "dirtree", path , (data)=>{
               var lists = data;
                $('#jstree').jstree(true).settings.core.data = lists;
                $('#jstree').jstree(true).refresh();
@@ -225,7 +230,7 @@ function jstreeRefresh($jstree, newTree){
             path : $path.text(),
             context : editor.getValue()
           }
-          client.sendEvent("UpdateFile", opts, completeEvent);
+          client.sendEvent(COMPLETE.NOT, "UpdateFile", opts, completeEvent);
       });
 
 
@@ -250,7 +255,7 @@ function jstreeRefresh($jstree, newTree){
             imageTag : $imageTag.val()
           };
 
-          client.sendEvent("build", opts, (data, callback)=>{
+          client.sendEvent(COMPLETE.NOT, "build", opts, (data, callback)=>{
             if(data){
               console.log("done");
             }
@@ -263,9 +268,9 @@ function jstreeRefresh($jstree, newTree){
           client.listen("buildingImage", (data)=>{
             console.log(data);
             $building.append(data.stream + "<br />");
-            if(data === true) {
-              popup.close(5000);
-            }
+            // if(data === true) {
+            //   popup.close(5000);
+            // }
           })
           popup.show();
       });

@@ -63,7 +63,11 @@
 
 
 $(function(){
-
+  const COMPLETE = {
+    DO : true,
+    NOT : false
+  }
+  
   var $all = {};
   $all.init = function(){
     $(".results").hide();

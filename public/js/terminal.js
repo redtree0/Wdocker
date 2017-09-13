@@ -1,18 +1,25 @@
 "use strict";
+
+
 function attachContainer(terminal, client, check, name ) {
+  const COMPLETE = {
+    DO : true,
+    NOT : false
+  }
+
   if(!check) {
     return
   }
   console.log(terminal);
   terminal.push(function(cmd, term) {
-    client.sendEvent('stdin', cmd);
+    client.sendEvent(COMPLETE.NOT, 'stdin', cmd);
   }, {
     prompt: 'Container :'+ name + '> ',
     name: 'container',
     onExit: (function () {
       // jquery terminal 에서 먼저 exit를 인식해 명령어가 아닌 terminal pop 호출
       // 되기 때문에 명령문으로써 호출 될기 위해 넣음
-      client.sendEvent('stdin', "exit");
+      client.sendEvent(COMPLETE.NOT,'stdin', "exit");
     })
     , exit: true
   });
@@ -44,6 +51,11 @@ function userlogin(name, password, callback){
 }
 
 $(function() {
+  const COMPLETE = {
+    DO : true,
+    NOT : false
+  }
+
   var socket = io();
   var Socket = require("./module/io");
   var client = new Socket(socket, $('body'));
@@ -51,7 +63,7 @@ $(function() {
 //  console.log($("#terminal"));
   var terminal = $("#terminal").terminal((command, terminal) => {
 
-    client.sendEvent('stdin', command);
+    client.sendEvent(COMPLETE.NOT, 'stdin', command);
     // changePrompt(terminal, command, defaultprompt, client);
 
     var cmd = $.terminal.parse_command(command);

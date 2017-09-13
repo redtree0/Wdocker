@@ -15,8 +15,8 @@ function initDropdown(jsonUrl, $li, $button, opts) {
 
   $li.children().remove();
   $.getJSON(jsonUrl, function(json, textStatus) {
-    console.log(jsonUrl);
-    console.log(json);
+    // console.log(jsonUrl);
+    // console.log(json);
     if(json !== false){
          json.some((data)=>{
            if(hasFilter){

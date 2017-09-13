@@ -74,6 +74,69 @@ var eventLists = function(io){
       server.listen("ArchiveContainer", function(data, fn){
           container.getArchive(data, fn);
       });
+
+			server.listen("AttachContainer", function(data, fn){
+
+					function stdin(stream){
+							server.listen("AttachStdin", stream);
+					}
+
+					function stdout(stream){
+							// server.sendEvent("AttachStdout",  stream.pipe(stdout));
+							// stream.setEncoding('ascii');
+							stream.on('data', function(data){
+								server.sendEvent("AttachStdout", data.toString());
+								
+							});
+							stream.on('end', function(end) {
+								server.sendEvent("AttachEnable", "enable");
+						 });
+
+					}
+
+					function stderr(stream){
+							// stream.setEncoding('ascii');
+							stream.on('error', function(err){
+								server.sendEvent("AttachStderr", err.toString());
+							});
+					}
+
+					container.attach(data, stdin, stdout, stderr);
+
+					//
+					// shell.on('exit', function (c, s){
+					// 	console.log(c);
+					// 	console.log(s);
+					// });
+					//
+					//  shell.on('close', function (c, s){
+					// 	 console.log(c);
+					//  });
+					//
+					// shell['stdout'].setEncoding('ascii');
+					// shell['stdout'].on('data', function(data) {
+					// 	server.sendEvent('stdout', data);
+					// });
+					//
+					// shell['stderr'].setEncoding('ascii');
+					// shell['stderr'].on('data', function(data) {
+					// 	server.sendEvent('stderr', data);
+					// });
+					//
+					//
+					// server.listen('stdin', function(command) {
+					// 	stdin.write(command+"\n") || server.sendEvent('disable');
+					// });
+					//
+					// stdin.on('drain', function() {
+					// 	server.sendEvent('enable');
+					// });
+					//
+					// stdin.on('error', function(exception) {
+					// 	server.sendEvent('error', String(exception));
+					// });
+
+			});
   };
   // });
 
@@ -99,18 +162,18 @@ var network = function(server){
 
 var image = function(server){
 	 	 var image = p.image;
+
+		 function onProgress(progress){
+			 server.sendEvent("progress", progress);
+		 }
+
 	   server.listen("SearchImages", function(data, fn){
 	     		image.search(data, fn);
 	   });
 
+
 	   server.listen("PullImages", function(data, fn) {
-						// 	console.log(data);
-					function onProgress(progress){
-							server.sendEvent("progress", progress);
-					}
-
-					image.create(data, onProgress);
-
+					image.create(data, onProgress, fn);
      });
 
      server.listen("RemoveImages", function(data, fn) {
@@ -118,8 +181,18 @@ var image = function(server){
      });
 
 		 server.listen("PushImages", function(data, fn) {
-			 		image.push(data, fn);
+			 		image.push(data, onProgress, fn);
 		 });
+
+		 server.listen("build", function(data, fn){
+				 function onProgress(progress){
+					 server.sendEvent("buildingImage", progress);
+				 }
+
+			 		image.build(data, onProgress);
+		 });
+
+
 };
 
 var volume = function(server){
@@ -207,31 +280,6 @@ var dockerfile = function(server) {
     fs.rename(origin, renew, function(err) {
     });
   });
-
-  server.listen("build", function(data, fn){
-    // console.log(data);
-    self.build(data, function(err, stream) {
-			if(err) return fn(err);
-					// console.log(stream);
-					// 	var docker = require("./docker")();
-
-						var docker = require("./docker")();
-						// console.log(server);
-						docker.modem.followProgress(stream, onFinished, onProgress);
-
-						 function onFinished(err, output) {
-							//  console.log("onFinished");
-							 server.sendEvent("buildingImage", true);
-
-						 }
-						 function onProgress(event) {
-							//  console.log(event);
-									server.sendEvent("buildingImage", event);
-							}
-  				});
-    	fn(true);
-  });
-
 
 	      function jstreeList(json, parentid, leafs){
 	          if (json === null) {
@@ -392,44 +440,12 @@ var settings = function(server){
 			settings.delete(data, fn);
 	});
 
-	function getServerIp() {
-			var ifaces = os.networkInterfaces();
-			var result = '';
-			for (var dev in ifaces) {
-					var alias = 0;
-					if(dev === "eth0"){
-						ifaces[dev].forEach(function(details) {
-							if (details.family == 'IPv4' && details.internal === false) {
-								result = details.address;
-								++alias;
-							}
-						});
-					}
-			}
-			return result;
-	}
-
 	server.listen('IsConnected', function(data, fn) {
 		settings.isConnected(data, fn);
-			// if(data.ip === getServerIp() || data.ip === "default" ) {
-			// 	var docker = defaultDocker;
-			// 	fn(true);
-			// }else {
-			// 	mongo.docker.find({"ip" : data.ip}, (result)=>{
-			//
-			// 		var opts = {
-			// 			"host" : result.ip,
-			// 			"port" : result.port
-			// 		}
-			// 		settings.ping(opts, fn);
-			// 	});
-			// }
 	});
 
 	server.listen('ConnectDocker', function(data, fn) {
-
 		settings.connectDocker(data, fn);
-
 	});
 
 	server.listen('GetThisDocker', function(data, fn) {

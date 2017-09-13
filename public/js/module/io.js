@@ -1,5 +1,5 @@
 "use strict";
-
+var spin = require("./spinner");
 
 var clientsocket = (function clientsocket(io, $body) {
   this.socket = io; // client socket 정보
@@ -71,7 +71,8 @@ var clientsocket = (function clientsocket(io, $body) {
           }
           // console.log(data);
           self.$body.spinStart();  /// spinner 시작
-          return self.sendEvent(eventName, data, (data)=>{
+          const DOCOMPLETE = true;
+          return self.sendEvent(DOCOMPLETE , eventName, data, (data)=>{
             (self.$body).spinStop(); /// spinner 정지
             if(table){
               table.reload();  /// 테이블 갱신
@@ -96,18 +97,23 @@ var clientsocket = (function clientsocket(io, $body) {
     *  @param {Function} callback - 콜백 함수
     *  @return {Function} socket.emit - 소켓 송신
     */
-    this.sendEvent = function (eventName, data, callback) {
+    this.sendEvent = function (doComplete, eventName, data, callback) {
         var self = this;
 
         console.log("do event %s , data %s", eventName, data);
 
         var socket =  this.socket;
+        self.$body.spinStart();
+
         ///// socket.emit (eventName, data, callback)
         //// eventName 소켓 이벤트 명
         //// data 서버로 보낼 데이터
         //// callback 서버에서 다시 클라이언트로 보낸 데이터를 받은 후 실행할 콜백 함수
         return socket.emit(eventName, data, (data)=>{
-          self.completeEvent(data); /// 소켓 완료 후 실행 함수
+          (self.$body).spinStop(); /// spinner 정지
+            if(doComplete){
+              self.completeEvent(data); /// 소켓 완료 후 실행 함수
+            }
             if(typeof callback === "function"){
               callback(data);
             }
@@ -115,29 +121,29 @@ var clientsocket = (function clientsocket(io, $body) {
     };
 
 
-    /** @method  - onlyEvent
-    *  @description 소켓 데이터 송신 함수
-    *  @param {String} eventName - 소켓 이벤트 명
-    *  @param {Object} data - json data
-    *  @param {Function} callback - 콜백 함수
-    *  @return {Function} socket.emit - 소켓 송신
-    */
-    this.onlySendEvent = function (eventName, data, callback) {
-        var self = this;
-
-        console.log("do event %s , data %s", eventName, data);
-
-        var socket =  this.socket;
-        ///// socket.emit (eventName, data, callback)
-        //// eventName 소켓 이벤트 명
-        //// data 서버로 보낼 데이터
-        //// callback 서버에서 다시 클라이언트로 보낸 데이터를 받은 후 실행할 콜백 함수
-        return socket.emit(eventName, data, (data)=>{
-            if(typeof callback === "function"){
-              callback(data);
-            }
-        });
-    };
+    // /** @method  - onlyEvent
+    // *  @description 소켓 데이터 송신 함수
+    // *  @param {String} eventName - 소켓 이벤트 명
+    // *  @param {Object} data - json data
+    // *  @param {Function} callback - 콜백 함수
+    // *  @return {Function} socket.emit - 소켓 송신
+    // */
+    // this.onlySendEvent = function (eventName, data, callback) {
+    //     var self = this;
+    //
+    //     console.log("do event %s , data %s", eventName, data);
+    //
+    //     var socket =  this.socket;
+    //     ///// socket.emit (eventName, data, callback)
+    //     //// eventName 소켓 이벤트 명
+    //     //// data 서버로 보낼 데이터
+    //     //// callback 서버에서 다시 클라이언트로 보낸 데이터를 받은 후 실행할 콜백 함수
+    //     return socket.emit(eventName, data, (data)=>{
+    //         if(typeof callback === "function"){
+    //           callback(data);
+    //         }
+    //     });
+    // };
 
     /** @method  - listen
     *  @description 소켓 데이터 수신 함수

@@ -57,6 +57,7 @@ var serversocket = (function serversocket(socket) {
     //// data 클라이언트로 보낼 데이터
     //// callback 클라이언트에서 다시 서버로 보낸 데이터를 받은 후 실행할 콜백 함수
     socket.emit(eventName, data, callback);
+    console.log("do send %s", eventName);
   }
 
   // this.errTransmit = function(eventName, data, callback) {

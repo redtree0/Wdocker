@@ -35,6 +35,11 @@ const columns = [{
 
 
 $(function(){
+      const COMPLETE = {
+        DO : true,
+        NOT : false
+      }
+
 
       $('.ip_address').mask('0ZZ.0ZZ.0ZZ.0ZZ', { translation: { 'Z': { pattern: /[0-9]/, optional: true } } });
       var $all = {};
@@ -63,24 +68,20 @@ $(function(){
                   host : row.ip,
                   port : row.port,
                 }
-              client.sendEvent("PING", opts,(data)=>{
+              client.sendEvent(COMPLETE.NOT, "PING", opts,(data)=>{
                 var finished = null;
-                console.log(data);
-                if(data.err) {
-                  finished = new dialog("PING ERROR",  data.err.code, $("body"));
-                } else {
-                  finished = new dialog("PING OK",  data.data, $("body"));
-                }
+
+                finished = new dialog("PING OK",  data);
                 finished.setDefaultButton('Close[Enker]', 'btn-primary create');
                 finished.show();
-                finished.close(5000);
+                // finished.close(5000);
               });
             }else if(field === "remove"){
               var opts = {
                 _id : row._id,
               }
               client.sendEventTable("DELETE", $(".jsonTable"), opts, (data)=>{
-                var finished = new dialog("삭제", data, $("body"));
+                var finished = new dialog("삭제", data);
                 finished.setDefaultButton('Close[Enker]', 'btn-primary create');
                 finished.show();
               });
@@ -109,8 +110,8 @@ $(function(){
           user : $("#user").val(),
           password : $("#password").val()
         }
-          client.sendEvent("authCheck", opts, (data)=>{
-            var finished = new dialog("작업 완료",  data);
+          client.sendEvent(COMPLETE.NOT, "authCheck", opts, (data)=>{
+            var finished = new dialog("Authentication",  data);
             finished.show();
           });
       });

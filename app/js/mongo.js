@@ -10,6 +10,8 @@ db.on('error',
 db.once('open', function(){
   console.log("Connected to mongod server");
 });
+
+// ,'users_test'
 mongoose.connect('mongodb://localhost/nocker', function(err) {
     if (err) {
       throw err

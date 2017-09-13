@@ -73,7 +73,11 @@ const columns = [{
 
 
 $(function(){
-
+  const COMPLETE = {
+    DO : true,
+    NOT : false
+  }
+  
   $('.ip_address').mask('0ZZ.0ZZ.0ZZ.0ZZ/00', { translation: { 'Z': { pattern: /[0-9]/, optional: true } } });
 
   var $all = {};

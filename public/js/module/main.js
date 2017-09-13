@@ -6,9 +6,12 @@ var main = (function(){
     var socket = io();
     var Socket = require("./io");
     var client = new Socket(socket, $('body'));
-    var spin = require("./spinner");
     var table = require("./table.js");
     var dialog = require("./dialog.js");
+    const COMPLETE = {
+      DO : true,
+      NOT : false
+    }
 
 
 
@@ -242,9 +245,9 @@ var main = (function(){
                       return  config[self.get]();
                     }
                     // console.log(self.getSettingValue());
-                    console.log(self.labellists);
+                    // console.log(self.labellists);
                     var opts = setSettings(settings.form.getSettingValue(self), self.labellists,  self.portlists ); /// docker 데이터 설정
-                    console.log(opts);
+                    // console.log(opts);
                     if(settings.checkValue(opts)){ /// opts 값 null, undefind , "" 존재 확인
                       if( self.hasOwnProperty("completeEvent") ){
                         client.completeEvent = self.completeEvent;
@@ -320,7 +323,7 @@ var main = (function(){
           /// dropdown button 초기화
           initDropdown(JSONURL, self.$connectMenu, self.$connectDropDown, {attr : ATTR});
 
-         client.onlySendEvent("GetThisDocker", {"docker" : self.dockerinfo}, (data)=>{
+         client.sendEvent(COMPLETE.NOT, "GetThisDocker", {"docker" : self.dockerinfo}, (data)=>{
               self.$whoisConnected.text(data);
          });
          const  timeInterval = 120000;  // 2ms 120000
@@ -332,7 +335,7 @@ var main = (function(){
                  "ip" : self.$whoisConnected.text(),
                  "docker" : self.dockerinfo
                }
-               client.onlySendEvent("IsConnected",  OPTS, (state)=>{
+               client.sendEvent(COMPLETE.NOT, "IsConnected",  OPTS, (state)=>{
                  var msg = null;
                  if(state){
                    msg = "Connected";
@@ -372,8 +375,12 @@ var main = (function(){
 
                }else {
 
-                 client.onlySendEvent(CONNECTDOCKER,  OPTS, (data)=>{console.log(data);});
-                 self.$whoisConnected.text(hostIP);
+                 client.sendEvent(COMPLETE.NOT ,CONNECTDOCKER,  OPTS, (data)=>{
+                   console.log(hostIP);
+                   self.$whoisConnected.text(hostIP);
+                   console.log(data);});
+                //  console.log(self.$whoisConnected.text());
+
 
                }
          });
@@ -411,8 +418,8 @@ var main = (function(){
 
           for (var i in self.event) {
             /// button event를 loop로 초기화
-            console.log(self.event[i]);
-            console.log(self.event[i].eventName);
+            // console.log(self.event[i]);
+            // console.log(self.event[i].eventName);
             self.event[i].$button.click(
               self.event[i].clickEvent(client, self.event[i].eventName, self.mainTable) /// clickEvent 클로저
             );

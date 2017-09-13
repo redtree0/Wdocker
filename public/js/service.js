@@ -38,6 +38,10 @@ const columns = [{
 
 $(function(){
 
+  const COMPLETE = {
+    DO : true,
+    NOT : false
+  }
 
   var $all = {};
   $all.init = function(){
@@ -199,7 +203,7 @@ $(function(){
         opts.version = version;
         console.log("table");
         console.log($(".jsonTable"));
-        client.sendEvent("UpdateService", opts, ()=>{
+        client.sendEvent(COMPLETE.DO, "UpdateService", opts, ()=>{
           refresh();
         });
       });

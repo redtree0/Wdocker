@@ -43,6 +43,10 @@ const columns = [{
 
 $(function(){
 
+  const COMPLETE = {
+    DO : true,
+    NOT : false
+  }
 
   var $all = {};
   $all.init = function(){
@@ -52,7 +56,7 @@ $(function(){
   };
 
   $all.connect = {};
-  $all.connect.dockerinfo = "task";
+  $all.connect.dockerinfo = "node";
 
   $all.table = {};
   $all.table.main = {
@@ -71,7 +75,10 @@ $(function(){
 
     $.getJSON("/myapp/node/data.json", (data)=>{
       // console.log(data.length);
-
+      // console.log();
+      if(data.statusCode !== 200){
+        return;
+      }
       var data = (data.sort(function(a, b) {
         var nameA = a.Spec.Role.toUpperCase(); // ignore upper and lowercase
         var nameB = b.Spec.Role.toUpperCase(); // ignore upper and lowercase

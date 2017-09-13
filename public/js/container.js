@@ -69,6 +69,11 @@ const columns = [{
 
 
 $(function(){
+  const COMPLETE = {
+    DO : true,
+    NOT : false
+  }
+
   var $all = {};
   $all.init = function(){
     $("#terminal").hide();
@@ -186,6 +191,7 @@ $(function(){
           }
           else if(row.State === "running" ){
               $("#terminal").show();
+              console.log(row);
               terminal(row.Id);
               $element.find(".attach").attr({
                 class : "btn btn-danger exit"
@@ -266,63 +272,70 @@ $(function(){
      var client = main.getSocket();
      var $terminal = null;
 
-     client.listen('stdout', function(data) {
-       $terminal.echo(String(data));
-     });
-     client.listen('stderr', function(data) {
+     client.listen('AttachStderr', function(data) {
        $terminal.error(String(data));
      });
-     client.listen('disconnect', function() {
-       $terminal.disable();
+     client.listen('AttachStdout', function(data) {
+       $terminal.echo(String(data));
      });
-     client.listen('enable', function() {
+    //  client.listen('stdout', function(data) {
+    //    $terminal.echo(String(data));
+    //  });
+    //  client.listen('stderr', function(data) {
+    //    $terminal.error(String(data));
+    //  });
+    //  client.listen('disconnect', function() {
+    //    $terminal.disable();
+    //  });
+     client.listen('AttachEnable', function() {
        $terminal.enable();
      });
-     client.listen('disable', function(data) {
-       $terminal.disable();
-     });
+    //  client.listen('disable', function(data) {
+    //    $terminal.disable();
+    //  });
 
      function terminal(containerId){
 
-       function userlogin(name, password, callback){
-           if(name === "pirate"){
-               callback("some token");
-           } else {
-               callback(false);
+           function userlogin(name, password, callback){
+               if(name === "pirate"){
+                   callback("some token");
+               } else {
+                   callback(false);
+               }
            }
-       }
 
-        $terminal =  $("#terminal").terminal((command, term) => {
-         client.sendEvent('stdin', command);
-         var cmd = $.terminal.parse_command(command);
-         console.log(cmd);
-         return ;
+            $terminal =  $("#terminal").terminal((command, term) => {
+              // client.sendEvent(COMPLETE.NOT,'stdin', command);
+                 client.sendEvent(COMPLETE.NOT,'AttachStdin', command);
+                 var cmd = $.terminal.parse_command(command);
+                 return ;
 
-       }, {
-         login : userlogin,
-         prompt: containerId + " >",
+           }, {
+                 login : userlogin,
+                 prompt: containerId.substring(0,16) + "# ",
+                 greetings: false,
+                 history : true,
+                 exit: true,
 
-         greetings: false,
-         history : true,
-         exit: true,
-         onInit: function(term){
-           term.echo("컨테이너 접속 완료");
+                 onInit: function(term){
+                       term.echo("컨테이너 접속 완료");
 
-           client.sendEvent('stdin', "docker attach " + containerId);
-         },
-         onBeforeLogin: function(term){
-          //  console.log(term);
-         },
-         onBeforeCommand : function(term){
-          //  console.log(term);
-         },
-         onExit : function(term){
-          client.sendEvent('stdin', "exit");
-          containerTable.reload();
-          term.destroy();
-           $("#terminal").hide();
-         }
-       });
+                       client.sendEvent(COMPLETE.NOT,'AttachContainer', containerId);
+                 },
+                 onBeforeLogin: function(term){
+                  //  console.log(term);
+                 },
+                 onBeforeCommand : function(term){
+                  //  console.log(term);
+                 },
+                 onExit : function(term){
+                      client.sendEvent(COMPLETE.NOT,'AttachStdin', "exit");
+                      containerTable.reload();
+                      term.destroy();
+                       $("#terminal").hide();
+                      refresh();
+                 }
+           });
 
 
      }
