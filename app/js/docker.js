@@ -1,8 +1,8 @@
 
+var Docker = require('dockerode');
+var fs     = require('fs');
 
 module.exports = function(opts) {
-  var Docker = require('dockerode');
-  var fs     = require('fs');
 
   ////// socket 변수 지정
   var socket = process.env.DOCKER_SOCKET || '/var/run/docker.sock';

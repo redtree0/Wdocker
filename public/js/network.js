@@ -77,7 +77,7 @@ $(function(){
     DO : true,
     NOT : false
   }
-  
+
   $('.ip_address').mask('0ZZ.0ZZ.0ZZ.0ZZ/00', { translation: { 'Z': { pattern: /[0-9]/, optional: true } } });
 
   var $all = {};
@@ -176,37 +176,38 @@ $(function(){
     eventName : "RemoveNetwork",
     clickEvent : clickDefault
   };
+
+  function connectionEvent(client, eventName, table){
+    return function(){
+      var container = $("#containerDropDown").text().trim();
+      // console.log(container);
+      if(container === "Containers") {
+        return false;
+      }else {
+        var opts = {
+          "checkedRowLists" : table.checkedRowLists,
+          "opts" : {
+            "container" : container
+          }
+        };  //
+        // console.log(opts);
+        client.sendEvent(COMPLETE.DO, eventName,  opts, ()=>{
+          refresh();
+        });
+      }
+    }
+  }
+
   $all.event.connect = {
     $button : $("#connect"),
     eventName : "ConnectNetwork",
-    clickEvent : function(client, eventName, table){
-      return function(){
-        if($("#containerDropDown").text().trim() === "Containers") {
-          return false;
-        }else {
-          var opts ={
-            "container" : $("#containerDropDown").text().trim()
-          }
-          client.sendEventTable(eventName, table, opts);
-        }
-      };
-    }
+    clickEvent : connectionEvent
   };
+
   $all.event.disconnect = {
     $button : $("#disconnect"),
     eventName : "DisconnectNetwork",
-    clickEvent : function(client, eventName, table){
-      return function(){
-        if($("#containerDropDown").text().trim() === "Containers") {
-          return false;
-        }else {
-          var opts ={
-            "container" : $("#containerDropDown").text().trim()
-          }
-          client.sendEventTable(eventName, table, opts);
-        }
-      };
-    }
+    clickEvent : connectionEvent
   };
   $all.completeEvent = function(data, callback){
     // console.log(arguments);
@@ -224,11 +225,11 @@ $(function(){
   var networkTable = main.getMainTable();
       // networkTable.clickRow($detail);
 
-  var expandinfo = [{
-     url : "/myapp/network/",
-     keys : ["Containers", "Name", "Id", "Driver"]
-   }];
-   networkTable.expandRow(expandinfo);
+  // var expandinfo = [{
+  //    url : "/myapp/network/",
+  //    keys : ["Containers", "Name", "Id", "Driver"]
+  //  }];
+  //  networkTable.expandRow(expandinfo);
 
   var $detail = $("#detail");
   $("#containerMenu").click((e)=>{
@@ -259,7 +260,7 @@ $(function(){
             if(item === data.Names.toString()){
               // $detail.append(JSON.stringify(data));
               var networkmsg = null;
-              console.log(Object.keys(data.NetworkSettings.Networks));
+              // console.log(Object.keys(data.NetworkSettings.Networks));
               if(Object.keys(data.NetworkSettings.Networks).length === 0){
                     networkmsg = "not Exist";
               }else {

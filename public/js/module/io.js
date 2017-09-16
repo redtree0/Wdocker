@@ -61,7 +61,8 @@ var clientsocket = (function clientsocket(io, $body) {
               // data = {
               //   "checkedRowLists" : checkedRowLists,
               //   "opts" : opts
-              // };
+              // };  ///// network connecttion
+
               data = opts;
           }
            else if (arguments.length === 4 ){
@@ -99,10 +100,11 @@ var clientsocket = (function clientsocket(io, $body) {
     */
     this.sendEvent = function (doComplete, eventName, data, callback) {
         var self = this;
+        var socket =  self.socket;
 
+        console.log(socket);
         console.log("do event %s , data %s", eventName, data);
 
-        var socket =  this.socket;
         self.$body.spinStart();
 
         ///// socket.emit (eventName, data, callback)

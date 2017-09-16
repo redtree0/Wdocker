@@ -2,7 +2,7 @@
 
 var Socket = require("./socket");
 
-var p = require('./dockerEvent');
+	var p = require('./dockerEvent');
 var mongo = require("./mongoController");
 var os = require("os");
 
@@ -27,11 +27,30 @@ var eventLists = function(io){
   // console.log(io);
   //  io.on('connection', function(socket) {
   function onConnect(socket) {
+				socket.handshake.secure = true;
+				// console.log("socket");
+				// console.log(socket);
+				// socket.test = "test";
+				// console.log(socket);
 
         var server = new Socket(socket);
 
-        container(server);
-        network(server);
+				// var Container = p.container;
+				// console.log("server");
+				// console.log(server);
+        // container(server, new Container());
+        // // network(server);
+        // // image(server)
+        // // volume(server);
+        // // dockerfile(server);
+				// // terminal(server);
+				// settings(server, p.settings);
+				// // swarm(server);
+				// // node(server);
+				// // service(server);
+				// // task(server);
+				container(server);
+				network(server);
         image(server)
         volume(server);
         dockerfile(server);
@@ -43,8 +62,10 @@ var eventLists = function(io){
 				task(server);
   }
 
-  var container = function(server){
+  var container = function(server, container){
+
 		var container = p.container;
+
 		server.listen('CreateContainer', function(data, fn){
 					container.create(data, fn);
 		});
@@ -86,7 +107,7 @@ var eventLists = function(io){
 							// stream.setEncoding('ascii');
 							stream.on('data', function(data){
 								server.sendEvent("AttachStdout", data.toString());
-								
+
 							});
 							stream.on('end', function(end) {
 								server.sendEvent("AttachEnable", "enable");
@@ -102,39 +123,6 @@ var eventLists = function(io){
 					}
 
 					container.attach(data, stdin, stdout, stderr);
-
-					//
-					// shell.on('exit', function (c, s){
-					// 	console.log(c);
-					// 	console.log(s);
-					// });
-					//
-					//  shell.on('close', function (c, s){
-					// 	 console.log(c);
-					//  });
-					//
-					// shell['stdout'].setEncoding('ascii');
-					// shell['stdout'].on('data', function(data) {
-					// 	server.sendEvent('stdout', data);
-					// });
-					//
-					// shell['stderr'].setEncoding('ascii');
-					// shell['stderr'].on('data', function(data) {
-					// 	server.sendEvent('stderr', data);
-					// });
-					//
-					//
-					// server.listen('stdin', function(command) {
-					// 	stdin.write(command+"\n") || server.sendEvent('disable');
-					// });
-					//
-					// stdin.on('drain', function() {
-					// 	server.sendEvent('enable');
-					// });
-					//
-					// stdin.on('error', function(exception) {
-					// 	server.sendEvent('error', String(exception));
-					// });
 
 			});
   };
@@ -430,8 +418,13 @@ var terminal = function (server) {
 
 }
 
-var settings = function(server){
-	var settings = p.settings;
+var settings = function(server, settings){
+	// var selfP = new p();
+	// var settings = selfP.settings;
+	// console.log(Settings);
+	// var settings = new Settings();
+	// var settings = p.settings;
+
 	server.listen('PING', function(data, fn) {
 			settings.ping(data, fn);
 	});
@@ -448,21 +441,21 @@ var settings = function(server){
 		settings.connectDocker(data, fn);
 	});
 
-	server.listen('GetThisDocker', function(data, fn) {
-		var docker = (p[data.docker].getDocker()).modem;
-		var whoisDocker = null;
-		if(docker.socketPath !== undefined){
-					// console.log("default");
-					whoisDocker = "default";
-		}else if(docker.host !== undefined){
-			// console.log("remote");
-			whoisDocker = docker.host;
-		}
-		// console.log(docker.modem);
-		// // console.log(p[data.docker].getDocker().socketPath);
-		// // console.log(p[data.docker].getDocker().host);
-		fn(whoisDocker);
-	});
+	// server.listen('GetThisDocker', function(data, fn) {
+	// 	var docker = (p[data.docker].getDocker()).modem;
+	// 	var whoisDocker = null;
+	// 	if(docker.socketPath !== undefined){
+	// 				// console.log("default");
+	// 				whoisDocker = "default";
+	// 	}else if(docker.host !== undefined){
+	// 		// console.log("remote");
+	// 		whoisDocker = docker.host;
+	// 	}
+	// 	// console.log(docker.modem);
+	// 	// // console.log(p[data.docker].getDocker().socketPath);
+	// 	// // console.log(p[data.docker].getDocker().host);
+	// 	fn(whoisDocker);
+	// });
 
 	server.listen('authCheck', function(data, fn) {
 		settings.authCheck(data, fn);

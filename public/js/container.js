@@ -173,7 +173,7 @@ $(function(){
     hideColumns : ["Id", "ImageID", "Ports", "Mounts", "HostConfig", "NetworkingSettings", "Status"],
     columns : columns,
     jsonUrl : '/myapp/container/data.json',
-    isExpend : true,
+    isExpend : false,
     clickRow : function  (e, row, $element, field) {
 
       if(field === "Attach"){
@@ -260,14 +260,14 @@ $(function(){
     var containerTable = main.getMainTable();
 
 
-     var expandinfo = [{
-       url : "/myapp/container/top/",
-       keys : ["Titles", "Processes"]
-     },{
-       url : "/myapp/container/stats/",
-       keys : ["id", "name", "memory_stats", "networks", "cpu_stats", "Ports"]
-     }];
-     containerTable.expandRow(expandinfo);
+    //  var expandinfo = [{
+    //    url : "/myapp/container/top/",
+    //    keys : ["Titles", "Processes"]
+    //  },{
+    //    url : "/myapp/container/stats/",
+    //    keys : ["id", "name", "memory_stats", "networks", "cpu_stats", "Ports"]
+    //  }];
+    //  containerTable.expandRow(expandinfo);
 
      var client = main.getSocket();
      var $terminal = null;

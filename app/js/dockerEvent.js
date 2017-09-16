@@ -2,6 +2,29 @@
   var mongo = require("./mongoController.js");
   var path = require("path");
   var Docker = require("./docker");
+  var dbLists = require("./mongo.js");
+  var os = require("os");
+
+
+  function getServerIp() {
+      var ifaces = os.networkInterfaces();
+      var result = '';
+      for (var dev in ifaces) {
+          var alias = 0;
+          if(dev === "eth0"){
+            ifaces[dev].forEach(function(details) {
+              if (details.family == 'IPv4' && details.internal === false) {
+                result = details.address;
+                ++alias;
+              }
+            });
+          }
+      }
+
+      return result;
+  }
+
+
 
   var Common = function( docker){
     this.docker = docker; /// docker modem 겍체 설정
@@ -49,7 +72,21 @@
       }
       return callback(result);
     };
-
+    // /** @method  - get
+    // *  @description 실행할 Promise를 GET함
+    // *  @param {Object} data - promise 데이터
+    // *  @param {Object} opts - docker 실행 시 필요한 옵션
+    // *  @param {String} method - docker에서 실행할 메소드
+    // *  @return {Array} lists - Promise Array
+    // */
+    // self.getWorkingDocker = function () {
+    //       var self = this;
+    //       if(self.remoteDocker !== null){
+    //           return self.remoteDocker;
+    //       }else {
+    //         return  self.docker;
+    //       }
+    // };
 
     /** @method  - get
     *  @description 실행할 Promise를 GET함
@@ -131,15 +168,22 @@
     *  @param {Function} callback - client로 보낼 콜백함수
     *  @return {Function} callback - res로 보낼 콜백함수
     */
-    self.getAllLists = function (opts, successCallback, failCallback){
+    self.getAllLists = function (opts, successCallback, failCallback, remoteDocker){
       var self = this;
-
-      if(self.getLists !== null){
-        var dockerInfo = self.docker[self.getLists](opts);
+      var docker = null;
+      if(remoteDocker){
+        docker = remoteDocker;
+      }else {
+        docker = self.docker;
       }
-      return new Promise(function(resolve, reject){
-        resolve(dockerInfo);
-      }).then(successCallback, failCallback);
+      if(self.getLists !== null){
+        var dockerInfo = docker[self.getLists](opts);
+        return new Promise(function(resolve, reject){
+          resolve(dockerInfo);
+        }).then(successCallback, failCallback);
+      }else {
+        return;
+      }
 
 
     };
@@ -150,8 +194,19 @@
     */
     self.setRemoteDocker = function (config) {
       var self = this;
-      self.remoteDocker = require("./docker")(config);
+      self.remoteDocker = new Docker(config);
     }
+
+
+
+          /** @method  - ping
+          *  @description docker host ping test
+          *  @param {Object} data - 설정 데이터
+          *  @param {Function} callback - 클라이언트로 보낼 callback
+          */
+          self.ping = function (docker, callback) {
+                return docker.ping(callback);
+          };
 
 
     /** @method  - getDocker
@@ -160,8 +215,47 @@
     */
     self.getDocker = function () {
       var self = this;
-      // this.docker = require("./docker")(data);
       return self.docker;
+    }
+
+    /** @method  - getTastDocker
+    *  @description docker modem 객체 GET
+    *  @return {Object} docker modem 객체
+    */
+    self.getTaskDocker = function(host, callback){
+
+        var self = this;
+        var docker = null;
+        if(host !== getServerIp()  && host !== "default") {
+
+            mongo.docker.find({"ip" : host}, (result)=>{
+              // console.log(result);
+              if(result === null){
+                return callback(false);
+              }
+              var opts = {
+                "host" : result.ip,
+                "port" : result.port
+              }
+
+              docker = new Docker(opts);
+              // console.log(docker);
+              return self.ping(docker, (err, data)=>{
+                  if(err === null){
+                    callback(docker);
+                  }
+              });
+              // return callback(docker);
+            });
+        }else if(host === getServerIp() || host === null ) {
+
+          docker = new Docker();
+          return self.ping(docker, (err, data)=>{
+              if(err === null){
+                callback(docker);
+              }
+          });
+        }
     }
 
   }).call(Common.prototype);
@@ -415,15 +509,15 @@
      */
      self.connect =  function (data, callback) {
        console.log(data);
-      //  var lists = data.checkedRowLists;
-      //  var container = (data.opts.container);
-      //  var opts = {
-      //    "Container" : container,
-      //    "EndpointConfig" : {"NetworkID" : ""}
-      //  };
-      // //  console.log(opts);
-      //  var promiseList = self.get( lists, opts, "connect");
-      //  return self.dockerPromiseEvent(promiseList, callback);
+       var lists = data.checkedRowLists;
+       var container = (data.opts.container);
+       var opts = {
+         "Container" : container,
+         "EndpointConfig" : {"NetworkID" : ""}
+       };
+       console.log(opts);
+       var promiseList = self.get( lists, opts, "connect");
+       return self.dockerPromiseEvent(promiseList, callback);
 
      }
 
@@ -437,7 +531,8 @@
 
        var lists = data.checkedRowLists;
        var opts = data.opts;
-
+      //  console.log(lists);
+      //  console.log(opts);
        var promiseList = self.get( lists, opts, "disconnect");
        return  self.dockerPromiseEvent(promiseList, callback);
 
@@ -599,11 +694,11 @@
         console.log(data);
 
         if(data.hasOwnProperty("host") && data.hasOwnProperty("port")){
-          var docker = require("./docker")(data);
+          var docker = new Docker(data);
           docker.ping((err,data)=>{
               // callback(err, data);
-              console.log(data);
-              console.log(err);
+              // console.log(data);
+              // console.log(err);
               if(err !== null){
                   callback({err : err, data: data, statusCode : 500});
               }else {
@@ -623,7 +718,7 @@
       *  @param {Function} callback - 클라이언트로 보낼 callback
       */
       self.delete = function (data, callback) {
-        var dbLists = require("./mongo.js");
+
 
         dbLists.docker.remove(data, function(err, output){
           if(err) {
@@ -632,9 +727,10 @@
           callback(true);
         });
       };
-      var defaultDocker = require("./docker")();
+      var defaultDocker = new Docker();
       self.isConnected = function(data, callback){
             console.log(data);
+              // var defaultDocker = new Docker();
             if(data.ip !== getServerIp()  && data.ip !== "default") {
 
               mongo.docker.find({"ip" : data.ip}, (result)=>{
@@ -710,24 +806,6 @@
     }).call(Settings);
 
 
-    var os = require("os");
-    function getServerIp() {
-        var ifaces = os.networkInterfaces();
-        var result = '';
-        for (var dev in ifaces) {
-            var alias = 0;
-            if(dev === "eth0"){
-              ifaces[dev].forEach(function(details) {
-                if (details.family == 'IPv4' && details.internal === false) {
-                  result = details.address;
-                  ++alias;
-                }
-              });
-            }
-        }
-
-        return result;
-    }
 
     var Swarm = Object.create(common);
 
@@ -1090,7 +1168,7 @@
    }).call(Task);
 
 
-
+   //
    var lists = {
      "container" : Container,
      "network" : Network,
@@ -1102,5 +1180,17 @@
      "service" : Service,
      "task" : Task
    }
+  // var lists = function(){
+  //   var self = this;
+  //   self.container = Container;
+  //   self.network = Network;
+  //   self.image = Image;
+  //   self.volume = Volume;
+  //   self.settings = Settings;
+  //   self.swarm = Swarm;
+  //   self.node = Node;
+  //   self.service = Service;
+  //   self.task = Task;
+  // }
 
 module.exports = lists;

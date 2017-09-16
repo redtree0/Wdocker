@@ -29,6 +29,7 @@ var socketEvents  = require('./js/event');
 
 ////////////////////////////////////////////////////////////////////////////
 const WEBPATH = '/myapp';
+// app.use(express.urlencoded());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -59,7 +60,9 @@ app.use(WEBPATH, web);
 const websockifyConfig = {
   source: '192.168.0.108:9000',
   target: '192.168.0.108:5901',
-  web : "../views/"
+  web : "../views/",
+  cert: '../cert.pem',
+  key: '../key.pem'
 }
 websockify(websockifyConfig);
 
@@ -136,16 +139,41 @@ app.route('*')
 ///////////////////////////////////////////////////////////////////////////////////
 
 
-///////////////////////// WEB SERVICE //////////////////////////////////////////////
-
-const PORT = 3000;
-const EXPRESS = server.listen(PORT, () => {
-    console.log("Express server has started on port " + PORT);
-});
+/////////////////////////////// HTTP ///////////////////////////////////////////////
+// const HTTP = 80;
+// var http = require('http');
+// var service = http.createServer(app).listen(HTTP, function(){
+//   console.log("Http server listening on port " + HTTP);
+// });
 ///////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////// HTTPS //////////////////////////////////////////////
+
+
+const HTTPS = 443;
+var options = {
+    key: fs.readFileSync('../key.pem'),
+    cert: fs.readFileSync('../cert.pem')
+};
+
+var https = require('https');
+var service = https.createServer(options, app).listen(HTTPS, function(){
+  console.log("Https server listening on port " + HTTPS);
+});
+/////////////////////////////////////////////////////////////////////////////////
+
+
 ///////////////////////// SOCKET IO //////////////////////////////////////////////
 
-const SOCKET = new SocketIo(EXPRESS);
+// const PORT = 3000;
+// const EXPRESS = server.listen(PORT, () => {
+//     console.log("Express server has started on port " + PORT);
+// });
+// const SOCKET = new SocketIo(EXPRESS);
+// socketEvents(SOCKET);
+
+const SOCKET = new SocketIo(service);
 socketEvents(SOCKET);
+
 
 ///////////////////////////////////////////////////////////////////////////////////

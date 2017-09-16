@@ -4,6 +4,7 @@
 var main = (function(){
     var settings = {};
     var socket = io();
+    socket.io.opts.secure =true;
     var Socket = require("./io");
     var client = new Socket(socket, $('body'));
     var table = require("./table.js");

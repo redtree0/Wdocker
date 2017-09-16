@@ -50,9 +50,21 @@
         p.container.getAllLists({all: true}, resCallback.bind(null, res), failureCallback.bind(null, res));
   });
 
-  router.get( '/network/data.json' , (req, res) => {
-    res.setHeader("Content-Type", "application/json");  /// application/json 헤더 설정
+  router.get( '/container/data/:host' , (req, res) => {
+        var host = req.params.host;
+        console.log(host);
+        p.container.getTaskDocker(host, (docker)=>{
+          if(docker){
+            p.container.getAllLists({all: true}, resCallback.bind(null, res), failureCallback.bind(null, res), docker);
+          }else {
+            res.json(true);
+          }
+        });
+        // res.json(true);
+        // p.container.getAllLists({all: true}, resCallback.bind(null, res), failureCallback.bind(null, res));
+  });
 
+  router.get( '/network/data.json' , (req, res) => {
         p.network.getAllLists({}, resCallback.bind(null, res), failureCallback.bind(null, res));
   });
 
