@@ -15,7 +15,6 @@
               <div class="row placeholders">
                 <div class="container">
 
-		                   <% include ./partials/connectDocker  %>
                       <div id="toolbar" class="btn-group" role="group">
                         <div  class="btn-group" role="group">
                           <button  onclick=" return false;"  type="button" class="btn btn-default newForm">
@@ -26,13 +25,20 @@
                         </div>
                       </div>
 
+                      <div class="panel panel-success row">
+                          <div class="panel-heading">
+                              <h4 class ="text-left">서비스 관리</h4>
+                          </div>
+                          <div class="panel-body">
 
-                      <table id="ctable" data-toolbar="#toolbar" data-pagination="true" class="table table-striped jsonTable">
-                      </table>
-                      <p><span class="glyphicon glyphicon-exclamation-sign"></span>
-                        해당 호스트가 swarm 구성이 되있을 경우, 재 기능을 안할 수 있습니다.
-                        다른 node 상태 확인하시오.
-                    </p>
+                              <% include ./partials/connectDocker %>
+                              <table data-toolbar="#toolbar" data-pagination="true" class="table table-striped jsonTable"></table>
+                              <p><span class="glyphicon glyphicon-exclamation-sign"></span>
+                                해당 호스트가 swarm 구성이 되있을 경우, 재 기능을 안할 수 있습니다.
+                                다른 node 상태 확인하시오.
+                              </p>
+                          </div>
+                      </div>
 
                       <div id="detail">
                       </div>
@@ -92,35 +98,9 @@
                               <% include ./partials/label %>
 
                               <% include ./partials/port %>
-                              <!--
-                              <div class="form-group">
-                                <label for="containerPort" class="col-sm-2 control-label">Container port : </label>
-                                <div class="col-sm-2">
-                                  <input type="number" class="form-control"  min="1" max="65535" id="containerPort" >
-                                </div>
-                              </div>
-                              <div class="form-group">
-                                <label for="hostPort" class="col-sm-2 control-label">Host port : </label>
-                                <div class="col-sm-2">
-                                  <input type="number" class="form-control" min="1" max="65535" id="hostPort" >
-                                </div>
-                              </div>
-                              <div class="form-group">
-                                <label for="protocol" class="col-sm-2 control-label">protocal : </label>
-                                <div class="col-sm-2">
-                                  <label class="checkbox-inline">
-                                     <input type="checkbox" id="protocol" checked data-toggle="toggle" data-on="tcp"
-                                     data-off="udp" data-onstyle="success" data-offstyle="primary"></input>
-                                  </label>
-                                </div>
 
-                                <button id ="portAdd" class="btn btn-primary ">Add</button>
-                              </div>
-                              <div class="form-group">
-                                <div id = "portlists"></div>
-                              </div> -->
                           </form>
-<!-- hidden form -->
+
 
               </div>
 

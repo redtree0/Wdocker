@@ -73,6 +73,7 @@ $(function(){
     DO : true,
     NOT : false
   }
+  var dialog = require("./module/dialog.js");
 
   var $all = {};
   $all.init = function(){
@@ -86,45 +87,46 @@ $(function(){
   };
 
   $all.form.getSettingValue = function(self) {
-    var self = self.data ;
+      var self = self.data ;
+      var opts = {
+        name : self.$name.val(),
+        Cmd : self.$command.val()
+      }
+      var image = self.$image.text().trim();
+      var volume = self.$volume.text().trim();
+      var containerDest = self.$containerDest.val();
+      var network = self.$network.text().trim();
 
-    var opts = {
-      Image : self.$image.text().trim(),
-      name : self.$name.val(),
-      Cmd : self.$command.val()
-    }
-    if(self.$volume.text().trim() !== "Volumes" && self.$containerDest.val() !== null){
-      opts.volume = self.$volume.text().trim();
-      opts.containerDest = self.$containerDest.val();
-    }
-    if(self.$network.text().trim() !== "Networks"){
-      //  $.getJSON
-      var jsonUrl = "/myapp/network/data.json";
+      if(image !== "Images"){
+        opts.Image = image;
+      }
+      if(volume !== "Volumes" && containerDest !== null){
+        opts.volume = volume;
+        opts.containerDest = containerDest;
+      }
+      if(network !== "Networks"){
+        var networkLists = self.networkLists;
+        for(var i in networkLists){
+          if(network === networkLists[i].Name){
+            opts.networkID =  networkLists[i].Id;
+          }
+        }
 
-      $.getJSON(jsonUrl, function(json, textStatus) {
-          json.forEach ( (data) => {
-            if(self.$network.text().trim() === data.Name ){
-              console.log(data.Id);
-              opts.networkID = data.Id;
-            }
-          });
-
-      });
-    }
-    return opts;
+      }
+      return opts;
   }
   $all.form.create = {};
   $all.form.create.formName = "컨테이너 생성";
   $all.form.create.data = {
-    $imageMenu : $("#imageMenu"),
-    $image : $('#imageDropDown'),
-    $name : $("#name"),
-    $command : $("#command"),
-    $volumeMenu : $("#volumeMenu"),
-    $volume : $("#volumeDropDown"),
-    $containerDest : $("#containerDest"),
-    $networkMenu : $("#networkMenu"),
-    $network : $("#networkDropDown")
+      $imageMenu : $("#imageMenu"),
+      $image : $('#imageDropDown'),
+      $name : $("#name"),
+      $command : $("#command"),
+      $volumeMenu : $("#volumeMenu"),
+      $volume : $("#volumeDropDown"),
+      $containerDest : $("#containerDest"),
+      $networkMenu : $("#networkMenu"),
+      $network : $("#networkDropDown")
   };
   $all.form.create.$newForm =  $(".newForm");
   $all.form.create.formEvent = "CreateContainer";
@@ -135,28 +137,62 @@ $(function(){
   $all.form.create.$labelAdd = $("#labelAdd");
   $all.form.create.$labellists = $("#labellists");
 
-  $all.form.create.initDropdown = function(self){
+  $all.form.create.initDropdown = function(self, host){
     var self = self.data;
-    var jsonUrl = '/myapp/image/data.json';
+    var jsonUrl = null
+    var local = getHostIP();
+    if(host === null || host === undefined){
+      jsonUrl = "/myapp/image/data/" + local;
+    }else {
+      jsonUrl = "/myapp/image/data/" + host;
+    }
+    // console.log(jsonUrl);
+    // jsonUrl = '/myapp/image/data.json';
     var $contextMenu =   self.$imageMenu;
     var $dropDown =   self.$image;
     var attr = "RepoTags";
     var index = 0;
     initDropdown(jsonUrl, $contextMenu, $dropDown, { attr : attr, index :  index} );
 
-    var jsonUrl = '/myapp/volume/data.json';
+    if(host === null || host === undefined){
+      jsonUrl = "/myapp/volume/data/" + local;
+    }else {
+      jsonUrl = "/myapp/volume/data/" + host;
+    }
+    // console.log(jsonUrl);
+
+    // jsonUrl = '/myapp/volume/data.json';
     var $contextMenu =   self.$volumeMenu;
     var $dropDown =   self.$volume;
     var attr = "Name";
 
     initDropdown(jsonUrl, $contextMenu, $dropDown, { attr : attr } );
 
-    var jsonUrl = '/myapp/network/data.json';
+    if(host === null || host === undefined){
+      jsonUrl = "/myapp/network/data/" + local;
+    }else {
+      jsonUrl = "/myapp/network/data/" + host;
+    }
+    // console.log(jsonUrl);
+    // jsonUrl = '/myapp/network/data.json';
     var $contextMenu =   self.$networkMenu;
     var $dropDown =   self.$network;
     var attr = "Name";
     // var index = 0;
     initDropdown(jsonUrl, $contextMenu, $dropDown, { "attr" :  attr});
+
+    $.getJSON(jsonUrl, function(json, textStatus) {
+      function filterByIdName(obj){
+        var robj = {
+          networkID : obj.Id,
+          Name : obj.Name
+        }
+        return robj;
+      }
+      var networkLists = json.map(filterByIdName);
+      self.networkLists = networkLists;
+
+    });
 
   }
   $all.form.create.more = {
@@ -166,18 +202,20 @@ $(function(){
   }
 
   $all.connect = {};
-  $all.connect.dockerinfo = "container";
+
   $all.table = {};
   $all.table.main = {
     $table : $(".jsonTable"),
-    hideColumns : ["Id", "ImageID", "Ports", "Mounts", "HostConfig", "NetworkingSettings", "Status"],
+    hideColumns : ["Id", "ImageID", "Ports", "Mounts", "HostConfig", "Labels", "NetworkingSettings", "Status"],
     columns : columns,
-    jsonUrl : '/myapp/container/data.json',
+    jsonUrl : '/myapp/container/data/' + getHostIP(),
     isExpend : false,
     clickRow : function  (e, row, $element, field) {
-
+      // console.log("click");
       if(field === "Attach"){
+
           if(row.State !== "running" && $("#terminal").is(":visible")){
+            // console.log("hide");
             $("#terminal").hide();
           }
           else if($element.find(".exit").length > 0){
@@ -190,8 +228,9 @@ $(function(){
             }
           }
           else if(row.State === "running" ){
+              // console.log($("#terminal"));
               $("#terminal").show();
-              console.log(row);
+              // console.log(row);
               terminal(row.Id);
               $element.find(".attach").attr({
                 class : "btn btn-danger exit"
@@ -243,9 +282,9 @@ $(function(){
       eventName : "UnpauseContainer",
       clickEvent : clickDefault
   };
+  
   $all.completeEvent = function(data, callback){
     if(hasValue(data)){
-      var dialog = require("./module/dialog.js");
 
       var finished = new dialog("컨테이너", data);
       finished.setDefaultButton('Close[Enker]', 'btn-primary create');
@@ -260,41 +299,20 @@ $(function(){
     var containerTable = main.getMainTable();
 
 
-    //  var expandinfo = [{
-    //    url : "/myapp/container/top/",
-    //    keys : ["Titles", "Processes"]
-    //  },{
-    //    url : "/myapp/container/stats/",
-    //    keys : ["id", "name", "memory_stats", "networks", "cpu_stats", "Ports"]
-    //  }];
-    //  containerTable.expandRow(expandinfo);
-
-     var client = main.getSocket();
      var $terminal = null;
 
-     client.listen('AttachStderr', function(data) {
-       $terminal.error(String(data));
-     });
-     client.listen('AttachStdout', function(data) {
-       $terminal.echo(String(data));
-     });
-    //  client.listen('stdout', function(data) {
-    //    $terminal.echo(String(data));
-    //  });
-    //  client.listen('stderr', function(data) {
-    //    $terminal.error(String(data));
-    //  });
-    //  client.listen('disconnect', function() {
-    //    $terminal.disable();
-    //  });
-     client.listen('AttachEnable', function() {
-       $terminal.enable();
-     });
-    //  client.listen('disable', function(data) {
-    //    $terminal.disable();
-    //  });
-
      function terminal(containerId){
+        var client = main.getSocket();
+          // console.log(containerId);
+          client.listen('AttachStderr', function(data) {
+            $terminal.error(String(data));
+          });
+          client.listen('AttachStdout', function(data) {
+            $terminal.echo(String(data));
+          });
+          client.listen('AttachEnable', function() {
+            $terminal.enable();
+          });
 
            function userlogin(name, password, callback){
                if(name === "pirate"){
@@ -303,7 +321,7 @@ $(function(){
                    callback(false);
                }
            }
-
+          //  console.log($terminal);
             $terminal =  $("#terminal").terminal((command, term) => {
               // client.sendEvent(COMPLETE.NOT,'stdin', command);
                  client.sendEvent(COMPLETE.NOT,'AttachStdin', command);
@@ -330,13 +348,14 @@ $(function(){
                  },
                  onExit : function(term){
                       client.sendEvent(COMPLETE.NOT,'AttachStdin', "exit");
-                      containerTable.reload();
+                      containerTable.refresh();
                       term.destroy();
                        $("#terminal").hide();
                       refresh();
                  }
            });
 
+          //  console.log($terminal);
 
      }
 });

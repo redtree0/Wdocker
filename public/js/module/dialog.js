@@ -50,6 +50,7 @@ function makeBootstrapDialog(title, message, button){
   }else {
     msg = message;
   }
+  // console.log(msg);
   var dialogInstance = new BootstrapDialog({
        title: title,
        message: msg,
@@ -76,9 +77,11 @@ dialog.prototype.show = function () {
 dialog.prototype.close = function (timeout) {
     var diaglogInstance = (this.dialogInstance);
 
+    var element = diaglogInstance.getModalBody().html();
     diaglogInstance.getModalBody().html('Dialog closes in 5 seconds.');
     setTimeout(function(){
               diaglogInstance.close();
+              diaglogInstance.getModalBody().html(element);
     }, timeout);
 };
 

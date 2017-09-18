@@ -76,7 +76,9 @@ var clientsocket = (function clientsocket(io, $body) {
           return self.sendEvent(DOCOMPLETE , eventName, data, (data)=>{
             (self.$body).spinStop(); /// spinner 정지
             if(table){
-              table.reload();  /// 테이블 갱신
+              // console.log(table);
+              // table.reload();  /// 테이블 갱신
+              table.refresh();
             }
             if(typeof callback !== undefined && typeof callback === "function") {
               callback(data);
@@ -102,16 +104,17 @@ var clientsocket = (function clientsocket(io, $body) {
         var self = this;
         var socket =  self.socket;
 
-        console.log(socket);
+        // console.log(socket);
         console.log("do event %s , data %s", eventName, data);
 
-        self.$body.spinStart();
+        // self.$body.spinStart();
 
         ///// socket.emit (eventName, data, callback)
         //// eventName 소켓 이벤트 명
         //// data 서버로 보낼 데이터
         //// callback 서버에서 다시 클라이언트로 보낸 데이터를 받은 후 실행할 콜백 함수
         return socket.emit(eventName, data, (data)=>{
+          console.log("do back");
           (self.$body).spinStop(); /// spinner 정지
             if(doComplete){
               self.completeEvent(data); /// 소켓 완료 후 실행 함수
@@ -122,6 +125,13 @@ var clientsocket = (function clientsocket(io, $body) {
         });
     };
 
+
+    /// 소켓 완료 후 실행 함수 , 바깥에서 기능에 맞게 Overwrite
+    this.disconnect = function(){
+        var self = this;
+        var socket =  self.socket;
+        return socket.disconnect();
+    };
 
     // /** @method  - onlyEvent
     // *  @description 소켓 데이터 송신 함수

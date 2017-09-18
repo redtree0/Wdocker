@@ -69,7 +69,36 @@
                                 <button type="submit" class="btn  btn-primary btn-block">Save</button>
                               </div>
                               <div class="col-md-2">
-                                <button type="button" id="authCheck" class="btn btn-Success btn-block">Check</button>
+                                <button type="button" id="authCheck" class="btn btn-default btn-block">Check</button>
+                              </div>
+                            </div>
+                        </form>
+
+                      </div>
+                    </div>
+
+                    <div class="panel panel-danger row">
+                      <div class="panel-heading">
+                          <h4 class ="text-left">Web Terminal User</h4>
+                      </div>
+                      <div class="panel-body">
+                        <form class="form-horizontal" action="/myapp/terminal"  method="post" >
+                            <div class="form-group">
+                              <label for="name" class="col-md-2 control-label">User Name</label>
+                              <div class="col-md-6">
+                                <input type="text" class="form-control" id="webUser"  name="user">
+                              </div>
+                            </div>
+                            <div class="form-group">
+                              <label for="name" class="col-md-2 control-label">Password </label>
+                              <div class="col-md-6">
+                                <input type="password" class="form-control" id="webPassword" name="password">
+                              </div>
+                              <div class="col-md-2">
+                                <button type="submit" class="btn  btn-primary btn-block">Save</button>
+                              </div>
+                              <div class="col-md-2">
+                                <button type="button" class="btn btn-default btn-block">Default</button>
                               </div>
                             </div>
                         </form>

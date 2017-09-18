@@ -167,7 +167,7 @@ var config = (function(){
   };
 
   var getImage = function(){
-    console.log(image);
+    // console.log(image);
     return image;
   };
 
@@ -262,8 +262,8 @@ var config = (function(){
     };
 
     var setService = function (filter, labellists, portlists){
-      console.log("argument");
-      console.log(arguments);
+      // console.log("argument");
+      // console.log(arguments);
       var opts = service;
       opts.Name = filter.Name;
       opts.TaskTemplate.ContainerSpec.Image = filter.Image;

@@ -2,14 +2,9 @@
 
 var Socket = require("./socket");
 
-	var p = require('./dockerEvent');
+var p = require('./dockerEvent');
 var mongo = require("./mongoController");
 var os = require("os");
-
-const eventName = {
-	STARTCONTAINER : 'StartContainer',
-	STOPCONTAINER: 'StopContainer'
-}
 
 
 var eventLists = function(io){
@@ -28,13 +23,14 @@ var eventLists = function(io){
   //  io.on('connection', function(socket) {
   function onConnect(socket) {
 				socket.handshake.secure = true;
-				// console.log("socket");
-				// console.log(socket);
+				console.log("socket");
+				var token = socket.handshake.query.token;
+				console.log(token);
+				// console.log(socket.query.token);
 				// socket.test = "test";
 				// console.log(socket);
 
         var server = new Socket(socket);
-
 				// var Container = p.container;
 				// console.log("server");
 				// console.log(server);
@@ -49,149 +45,166 @@ var eventLists = function(io){
 				// // node(server);
 				// // service(server);
 				// // task(server);
-				container(server);
-				network(server);
-        image(server)
-        volume(server);
+				var host = token;
+				container(server, host);
+				network(server, host);
+				image(server, host)
+        volume(server, host);
         dockerfile(server);
 				terminal(server);
 				settings(server);
 				swarm(server);
 				node(server);
-				service(server);
+				service(server, host);
 				task(server);
   }
 
-  var container = function(server, container){
+  var container = function(server, host){
 
 		var container = p.container;
+		container.getTaskDocker(host, (docker)=>{
 
-		server.listen('CreateContainer', function(data, fn){
-					container.create(data, fn);
+					container.docker = docker;
+					server.listen('CreateContainer', function(data, fn){
+								container.create(data, fn);
+					});
+					server.listen('StartContainer', function(data, fn){
+							 container.start(data, fn);
+					});
+
+					server.listen("StopContainer", function(data, fn){
+							 container.stop(data, fn);
+					});
+
+					server.listen("RemoveContainer", function(data, fn){
+							container.remove(data, fn);
+					});
+					server.listen("KillContainer", function(data, fn){
+							container.kill(data, fn);
+					});
+					server.listen("PauseContainer", function(data, fn){
+							container.pause(data, fn);
+					});
+					server.listen("UnpauseContainer", function(data, fn){
+							container.unpause(data, fn);
+					});
+					server.listen("StatsContainer", function(data, fn){
+							container.stats(data, fn);
+					});
+					server.listen("ArchiveContainer", function(data, fn){
+							container.getArchive(data, fn);
+					});
+
+					server.listen("AttachContainer", function(data, fn){
+
+							function stdin(stream){
+									server.listen("AttachStdin", stream);
+							}
+
+							function stdout(stream){
+									// server.sendEvent("AttachStdout",  stream.pipe(stdout));
+									// stream.setEncoding('ascii');
+									stream.on('data', function(data){
+										server.sendEvent("AttachStdout", data.toString());
+
+									});
+									stream.on('end', function(end) {
+										server.sendEvent("AttachEnable", "enable");
+								 });
+
+							}
+
+							function stderr(stream){
+									// stream.setEncoding('ascii');
+									stream.on('error', function(err){
+										server.sendEvent("AttachStderr", err.toString());
+									});
+							}
+							fn(true);
+							container.attach(data, stdin, stdout, stderr);
+
+					});
 		});
-      server.listen('StartContainer', function(data, fn){
-           container.start(data, fn);
-      });
+		// console.log("this");
+		// console.log(container.remoteDocker);
 
-      server.listen("StopContainer", function(data, fn){
-           container.stop(data, fn);
-      });
-
-      server.listen("RemoveContainer", function(data, fn){
-          container.remove(data, fn);
-      });
-      server.listen("KillContainer", function(data, fn){
-          container.kill(data, fn);
-      });
-      server.listen("PauseContainer", function(data, fn){
-          container.pause(data, fn);
-      });
-      server.listen("UnpauseContainer", function(data, fn){
-          container.unpause(data, fn);
-      });
-      server.listen("StatsContainer", function(data, fn){
-          container.stats(data, fn);
-      });
-      server.listen("ArchiveContainer", function(data, fn){
-          container.getArchive(data, fn);
-      });
-
-			server.listen("AttachContainer", function(data, fn){
-
-					function stdin(stream){
-							server.listen("AttachStdin", stream);
-					}
-
-					function stdout(stream){
-							// server.sendEvent("AttachStdout",  stream.pipe(stdout));
-							// stream.setEncoding('ascii');
-							stream.on('data', function(data){
-								server.sendEvent("AttachStdout", data.toString());
-
-							});
-							stream.on('end', function(end) {
-								server.sendEvent("AttachEnable", "enable");
-						 });
-
-					}
-
-					function stderr(stream){
-							// stream.setEncoding('ascii');
-							stream.on('error', function(err){
-								server.sendEvent("AttachStderr", err.toString());
-							});
-					}
-
-					container.attach(data, stdin, stdout, stderr);
-
-			});
   };
   // });
 
 
-var network = function(server){
+var network = function(server, host){
 		var network = p.network;
-    server.listen("ConnectNetwork", function(data, fn){
-          network.connect(data, fn);
-    });
+		network.getTaskDocker(host, (docker)=>{
 
-    server.listen("DisconnectNetwork", function(data, fn){
-          network.disconnect(data, fn);
-    });
+					network.docker = docker;
+			    server.listen("ConnectNetwork", function(data, fn){
+			          network.connect(data, fn);
+			    });
 
-    server.listen('CreateNetwork', function(data, fn) {
-        	network.create(data, fn);
-    });
+			    server.listen("DisconnectNetwork", function(data, fn){
+			          network.disconnect(data, fn);
+			    });
 
-    server.listen('RemoveNetwork', function(data, fn) {
-          network.remove(data, fn);
-    });
+			    server.listen('CreateNetwork', function(data, fn) {
+			        	network.create(data, fn);
+			    });
+
+			    server.listen('RemoveNetwork', function(data, fn) {
+			          network.remove(data, fn);
+			    });
+
+	});
 };
 
-var image = function(server){
+var image = function(server, host){
 	 	 var image = p.image;
+		 image.getTaskDocker(host, (docker)=>{
+					 image.docker = docker;
+					 function onProgress(progress){
+						 server.sendEvent("progress", progress);
+					 }
 
-		 function onProgress(progress){
-			 server.sendEvent("progress", progress);
-		 }
-
-	   server.listen("SearchImages", function(data, fn){
-	     		image.search(data, fn);
-	   });
+				   server.listen("SearchImages", function(data, fn){
+				     		image.search(data, fn);
+				   });
 
 
-	   server.listen("PullImages", function(data, fn) {
-					image.create(data, onProgress, fn);
-     });
+				   server.listen("PullImages", function(data, fn) {
+								image.create(data, onProgress, fn);
+			     });
 
-     server.listen("RemoveImages", function(data, fn) {
-       		image.remove(data, fn);
-     });
+			     server.listen("RemoveImages", function(data, fn) {
+			       		image.remove(data, fn);
+			     });
 
-		 server.listen("PushImages", function(data, fn) {
-			 		image.push(data, onProgress, fn);
-		 });
+					 server.listen("PushImages", function(data, fn) {
+						 		image.push(data, onProgress, fn);
+					 });
 
-		 server.listen("build", function(data, fn){
-				 function onProgress(progress){
-					 server.sendEvent("buildingImage", progress);
-				 }
+					 server.listen("build", function(data, fn){
+							 function onProgress(progress, err){
 
-			 		image.build(data, onProgress);
-		 });
+								 server.sendEvent("buildingImage", progress);
+							 }
 
+						 		image.build(data, onProgress);
+					 });
+	 });
 
 };
 
-var volume = function(server){
-		var volume = p.volume
-     server.listen("CreateVolume", function(data, fn){
-          volume.create(data, fn);
-    });
+var volume = function(server, host){
+		var volume = p.volume;
+		volume.getTaskDocker(host, (docker)=>{
+				volume.docker = docker;
+		     server.listen("CreateVolume", function(data, fn){
+		          volume.create(data, fn);
+		    });
 
-     server.listen("RemoveVolume", function(data, fn){
-        volume.remove(data, fn);
-    });
+		     server.listen("RemoveVolume", function(data, fn){
+		        volume.remove(data, fn);
+		    });
+			});
 };
 
 
@@ -354,7 +367,9 @@ var dockerfile = function(server) {
 	        const PATH = require('path');
 	        const dirTree = require('directory-tree');
 	        var tree = null;
-					var home = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
+					// var home = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE || "/home";
+					var home = "/home";
+
 					var workspace = path.join(home, "dockerfile");
 
 					if(!fs.existsSync(workspace)){
@@ -418,12 +433,12 @@ var terminal = function (server) {
 
 }
 
-var settings = function(server, settings){
+var settings = function(server){
 	// var selfP = new p();
 	// var settings = selfP.settings;
 	// console.log(Settings);
 	// var settings = new Settings();
-	// var settings = p.settings;
+	var settings = p.settings;
 
 	server.listen('PING', function(data, fn) {
 			settings.ping(data, fn);
@@ -433,13 +448,13 @@ var settings = function(server, settings){
 			settings.delete(data, fn);
 	});
 
-	server.listen('IsConnected', function(data, fn) {
-		settings.isConnected(data, fn);
-	});
-
-	server.listen('ConnectDocker', function(data, fn) {
-		settings.connectDocker(data, fn);
-	});
+	// server.listen('IsConnected', function(data, fn) {
+	// 	settings.isConnected(data, fn);
+	// });
+	//
+	// server.listen('ConnectDocker', function(data, fn) {
+	// 	settings.connectDocker(data, fn);
+	// });
 
 	// server.listen('GetThisDocker', function(data, fn) {
 	// 	var docker = (p[data.docker].getDocker()).modem;
@@ -523,19 +538,22 @@ var node = function(server){
 	// });
 };
 
-var service = function(server){
+var service = function(server, host){
 	var service = p.service;
+	service.getTaskDocker(host, (docker)=>{
+			service.docker = docker;
+			server.listen("CreateService", function(data, fn){
+				service.create(data, fn);
+			});
 
-	server.listen("CreateService", function(data, fn){
-		service.create(data, fn);
-	});
+			server.listen("RemoveService", function(data, fn){
+				service.remove(data, fn);
+			});
 
-	server.listen("RemoveService", function(data, fn){
-		service.remove(data, fn);
-	});
+			server.listen("UpdateService", function(data, fn){
+				service.update(data, fn);
+			});
 
-	server.listen("UpdateService", function(data, fn){
-		service.update(data, fn);
 	});
 }
 

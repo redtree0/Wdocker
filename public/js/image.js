@@ -67,7 +67,7 @@ $(function(){
     DO : true,
     NOT : false
   }
-  
+  var dialog = require("./module/dialog.js");
   var $all = {};
   $all.init = function(){
     $(".results").hide();
@@ -86,7 +86,6 @@ $(function(){
       "limit" : self.$limit.val(),
       "is-automated" : self.$is_automated.prop("checked").toString(),
       "is-official" : self.$is_official.prop("checked").toString()
-      // ,"stars" :self.$stars.val()
     }
   };
 
@@ -95,24 +94,73 @@ $(function(){
     $term : $("#term"),
     $limit : $("#limit"),
     $is_automated : $("#is_automated"),
-    $is_official : $("#is_official"),
-    $stars : $("#stars")
+    $is_official : $("#is_official")
   };
 
   $all.form.create.$newForm =  $(".newForm");
   $all.form.create.formName = "이미지 생성";
   $all.form.create.formEvent = "SearchImages";
-  $all.form.create.labellists = [];
-  $all.form.create.$labelAdd = $("#labelAdd");
-  $all.form.create.$labellists = $("#labellists");
+  // $all.form.create.labellists = [];
+  // $all.form.create.$labelAdd = $("#labelAdd");
+  // $all.form.create.$labellists = $("#labellists");
   $all.form.create.callback = function(data){
             var row = data.msg ;
-            console.log(row);
+            // console.log(row);
             $all.table.sub.$table.bootstrapTable('load', row);
 
             $(".results").show();
   }
+  $all.form.create.loaded = function(client){
+    var $msgdiag = $("#msgdiag");
+    $msgdiag.hide();
+    $(".download").off();
+    $(".download").click((e)=> {
+          e.preventDefault();
 
+        client.completeEvent = function(data, callback){
+             if(hasValue(data)){
+
+                  var finished = new dialog("이미지", JSON.stringify(data), $("body"));
+                  finished.setDefaultButton('Close[Enker]', 'btn-primary create');
+                  finished.show();
+                  callback;
+              }
+          }
+          client.sendEventTable("PullImages", searchTable);
+          var $progressbar = $(".progress-bar");
+          $progressbar.css("width", '0%');
+          // console.log($progressbar);
+          // console.log($msgdiag);
+          var popup = new dialog("이미지 다운 중", $msgdiag.show(), $("body"));
+          // console.log(popup);
+          var $status = $("#status");
+          client.listen("progress", (event)=> {
+              // console.log(event);
+                if((event.status)){
+                  $status.text(event.status);
+                }
+                if((event.progressDetail)){
+                  var download = event.progressDetail;
+                  if(download.current && download.total){
+                    var percentage = (download.current / download.total) * 100;
+                    var $progress = $(".progress");
+                    // console.log($progress);
+                    if(percentage != NaN) {
+                      $progress.css("width", Math.round(percentage)+ '%');
+                    }
+                  }
+                }else if (event === true) {
+                    popup.close(5000);
+                    $(".results").hide();
+                    ///////////////////////////////////////////////////////////////////
+                    imageTable.refresh();
+                }
+            });
+
+            popup.show();
+    });
+
+  }
 
   $all.form.completeEvent = function(data, callback){
     // console.log(arguments);
@@ -128,13 +176,14 @@ $(function(){
     $table : $(".jsonTable"),
     hideColumns : ["Id",  "ParentId", "Created", "RepoDigests"],
     columns : columns,
-    jsonUrl : '/myapp/image/data.json',
+    jsonUrl : '/myapp/image/data/'+ getHostIP(),
     isExpend : true
   };
   $all.table.sub = {
     $table : $(".dataTable"),
     columns : searchcolumns
   }
+
   $all.event = {};
   function clickDefault(client, eventName, table){
     return function(){
@@ -165,15 +214,15 @@ $(function(){
 
     var main = require("./module/main.js");
     main.init($all);
-
-        var client = main.getSocket();
-        var dialog = main.getDialog();
-        var searchTable = main.getSubTable();
-        var imageTable = main.getMainTable();
-
+    $all.table.main.offLoaded = function(){
+        // $("#containerMenu").off();
+        $(".push").off();
+    }
+    $all.table.main.loaded = function(client, host, Table){
         var $expand = $("#expand").clone();
         $("#expand").remove();
         var isExpand = false;
+        var imageTable = Table;
         imageTable.$table.on("expand-row.bs.table", function (e, index, row, $detail){
           if(isExpand) {
             isExpand = false;
@@ -194,6 +243,49 @@ $(function(){
               });
             };
           });
+    }
+
+
+
+    // $all.table.sub.loaded = function(client, host, Table){
+    //           var searchTable = Table;
+    //           searchTable.$table.on("check.bs.table",  function (e, row, $element) {  /// 테이블 한 Row check box 선택 시
+    //             $(':checkbox').not(this).prop('checked', false);
+    //             $element.prop('checked', true);
+    //           });
+    //
+    //           searchTable.$table.on("check-all.bs.table",  function (e, row, $element) {  /// 테이블 한 Row check box 선택 시
+    //             $(':checkbox').prop('checked', false);
+    //           });
+    //
+    // }
+        // var client = main.getSocket();
+        var searchTable = main.getSubTable();
+        // var imageTable = main.getMainTable();
+
+        // var $expand = $("#expand").clone();
+        // $("#expand").remove();
+        // var isExpand = false;
+        // imageTable.$table.on("expand-row.bs.table", function (e, index, row, $detail){
+        //   if(isExpand) {
+        //     isExpand = false;
+        //     imageTable.$table.bootstrapTable("collapseAllRows");
+        //   }else {
+        //     $detail.append($expand);
+        //     $expand.show();
+        //     isExpand = true;
+        //
+        //       $(".push").click((e)=>{
+        //         var opts = {
+        //           name : $("#repositoryImage").val(),
+        //           tag : $("#repositoryTag").val()
+        //         };
+        //
+        //           client.sendEventTable("PushImages", imageTable, opts);
+        //
+        //       });
+        //     };
+        //   });
 
         searchTable.$table.on("check.bs.table",  function (e, row, $element) {  /// 테이블 한 Row check box 선택 시
           $(':checkbox').not(this).prop('checked', false);
@@ -202,48 +294,6 @@ $(function(){
 
         searchTable.$table.on("check-all.bs.table",  function (e, row, $element) {  /// 테이블 한 Row check box 선택 시
           $(':checkbox').prop('checked', false);
-        });
-
-        var $msgdiag = $("#msgdiag");
-        $msgdiag.hide();
-        $(".download").click((e)=> {
-              e.preventDefault();
-
-
-            client.completeEvent = function(data, callback){
-                 if(hasValue(data)){
-
-                      var finished = new dialog("이미지", JSON.stringify(data), $("body"));
-                      finished.setDefaultButton('Close[Enker]', 'btn-primary create');
-                      finished.show();
-                      callback;
-                  }
-              }
-              client.sendEventTable("PullImages", searchTable);
-              var $progress = $(".progress-bar");
-              $progress.css("width", '0%');
-              var popup = new dialog("이미지 다운 중", $msgdiag.show(), $("body"));
-              var $status = $("#status");
-              client.listen("progress", (event)=> {
-                    if((event.status)){
-                      $status.text(event.status);
-                    }
-                    if((event.progressDetail)){
-                      var download = event.progressDetail;
-                      if(download.current && download.total){
-                        var percentage = (download.current / download.total) * 100;
-                        var $progress = $(".progress");
-                        if(percentage != NaN) {
-                          $progress.css("width", Math.round(percentage)+ '%');
-                        }
-                      }
-                    }else if (event === true) {
-                        popup.close(5000);
-                        imageTable.reload();
-                    }
-                });
-
-                popup.show();
         });
 
 

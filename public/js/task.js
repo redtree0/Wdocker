@@ -51,7 +51,7 @@ $(function(){
   var $all = {};
   $all.init = function(){
     isSwarm();
-    loadTask();
+    loadTask(getHostIP());
 
   };
 
@@ -62,22 +62,34 @@ $(function(){
   $all.table.main = {
     $table : $(".jsonTable"),
     columns : columns,
-    jsonUrl : '/myapp/task/data.json',
+    jsonUrl : '/myapp/task/data/' + getHostIP(),
   };
+
+  $all.table.main.loaded = function(client, host, networkTable){
+    $("#refresh").off();
+
+    $("#refresh").click((e)=>{
+      loadTask(host);
+    });
+  }
+
   var main = require("./module/main.js");
   main.init($all);
 
-  $("#refresh").click((e)=>{
-      loadTask();
-  });
-  function loadTask() {
-    $(".dockerNode").children().remove();
+  function loadTask(host) {
 
-    $.getJSON("/myapp/node/data.json", (data)=>{
-      // console.log(data.length);
-      // console.log();
-      if(data.statusCode !== 200){
-        return;
+    $(".dockerNode").children().remove();
+    var nodeUrl = "/myapp/node/data/" + host;
+    $.getJSON( nodeUrl, (data)=>{
+      // console.log(data);
+      if(data.hasOwnProperty("statusCode")){
+        if(data.statusCode !== 200){
+          var errormsg = "It is not Swarm Manager"
+          $(".dockerNode").append($("<div/>").attr({
+            class : "alert alert-danger",
+          }).html(errormsg) );
+          return;
+        }
       }
       var data = (data.sort(function(a, b) {
         var nameA = a.Spec.Role.toUpperCase(); // ignore upper and lowercase
@@ -91,8 +103,10 @@ $(function(){
         // names must be equal
         return 0;
       }));
+      // console.log(data);
       for(var i in data){
         // console.log(data[i]);
+        console.log("doFor");
         var role = data[i].Spec.Role;
         var nodeID = data[i].ID;
         var hostname = data[i].Description.Hostname;
@@ -111,7 +125,11 @@ $(function(){
           id : nodeID
         }).html(msg) );
       }
-      $.getJSON("/myapp/task/data.json", (data)=>{
+      var taskUrl = "/myapp/task/data/" + host;
+      console.log(taskUrl);
+      $.getJSON(taskUrl , (data)=>{
+        console.log(data);
+
         // console.log(data);
         if(data.hasOwnProperty("json") && data.json.hasOwnProperty("message")){
 

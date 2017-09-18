@@ -171,11 +171,12 @@
     self.getAllLists = function (opts, successCallback, failCallback, remoteDocker){
       var self = this;
       var docker = null;
-      if(remoteDocker){
+      if(remoteDocker !== null && remoteDocker !== undefined){
         docker = remoteDocker;
       }else {
         docker = self.docker;
       }
+      console.log(docker);
       if(self.getLists !== null){
         var dockerInfo = docker[self.getLists](opts);
         return new Promise(function(resolve, reject){
@@ -195,6 +196,55 @@
     self.setRemoteDocker = function (config) {
       var self = this;
       self.remoteDocker = new Docker(config);
+    }
+
+    /** @method  - setRemoteDocker
+    *  @description 다른 호스트의 도커에 접속하기 위한 값 설정, p 객체에 remotedocker SET
+    *  @param {Object} config - 원격 docker 접속 시 필요한 옵션
+    */
+    var serverIp = getServerIp();
+    self.setNewRemoteDocker = function (host) {
+              var self = this;
+              var docker = null;
+              function dockerHeathCheck(docker, type){
+                  // type  remote or local
+                  self.ping(docker, (err, data)=>{
+                      if(err === null){
+                        self[type] = docker;
+                        console.log(docker);
+                      }else {
+                        self.remoteDocker = null;
+                      }
+                  });
+              }
+
+              if(host !== serverIp  && host !== "default") {
+
+                  mongo.docker.find({"ip" : host}, (result)=>{
+                    // console.log(result);
+                    if(result === null){
+                      return callback(false);
+                    }
+                    var opts = {
+                      "host" : result.ip,
+                      "port" : result.port
+                    }
+
+                    docker = new Docker(opts);
+                    // console.log(docker);
+                    return dockerHeathCheck(docker, "remoteDocker");
+                    // return callback(docker);
+                  });
+              }else if(host === getServerIp() || host === null ) {
+
+                docker = new Docker();
+                return dockerHeathCheck(docker, "docker");
+                // return self.ping(docker, (err, data)=>{
+                //     if(err === null){
+                //       callback(docker);
+                //     }
+                // });
+              }
     }
 
 
@@ -231,7 +281,8 @@
             mongo.docker.find({"ip" : host}, (result)=>{
               // console.log(result);
               if(result === null){
-                return callback(false);
+                docker = new Docker();
+                return   callback(docker);
               }
               var opts = {
                 "host" : result.ip,
@@ -250,11 +301,12 @@
         }else if(host === getServerIp() || host === null ) {
 
           docker = new Docker();
-          return self.ping(docker, (err, data)=>{
-              if(err === null){
-                callback(docker);
-              }
-          });
+          return   callback(docker);
+          // return self.ping(docker, (err, data)=>{
+          //     if(err === null){
+          //       callback(docker);
+          //     }
+          // });
         }
     }
 
@@ -399,8 +451,9 @@
      self.attach = function(data, stdin, stdout, stderr){
        var docker = self.docker;
        var container = docker.getContainer(data);
-       return stdin((data)=>{
-
+       return stdin((data, fn)=>{
+         fn(true);
+        //  callback(true);
          var options = {
            Cmd: data.split(" "),
            AttachStdin: true,
@@ -466,10 +519,16 @@
        }
        var list = [];
        var self = this;
+      //  var docker = null;
+      //  if(remoteDocker !== null){
+      //    docker = remoteDocker;
+      //  }else {
+      //    docker = self.docker;
+      //  }
 
        for(var i in data) {
 
-         var dockerInfo = docker[self.getInfo](data[i][self.attr]);
+         var dockerInfo = self.docker[self.getInfo](data[i][self.attr]);
          if(opts !== null && opts.EndpointConfig){
            opts.EndpointConfig.NetworkID = data[i].Id;
          }
@@ -501,6 +560,7 @@
        self.doTask(data, callback, "remove");
      }
 
+
      /** @method  - connect
      *  @description network에 container 연결
      *  @param {Object} data - 설정 데이터
@@ -508,14 +568,15 @@
      *  @return {object} Promise
      */
      self.connect =  function (data, callback) {
-       console.log(data);
+      //  console.log(data);
        var lists = data.checkedRowLists;
        var container = (data.opts.container);
        var opts = {
          "Container" : container,
          "EndpointConfig" : {"NetworkID" : ""}
        };
-       console.log(opts);
+
+      //  console.log(opts);
        var promiseList = self.get( lists, opts, "connect");
        return self.dockerPromiseEvent(promiseList, callback);
 
@@ -557,8 +618,15 @@
           docker.modem.followProgress(stream, onFinished, onProgress);
 
            function onFinished(err, output) {
-            //  console.log("finished");
-              callback(true);
+
+                var finished  = null;
+                if(err){
+                  finished = {"stream" : "Error: > "+ err};
+                }else {
+                  finished = true;
+                }
+                  callback(finished);
+
            }
            function onProgress(event) {
               callback(event);
@@ -617,7 +685,7 @@
                       dockerStream.bind(null, onProgress)
                 );
           });
-          callback(true);
+          callback("작업완료");
 
       };
 
@@ -628,23 +696,24 @@
       *  @return {Function} doTask
       */
       self.build = function(data,  onProgress) {
+          var docker = self.docker;
 
-            // console.log(data);
-            var filePath = data.path + ".tgz";
-            var fileName = path.basename(data.path);
+            var filePath = data.path ;
+            var fileName = path.basename(filePath);
             var dirPath = path.dirname(filePath);
             var imageTag = data.imageTag;
             if(imageTag === null || imageTag === "") {
               imageTag = "default"
             }
-
-            return  (self.docker).buildImage( {
+            console.log(docker);
+            docker.buildImage( {
                   context :  dirPath,
                   src : [fileName]
                 }, {
                   "dockerfile" : fileName,
                   "t" : imageTag.toString()
-                }, dockerStream.bind(null, onProgress));
+
+                }, dockerStream.bind(this, onProgress));
 
       };
 
@@ -727,76 +796,78 @@
           callback(true);
         });
       };
-      var defaultDocker = new Docker();
-      self.isConnected = function(data, callback){
-            console.log(data);
-              // var defaultDocker = new Docker();
-            if(data.ip !== getServerIp()  && data.ip !== "default") {
-
-              mongo.docker.find({"ip" : data.ip}, (result)=>{
-
-                var opts = {
-                  "host" : result.ip,
-                  "port" : result.port
-                }
-                self.ping(opts, callback);
-              });
-          }else {
-
-            var docker = defaultDocker;
-            callback(true);
-          }
-      }
-
-
-      /** @method  - connectDocker
-      *  @description docker host 원격 연결
-      *  @param {Object} data - 설정 데이터
-      *  @return {Object} setRemoteDocker -> return remotedocker
-      */
-      self.connectDocker = function (data, callback) {
-        var type = (data.docker);
-
-        var findDocker= new Promise(function(resolve, reject){
-              mongo.docker.find({"ip" : data.ip}, (result)=>{
-                var opts = {
-                  "host" : result.ip,
-                  "port" : result.port
-                }
-                resolve(opts);
-
-            })
-        })
-
-        Promise.all([findDocker]).then((data)=>{
-              var docker = null;
-              var hostconfig = data[0];
-
-              if(hostconfig.host !== getServerIp()  && hostconfig.host !== "default") {
-                self.setRemoteDocker(hostconfig)
-                docker = self.remoteDocker;
-              }else {
-                docker = defaultDocker;
-              }
-
-              docker.ping((err,data)=>{
-                // console.log(err);
-                // console.log(data);
-                    if(err !== null) {
-
-                      callback({err : err.code, statusCode : 500});
-
-                    }else {
-
-                      lists[type].docker = docker;
-                      callback({statusCode : 200});
-
-                    }
-              })
-        });
+      // var defaultDocker = new Docker();
+      // self.isConnected = function(data, callback){
+      //       console.log(data);
+      //         // var defaultDocker = new Docker();
+      //       if(data.ip !== getServerIp()  && data.ip !== "default") {
+      //
+      //         mongo.docker.find({"ip" : data.ip}, (result)=>{
+      //           if(result === null){
+      //             return ;
+      //           }
+      //           var opts = {
+      //             "host" : result.ip,
+      //             "port" : result.port
+      //           }
+      //           self.ping(opts, callback);
+      //         });
+      //     }else {
+      //
+      //       var docker = defaultDocker;
+      //       callback(true);
+      //     }
+      // }
 
 
-      };
+      // /** @method  - connectDocker
+      // *  @description docker host 원격 연결
+      // *  @param {Object} data - 설정 데이터
+      // *  @return {Object} setRemoteDocker -> return remotedocker
+      // */
+      // self.connectDocker = function (data, callback) {
+      //   var type = (data.docker);
+      //
+      //   var findDocker= new Promise(function(resolve, reject){
+      //         mongo.docker.find({"ip" : data.ip}, (result)=>{
+      //           var opts = {
+      //             "host" : result.ip,
+      //             "port" : result.port
+      //           }
+      //           resolve(opts);
+      //
+      //       })
+      //   })
+      //
+      //   Promise.all([findDocker]).then((data)=>{
+      //         var docker = null;
+      //         var hostconfig = data[0];
+      //
+      //         if(hostconfig.host !== getServerIp()  && hostconfig.host !== "default") {
+      //           self.setRemoteDocker(hostconfig)
+      //           docker = self.remoteDocker;
+      //         }else {
+      //           docker = defaultDocker;
+      //         }
+      //
+      //         docker.ping((err,data)=>{
+      //           // console.log(err);
+      //           // console.log(data);
+      //               if(err !== null) {
+      //
+      //                 callback({err : err.code, statusCode : 500});
+      //
+      //               }else {
+      //
+      //                 lists[type].docker = docker;
+      //                 callback({statusCode : 200});
+      //
+      //               }
+      //         })
+      //   });
+      //
+      //
+      // };
 
       self.authCheck = function(data, callback){
           mongo.auth.find(data, (result)=>{
@@ -1140,20 +1211,6 @@
         var self = this;
         self.getInfo = "getTask";
         self.getLists = "listTasks";
-
-        self.getAllLists = function (opts, successCallback, failCallback){
-          var self = this;
-          self.docker = Node.docker;
-          if(self.getLists !== null){
-            var dockerInfo = self.docker[self.getLists](opts);
-          }
-          return new Promise(function(resolve, reject){
-            resolve(dockerInfo);
-          }).then(successCallback, failCallback);
-
-
-        };
-
 
         /** @method  - inspect
         *  @description task inspect

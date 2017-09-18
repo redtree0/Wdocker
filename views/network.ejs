@@ -18,15 +18,13 @@
         <% include ./partials/nav %>
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
           <div class="row placeholders">
-            <% include ./partials/connectDocker %>
-
 
             <div id="toolbar" >
               <div  class="btn-group" role="group">
                 <button  onclick=" return false;"  type="button" class="btn btn-default newForm">
                   <span class="glyphicon glyphicon-plus"></span>
                 </button>
-                <button  onclick=" return false;"  type="button" class="btn btn-default  remove">
+                <button  onclick=" return false;"  type="button" class="btn btn-default" id="remove">
                   <span class="glyphicon glyphicon-minus"></span></button>
               </div>
               <div  class="btn-group dropdown">
@@ -52,7 +50,7 @@
                   <div id="detail" class="row detail text-left" style = "padding-left : 20px">
                   </div>
 
-
+                    <% include ./partials/connectDocker %>
                     <table data-toolbar="#toolbar"  data-pagination="true" class="table table-striped jsonTable"> </table>
                     <p><span class="glyphicon glyphicon-exclamation-sign"></span>
                       해당 호스트가 swarm 구성이 되있을 경우, 재 기능을 안할 수 있습니다.
@@ -81,7 +79,7 @@
                   <button id="driverDropDown" type="button" class="btn btn-default dropdown-toggle btn-block" data-toggle="dropdown" aria-expanded="false">
                     driver <span class="caret"></span>
                   </button>
-                  <ul class="dropdown-menu" id="driverMenu">
+                  <ul class="dropdown-menu btn-block" id="driverMenu">
                   </ul>
                 </div>
               </div>

@@ -71,13 +71,39 @@ var table = (function Table($table, columns){
     }, TIMEOUT);
   }
 
-  /** @method  - reset
+  /** @method  - load
    *  @description 테이블 data Load
    *  @param {Object} data - 테이블에 갱신할 데이터 json array
    */
   this.load = function (data) {
     (this.$table).bootstrapTable('load', data); /// 테이블 data로 새로 로드
   }
+
+    /** @method  - reset
+     *  @description 테이블 data Load
+     *  @param {Object} data - 테이블에 갱신할 데이터 json array
+     */
+    this.refresh = function (jsonUrl) {
+      var self = this;
+      if(self.checkedRowLists.length > 0) {
+        (self.checkedRowLists).splice(0, (self.checkedRowLists).length);
+      }
+      var init = self.opts;
+      if(jsonUrl !== null && jsonUrl !== undefined){
+        init.url = jsonUrl;
+      }
+      // console.log(init.url);
+      // console.log(jsonUrl);
+      (this.$table).bootstrapTable('refresh', {url : init.url}); /// 테이블 data로 새로 로드
+    }
+
+    /** @method  - reset
+     *  @description 테이블 data Load
+     *  @param {Object} data - 테이블에 갱신할 데이터 json array
+     */
+    this.destroy = function () {
+      (this.$table).bootstrapTable('destroy'); /// 테이블 data로 새로 로드
+    }
 
   // /** @method  - clickRow
   //  *  @description 테이블 Row 클릭 후

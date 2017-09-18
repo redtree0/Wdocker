@@ -31,45 +31,57 @@
 		          <div class="row placeholders">
 		            <div class="container">
 
-									<% include ./partials/connectDocker %>
+									<div class="panel panel-success row">
+											<div class="panel-heading">
+													<h4 class ="text-left">DockerFile 관리</h4>
+											</div>
+											<div class="panel-body">
 
-                  <!-- <form class="form-horizontal" > -->
-									<div class="row">
+													<% include ./partials/connectDocker %>
+													<!-- <form class="form-horizontal" > -->
+													<div class="row">
 
-			                <div class="form-group">
-												<div class="col-md-2" style="text-align : left">
+														<div class="form-group">
+															<div class="col-md-2" style="text-align : left">
 
-													<div class="alert alert-success" id ="filename" >
- 													</div>
-															<div id="jstree">
+																<div class="alert alert-danger" id ="filename" >
+																</div>
+																<div id="jstree">
+																</div>
 															</div>
-												</div>
 
-												<div class="col-md-10">
-													<div class="form-group">
-														<div class="alert alert-info" id ="path">
-	 													</div>
+															<div class="col-md-10">
+																<div class="form-group">
+																	<div class="alert alert-info" id ="path">
+																	</div>
+																</div>
+																<textarea id="editor" name="code"></textarea>
+															</div>
+														</div>
+
 													</div>
-													<textarea id="editor" name="code"></textarea>
-												</div>
-											</div>
-
-			             </div>
-                  <!-- </form> -->
-									<div class="row">
-											<div class="col-md-2">
-											</div>
-											<div class="col-md-4">
-												<input type="text" class="form-control" id="imageTag" placeholder="imageName:tag">
-										</div>
-										<div class="col-md-2">
-											<button id="build" class="btn btn-success"><span class="glyphicon glyphicon-hdd"></span>Build</button>
-										</div>
-											<div class="col-md-4">
-												<button class="btn btn-primary update"><span class="glyphicon glyphicon-floppy-disk"></span>Save</button>
+													<!-- </form> -->
+													<div class="row">
+														<div class="col-md-2">
+														</div>
+														<div class="col-md-4">
+															<input type="text" class="form-control" id="imageTag" placeholder="imageName:tag">
+														</div>
+														<div class="col-md-2">
+															<button id="build" class="btn btn-success"><span class="glyphicon glyphicon-hdd"></span>Build</button>
+														</div>
+														<div class="col-md-4">
+															<button class="btn btn-primary update"><span class="glyphicon glyphicon-floppy-disk"></span>Save</button>
+														</div>
+													</div>
+													<p><span class="glyphicon glyphicon-exclamation-sign"></span>
+														Test
+													</p>
 											</div>
 									</div>
 
+								</div>
+								<div id="building">
 								</div>
 							</div>
 						</div>

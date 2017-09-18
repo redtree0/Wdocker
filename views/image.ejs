@@ -16,7 +16,7 @@
         <% include ./partials/nav %>
           <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
             <div class="row placeholders">
-                <% include ./partials/connectDocker %>
+
 
                   <div id="toolbar" >
                         <div  class="btn-group" role="group">
@@ -33,6 +33,7 @@
                          <h4 class ="text-left">Image 관리</h4>
                      </div>
                      <div class="panel-body">
+                       <% include ./partials/connectDocker %>
                         <table data-toolbar="#toolbar"  data-pagination="true" class="table table-striped jsonTable"></table>
                     </div>
                   </div>

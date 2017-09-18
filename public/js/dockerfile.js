@@ -90,9 +90,9 @@ function reportMenu ($node) {
                            name : newFile
                          }
                          client.sendEvent(COMPLETE.NOT, "CreateFile", opts);
-                           socket.emit("dirtree", "", (data)=>{
+                         client.sendEvent(COMPLETE.NOT, "dirtree", "", (data)=>{
                               jstreeRefresh($jstree, data);
-                           });
+                          });
                         //  console.log(parentPath);
                        });
                    }
@@ -132,7 +132,7 @@ function reportMenu ($node) {
                          type : type,
                          path : deletePath
                        };
-                       client.socketEvent("RemoveFile", opts, completeEvent);
+                       client.sendEvent(COMPLETE.NOT, "RemoveFile", opts, completeEvent);
 
                        console.log($node);
                        console.log(obj);
@@ -256,6 +256,7 @@ function jstreeRefresh($jstree, newTree){
           };
 
           client.sendEvent(COMPLETE.NOT, "build", opts, (data, callback)=>{
+            console.log(data);
             if(data){
               console.log("done");
             }
@@ -263,11 +264,14 @@ function jstreeRefresh($jstree, newTree){
             callback;
           });
           var $building = $("#building");
+          console.log($building);
           var popup = new dialog("이미지 생성", $building);
           // popup.appendButton('Search', 'btn-primary create',
           client.listen("buildingImage", (data)=>{
             console.log(data);
-            $building.append(data.stream + "<br />");
+            if(data.hasOwnProperty("stream")){
+              $building.append(data.stream + "<br />");
+            }
             // if(data === true) {
             //   popup.close(5000);
             // }

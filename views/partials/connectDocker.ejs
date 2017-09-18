@@ -1,40 +1,25 @@
+<div class="form-inline row text-left">
 
-<div class ="row">
-  <div class="panel panel-success">
-    <div class="panel-heading">
-        <h4 class ="text-center">Docker Host Connection</h4>
+    <div class="col-md-3">
+          <button id="connectDropDown" type="button" class="btn btn-default dropdown-toggle btn-block"  data-toggle="dropdown" aria-expanded="false">
+            Connect Docker <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu col-xs-12" id="connectMenu">
+            <li><a>default</a></li>
+          </ul>
+    </div>
+    <div class="col-md-1" style="width : 150px">
+      <button  type="button" class="btn btn-info connectButton btn-block text-center"> Connect </button>
     </div>
 
-    <div class="panel-body">
-      <div class="col-md-8">
-          <div class="col-md-8">
-
-              <div class="form-group row">
-                <div class="form-group">
-                  <div class="col-md-8">
-                  <button id="connectDropDown" type="button" class="btn btn-default dropdown-toggle btn-block"  data-toggle="dropdown" aria-expanded="false">
-                    Connect Docker <span class="caret"></span>
-                  </button>
-                  <ul class="dropdown-menu col-xs-12" id="connectMenu">
-                    <li><a>default</a></li>
-                  </ul>
-                  </div>
-
-                <div class="col-md-4 text-left">
-                  <button  type="button" class="btn btn-success connectButton">Connect</button>
-                </div>
-              </div>
-            </div>
-        </div>
-      </div>
-        <div class="col-md-2 text-success text-center">
-          <h4 class="status"><span class="glyphicon glyphicon-record text-success"></span> Success </h4>
-        </div>
-        <div class="col-md-2">
-          <h4 class="whoisConnected"> default </h4>
-        </div>
-        <!-- <span> -->
-        <!-- </span> -->
+    <div class="col-md-6">
+      <h4>
+        <span>Using Docker Daemon - </span>
+        <span  id="IsConnected"></span>
+      </h4>
     </div>
-  </div>
+
+
+
 </div>
+<hr/>

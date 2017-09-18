@@ -79,18 +79,10 @@ $(function(){
   }
 
   $('.ip_address').mask('0ZZ.0ZZ.0ZZ.0ZZ/00', { translation: { 'Z': { pattern: /[0-9]/, optional: true } } });
+  var dialog = require("./module/dialog.js");
 
   var $all = {};
-  $all.init = function(){
-    var self = this;
-    var jsonUrl = '/myapp/container/data.json';
-    var $contextMenu = $("#containerMenu")  ;
-    var $dropDown =   $("#containerDropDown");
-    var attr = "Names";
-    // var index = 0;
-    return initDropdown(jsonUrl, $contextMenu, $dropDown, {attr : attr});
 
-  };
   $all.form = {};
   $all.form.$form = $("#hiddenForm");
   $all.form.settingMethod = {
@@ -135,10 +127,6 @@ $(function(){
   $all.form.create.labellists = [];
   $all.form.create.$labelAdd = $("#labelAdd");
   $all.form.create.$labellists = $("#labellists");
-  // $all.form.create.dropDown =  {
-  //   $dropDown : $('#driverDropDown'),
-  //   default : "driver"
-  // };
 
   $all.form.create.initDropdown = function(self){
     var self = self.data;
@@ -161,7 +149,7 @@ $(function(){
       "$table" : $(".jsonTable"),
       "hideColumns" : ["EnableIPv6", "Labels", "IPAM", "Containers", "Options", "Created", "Id"],
       "columns" : columns,
-      "jsonUrl" : '/myapp/network/data.json',
+      "jsonUrl" : '/myapp/network/data/' + getHostIP(),
       isExpend : false
     };
 
@@ -212,90 +200,91 @@ $(function(){
   $all.completeEvent = function(data, callback){
     // console.log(arguments);
     if(hasValue(data)){
-        var dialog = require("./module/dialog.js");
+        // var dialog = require("./module/dialog.js");
          var finished = new dialog("네트워크", data);
          finished.setDefaultButton('Close[Enker]', 'btn-primary create');
          finished.show();
          callback;
        }
   };
+  $all.table.main.offLoaded = function(){
+      $("#containerMenu").off();
+  }
+  $all.table.main.loaded = function(client, host, networkTable){
+
+    var jsonUrl = '/myapp/container/data/' + host;
+    var $contextMenu = $("#containerMenu")  ;
+    var $dropDown =   $("#containerDropDown");
+    var attr = "Names";
+    // var index = 0;
+    initDropdown(jsonUrl, $contextMenu, $dropDown, {attr : attr});
+      // $("#containerMenu").off();
+
+      $contextMenu.click((e)=>{
+          networkConnectedlists();
+      });
+
+
+      function networkConnectedlists(){
+        var item =   $dropDown.text().trim();
+        if(item === "Containers"){
+          return ;
+        }
+
+        return showContainerDetail((networkTable.$table), item, jsonUrl);
+      }
+
+
+      function showContainerDetail($table, item, jsonUrl){
+        var $detail = $("#detail");
+        var rows = $table.bootstrapTable('getData');
+
+        // var jsonUrl = "/myapp/container/data/" + host;
+        $.getJSON(jsonUrl, function(json, textStatus) {
+          var searchNetwork = [];
+          var container = json;
+          var networks = null;
+          var networkName = null;
+          var ipAddr = null;
+          container.forEach ( (data) => {
+                if(item === data.Names.toString()){
+
+                  networks = data.NetworkSettings.Networks;
+                  if(Object.keys(networks).length === 0){
+                        networkName = "not Exist";
+                  }else if(Object.keys(networks).length === 1){
+                    networkName = Object.keys(networks) ;
+                    if(networks[networkName].hasOwnProperty("IPAddress")){
+                      ipAddr = networks[networkName].IPAddress;
+                    }
+                  }else {
+                    networkName = Object.keys(networks) ;
+                  }
+
+
+                  if(ipAddr === null || ipAddr === "" ) {
+                      ipAddr = "not Exist or not Running";
+                  }
+                  // console.log(networks[networkName].IPAMConfig);
+                  var msg = "Container : " + data.Names
+                    + "<br/>Image : " + data.Image
+                    + "<br/>Network : " + networkName
+                    + "<br/>State : " + data.State
+                    + "<br/>IP Address : " + ipAddr;
+                  $detail.html(msg);
+
+                }
+
+          } );
+
+
+
+        });
+      }
+  };
 
   var main = require("./module/main.js");
   main.init($all);
   var networkTable = main.getMainTable();
-      // networkTable.clickRow($detail);
 
-  // var expandinfo = [{
-  //    url : "/myapp/network/",
-  //    keys : ["Containers", "Name", "Id", "Driver"]
-  //  }];
-  //  networkTable.expandRow(expandinfo);
-
-  var $detail = $("#detail");
-  $("#containerMenu").click((e)=>{
-      networkConnectedlists();
-  });
-
-  networkTable.$table.on("page-change.bs.table", function(e, number, size){
-      networkConnectedlists()
-  })
-
-  function networkConnectedlists(){
-    var item =   $("#containerDropDown").text().trim();
-    if(item === "Containers"){
-      return ;
-    }
-
-    return showDetailAddColor((networkTable.$table), item, "danger");
-  }
-
-
-  function showDetailAddColor($table, item, _class){
-    var rows = $table.bootstrapTable('getData');
-
-    $.getJSON("/myapp/container/data.json", function(json, textStatus) {
-      var searchNetwork = [];
-      var container = json;
-      container.forEach ( (data) => {
-            if(item === data.Names.toString()){
-              // $detail.append(JSON.stringify(data));
-              var networkmsg = null;
-              // console.log(Object.keys(data.NetworkSettings.Networks));
-              if(Object.keys(data.NetworkSettings.Networks).length === 0){
-                    networkmsg = "not Exist";
-              }else {
-                networkmsg = Object.keys(data.NetworkSettings.Networks) ;
-              }
-              var msg = "Container : " + data.Names
-                + "<br/>Image : " + data.Image
-                + "<br/>Network : " + networkmsg;
-              $detail.html(msg);
-
-            }
-            var networkSettings = data.NetworkSettings.Networks;
-            for(var network in networkSettings){
-                searchNetwork.push({"name" : data.Names, "networkId" : networkSettings[network].NetworkID});
-              }
-
-      } );
-      // console.log(searchNetwork);
-      $table.find("tr").removeClass(_class);
-      rows.forEach((data)=>{
-        for(var network in searchNetwork){
-          if(item == searchNetwork[network].name ){
-            if (data.Id == searchNetwork[network].networkId) {
-              // for(var i in $table.find("td:nth-child(2)"))
-              $table.find('td:nth-child(2)').filter(function() {
-                  return $(this).text() === data.Name ;
-              }).parent().addClass(_class);
-
-              // $table.find("td:contains("+ data.Id + ")").parent().addClass(_class);
-            }
-          }
-        }
-      });
-
-
-    });
-  }
 });

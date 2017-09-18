@@ -18,6 +18,7 @@ function initDropdown(jsonUrl, $li, $button, opts) {
     // console.log(jsonUrl);
     // console.log(json);
     if(json !== false){
+          // console.log(json);
          json.some((data)=>{
            if(hasFilter){
               if(data[opts.filter.key] !== opts.filter.value){
@@ -119,8 +120,8 @@ function createList ( $list, array ) {
     $list.children().remove();
     // console.log("createlists");
     for(var index in array) {
-      console.log(index);
-        console.log(array[index]);
+      // console.log(index);
+        // console.log(array[index]);
         var rowid = "#row"+ index;
         var $row = createElement("<div/>", "row", "", "row"+ index);
         var $deletebutton = createButton(index, "delete", "btn-danger", "glyphicon-remove");
@@ -134,9 +135,9 @@ function createList ( $list, array ) {
   function createRow($row, array, $buttons){
     var data = array;
     // console.log("createrow");
-    console.log(data);
+    // console.log(data);
     for (var index in data ) {
-      console.log(data[index]);
+      // console.log(data[index]);
         $row.append(createElement("<div/>", "col-sm-3 text-center " + index, data[index]));
     }
     // for (var i in $elements) {
@@ -207,4 +208,9 @@ function isSwarm(){
 
 function refresh(){
   setTimeout(()=>{location.reload(true)}, 3000);
+}
+
+
+function getHostIP(){
+  return window.location.host;
 }

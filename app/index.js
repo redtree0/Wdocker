@@ -13,7 +13,7 @@ var app = express();
 //////////////// WEBSOCKEFIY SET UP ///////////////////////////////////////
 
 var websockify = require("nodev6-websockify");
-var server  = require('http').Server(app)
+var server  = require('https').Server(app)
 var spawn   = require('child_process').spawn
 var fs      = require('fs')
 var ws      = require('websocket').server
@@ -56,6 +56,49 @@ app.use(WEBPATH, web);
 
 //////////////////////////////////////////////////////////////////////////////////////
 
+
+/////////////////////////////// HTTP ///////////////////////////////////////////////
+// const HTTP = 80;
+// var http = require('http');
+// var service = http.createServer(app).listen(HTTP, function(){
+//   console.log("Http server listening on port " + HTTP);
+// });
+///////////////////////////////////////////////////////////////////////////////////
+
+
+///////////////////////////// HTTPS //////////////////////////////////////////////
+
+
+const HTTPS = 443;
+var options = {
+    key: fs.readFileSync('../key.pem'),
+    cert: fs.readFileSync('../cert.pem')
+};
+
+var https = require('https');
+var service = https.createServer(options, app).listen(HTTPS, function(){
+  console.log("Https server listening on port " + HTTPS);
+});
+/////////////////////////////////////////////////////////////////////////////////
+
+
+///////////////////////// SOCKET IO //////////////////////////////////////////////
+
+// const PORT = 3000;
+// const EXPRESS = server.listen(PORT, () => {
+//     console.log("Express server has started on port " + PORT);
+// });
+// const SOCKET = new SocketIo(EXPRESS);
+// socketEvents(SOCKET);
+
+const SOCKET = new SocketIo(service);
+socketEvents(SOCKET);
+
+
+///////////////////////////////////////////////////////////////////////////////////
+
+
+
 //////////////////////// WEBSOCKEFIY /////////////////////////////////////////////////
 const websockifyConfig = {
   source: '192.168.0.108:9000',
@@ -67,6 +110,7 @@ const websockifyConfig = {
 websockify(websockifyConfig);
 
 
+///////////////////////////////////////////// LINUX_DASH /////////////////////////////////////////////
 app.get('/websocket', function (req, res) {
 
   res.send({
@@ -76,8 +120,9 @@ app.get('/websocket', function (req, res) {
 });
 
 wsServer = new ws({
-	httpServer: server
+	httpServer: service
 });
+
 var nixJsonAPIScript = __dirname + '/linux_json_api.sh'
 
 function getPluginData(pluginName, callback) {
@@ -136,44 +181,4 @@ app.route('*')
       res.render("404.ejs");
     }
 });
-///////////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////// HTTP ///////////////////////////////////////////////
-// const HTTP = 80;
-// var http = require('http');
-// var service = http.createServer(app).listen(HTTP, function(){
-//   console.log("Http server listening on port " + HTTP);
-// });
-///////////////////////////////////////////////////////////////////////////////////
-
-///////////////////////////// HTTPS //////////////////////////////////////////////
-
-
-const HTTPS = 443;
-var options = {
-    key: fs.readFileSync('../key.pem'),
-    cert: fs.readFileSync('../cert.pem')
-};
-
-var https = require('https');
-var service = https.createServer(options, app).listen(HTTPS, function(){
-  console.log("Https server listening on port " + HTTPS);
-});
-/////////////////////////////////////////////////////////////////////////////////
-
-
-///////////////////////// SOCKET IO //////////////////////////////////////////////
-
-// const PORT = 3000;
-// const EXPRESS = server.listen(PORT, () => {
-//     console.log("Express server has started on port " + PORT);
-// });
-// const SOCKET = new SocketIo(EXPRESS);
-// socketEvents(SOCKET);
-
-const SOCKET = new SocketIo(service);
-socketEvents(SOCKET);
-
-
 ///////////////////////////////////////////////////////////////////////////////////
