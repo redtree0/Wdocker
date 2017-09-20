@@ -19,13 +19,30 @@
 
 
                   <div id="toolbar" >
-                        <div  class="btn-group" role="group">
-                          <button  onclick=" return false;"  type="button" class="btn btn-default newForm">
-                            <span class="glyphicon glyphicon-plus"></span>
-                          </button>
-                          <button  onclick=" return false;"  type="button" class="btn btn-default  remove">
-                            <span class="glyphicon glyphicon-minus"></span></button>
+                          <div  class="btn-group" role="group">
+                              <button  onclick=" return false;"  type="button" class="btn btn-default newForm">
+                                <span class="glyphicon glyphicon-plus"></span>
+                              </button>
+                              <button  onclick=" return false;"  type="button" class="btn btn-default  remove">
+                                <span class="glyphicon glyphicon-minus"></span></button>
                           </div>
+
+                          <div  class="btn-group" role="group">
+                            <input type="text" class="form-control" id="rename" value=""  placeholder="repository/image:tag">
+                          </div>
+                          <div  class="btn-group" role="group">
+                            <button type="button" id="tag" class="btn btn-warning">
+                              <span class="glyphicon glyphicon-upload"></span>New Tag
+                            </button>
+                            <button type="button" id="push" class="btn btn-success">
+                              <span class="glyphicon glyphicon-upload"></span>Push
+                            </button>
+                          </div>
+                              <!-- <div class="col-md-3"> -->
+                              <!-- </div> -->
+                              <!-- <div class="col-md-2"> -->
+
+                              <!-- </div> -->
                   </div>
 
                  <div class="panel panel-success row">
@@ -117,6 +134,9 @@
                 </div>
           </div>
       </form>
+    <div id= "pushingImage">
+    </div>
+
 <!-- hide -->
 
 

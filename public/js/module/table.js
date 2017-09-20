@@ -18,6 +18,10 @@ var table = (function Table($table, columns){
 });
 
 (function(){
+
+  this.getCheckedLists = function(){
+    return this.checkedRowLists;
+  }
   /** @method  - initUrlTable
    *  @description 객체 정보를 기반으로 필요한 기능 초기화
    *  @param {String} urljson - json을 GET할 URL
@@ -214,6 +218,7 @@ var table = (function Table($table, columns){
     });
     this.checkedRowLists = checkedRowLists;
   }
+
 
   /** @method  - checkAllEvents
    *  @description 테이블 check box Event 전부

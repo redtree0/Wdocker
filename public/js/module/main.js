@@ -56,9 +56,10 @@ var main = (function(){
                 return true;
             };
 
+            self.setCompleteEvent(client);
 
             if(settings.hasOwnProperty("init")){
-              settings.init(); /// main 함수 이외에 초기화 해야할 내용 호출
+              settings.init(client); /// main 함수 이외에 초기화 해야할 내용 호출
             }
 
             /// table 초기화
@@ -73,7 +74,7 @@ var main = (function(){
                 self.initTable();
             }
 
-            self.setCompleteEvent(client);
+
             /// form 초기화
             self.initForm();
 
@@ -158,7 +159,9 @@ var main = (function(){
                 if(self.hasOwnProperty("clickRow")){
                   /// 테이블 Row 클릭 시 이벤트 정의
                   /// self.clickRow 가 Row 클릭 후 실행될 callback 함수
-                  self.$table.on("click-row.bs.table", self.clickRow );
+                  self.$table.on("click-row.bs.table", function(e, row, $element, field){
+                      self.clickRow(client, row, $element, field);
+                  });
                 }
 
                 if(self.hasOwnProperty("loaded")){
@@ -224,7 +227,7 @@ var main = (function(){
             return;
           }
           var self = settings.form.create;
-          settings.$body = $("body");
+          
           self.$newForm.off();
           self.$newForm.click((e)=>{
             e.preventDefault();
@@ -347,22 +350,26 @@ var main = (function(){
                /// completeEvent 함수 초기화
                that.setCompleteEvent(client);
 
+               if(settings.hasOwnProperty("table") && settings.table.hasOwnProperty("main")){
 
                  var jsonUrl = settings.table.main.jsonUrl;
 
                  var newJsonUrl = getNewJsonUrl(jsonUrl);
 
-                  settings.mainTable.refresh(newJsonUrl);
-                  // $("body").off();
+                 settings.mainTable.refresh(newJsonUrl);
+
+                 if(settings.table.main.hasOwnProperty("loaded")){
+                   settings.table.main.loaded(client, newHost,  settings.mainTable);
+                 }
+
+               }
                   that.offSocketButtonEvent();
                   that.socketButtonEvent(client);
 
                   // settings.form.create.initDropdown(settings.form.create, jsonUrl);
                   that.showForm(client, newHost);
 
-                  if(settings.table.main.hasOwnProperty("loaded")){
-                    settings.table.main.loaded(client, newHost,  settings.mainTable);
-                  }
+
 
                  function getNewJsonUrl(url){
                    var org = url;

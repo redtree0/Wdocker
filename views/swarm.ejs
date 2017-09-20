@@ -20,7 +20,7 @@ ol.vertical {
   opacity: 0.5;
   z-index: 2000;
 }
-ol.simple_with_animation li, ol.serialization li, ol.default li {
+ol.sortable li, ol.serialization li, ol.default li {
     cursor: pointer;
 }
 li.placeholder{
@@ -42,7 +42,7 @@ li.placeholder::before {
 }
 
 
-.highlight {
+.isLoaded {
   list-style-type: none;
     background-color: white;
     margin : 10px;
@@ -50,18 +50,44 @@ li.placeholder::before {
      border-width: 2px;
 		border-color: gray;
     border-style: groove;
+    font-size: large;
   /*.text-success;*/
 }
 
 .isLeader {
   list-style-type: none;
-    background-color: white;
+    background-color: #FADBD8 ;
     margin : 10px;
      border-radius: 5px;
      border-width: 2px;
 		border-color: gray;
     border-style: groove;
+    font-size: large;
   /*.text-success;*/
+}
+
+.isNode {
+  list-style-type: none;
+    margin : 10px;
+     border-radius: 5px;
+     border-width: 2px;
+		border-color: gray;
+    border-style: groove;
+    font-size: large;
+  /*.text-success;*/
+}
+
+.isWorker {
+    background-color: #FEF9E7;
+}
+
+.isManager {
+    background-color: #EBF5FB;
+}
+
+.isDown {
+    background-color: #EBEDEF  ;
+    color : #EC7063;
 }
 
 li span{
@@ -103,7 +129,7 @@ li:hover span{
                               </button>
                             </div>
                             <hr/>
-                            <ol id="initlists" class='simple_with_animation vertical'>
+                            <ol id="initlists" class='sortable vertical'>
                             </ol>
                           </div>
                         </div>
@@ -134,7 +160,7 @@ li:hover span{
                                 <div class="col-md-6">
                                   <label class="checkbox-inline">
                                     <input type="checkbox" id="force" checked data-toggle="toggle" data-on="unforce"
-                                    data-off="force" data-onstyle="success" data-offstyle="danger"></input>
+                                    data-off="force" data-onstyle="default" data-offstyle="danger"></input>
                                   </label>
                                   <button class="btn btn-danger leave">Leave</button>
                                 </div>
@@ -151,7 +177,7 @@ li:hover span{
                             <hr/>
 
 
-                            <ol id="leader" class='simple_with_animation vertical'>
+                            <ol id="leader" class='sortable vertical'>
                             </ol>
                           </div>
                         </div>
@@ -165,7 +191,7 @@ li:hover span{
                                   <h4>Managers</h4>
                               </div>
                               <div class="panel-body">
-                                <ol id="managers" class='simple_with_animation vertical'>
+                                <ol id="managers" class='sortable vertical'>
                                 </ol>
                               </div>
                           </div>
@@ -176,7 +202,7 @@ li:hover span{
                                   <h4>Workers</h4>
                               </div>
                               <div class="panel-body">
-                                <ol id="workers" class='simple_with_animation vertical'>
+                                <ol id="workers" class='sortable vertical'>
                                 </ol>
                               </div>
                            </div>

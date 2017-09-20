@@ -653,6 +653,27 @@
       return self.doTask(data, callback,  "remove");
     };
 
+    /** @method  - tag
+    *  @description 이미지 태그
+    *  @param {Object} data - 설정 데이터
+    *  @param {Function} callback - 클라이언트로 보낼 callback
+    *  @return {Function} doTask
+    */
+    self.tag = function (data, callback) {
+
+      var image = self.docker.getImage(data.orgImage);
+      // data.name +":" + data.tag
+      var opts = {
+        repo : data.repo,
+        tag : data.tag
+      };
+
+      return image.tag(opts).then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));
+
+      // return self.doTask(data, callback,  "remove");
+    };
+
+
 
     /** @method  - push
     *  @description docker 레퍼지토리에 이미지 올림
@@ -660,13 +681,19 @@
     *  @param {Function} callback - 클라이언트로 보낼 callback
     *  @return {Function} doTask
     */
-      self.push = function (opts, onProgress, callback) {
-          if(opts){
-            var image = self.docker.getImage(opts.name);
-            mongo.auth.show((result)=>{
-              var auth = (result[0]);
+      self.push = function (data, onProgress, callback) {
 
-              image.push(opts, dockerStream.bind(null, onProgress), auth);
+          if(data){
+            var image = self.docker.getImage(data.name +":" + data.tag);
+
+            mongo.auth.show((result)=>{
+              var auth = {
+                username : result[0].username,
+                password :  result[0].password,
+                email : result[0].email,
+                serveraddress : result[0].serveraddress
+              };
+              image.push(data, dockerStream.bind(self, onProgress), auth);
 
             });
           }
@@ -695,6 +722,7 @@
       *  @param {Function} callback - 클라이언트로 보낼 callback
       *  @return {Function} doTask
       */
+      var fs = require('fs');
       self.build = function(data,  onProgress) {
           var docker = self.docker;
 
@@ -705,15 +733,30 @@
             if(imageTag === null || imageTag === "") {
               imageTag = "default"
             }
-            console.log(docker);
-            docker.buildImage( {
+            // console.log(docker);
+            fs.readdir(dirPath, function(err, list) {
+
+                var search = null;
+                for(var i in list){
+                  search = path.join(dirPath, list[i])
+                  try{
+                    if(fs.lstatSync(search).isDirectory()){
+                      list.splice(i, 1)
+                    }
+                  }catch(e){
+                    console.log(e);
+                  }
+                }
+
+                docker.buildImage( {
                   context :  dirPath,
-                  src : [fileName]
+                  src : list
                 }, {
                   "dockerfile" : fileName,
                   "t" : imageTag.toString()
 
                 }, dockerStream.bind(this, onProgress));
+            });
 
       };
 
@@ -760,7 +803,7 @@
       *  @param {Function} callback - 클라이언트로 보낼 callback
       */
       self.ping = function (data, callback) {
-        console.log(data);
+        // console.log(data);
 
         if(data.hasOwnProperty("host") && data.hasOwnProperty("port")){
           var docker = new Docker(data);
@@ -796,84 +839,14 @@
           callback(true);
         });
       };
-      // var defaultDocker = new Docker();
-      // self.isConnected = function(data, callback){
-      //       console.log(data);
-      //         // var defaultDocker = new Docker();
-      //       if(data.ip !== getServerIp()  && data.ip !== "default") {
-      //
-      //         mongo.docker.find({"ip" : data.ip}, (result)=>{
-      //           if(result === null){
-      //             return ;
-      //           }
-      //           var opts = {
-      //             "host" : result.ip,
-      //             "port" : result.port
-      //           }
-      //           self.ping(opts, callback);
-      //         });
-      //     }else {
-      //
-      //       var docker = defaultDocker;
-      //       callback(true);
-      //     }
-      // }
-
-
-      // /** @method  - connectDocker
-      // *  @description docker host 원격 연결
-      // *  @param {Object} data - 설정 데이터
-      // *  @return {Object} setRemoteDocker -> return remotedocker
-      // */
-      // self.connectDocker = function (data, callback) {
-      //   var type = (data.docker);
-      //
-      //   var findDocker= new Promise(function(resolve, reject){
-      //         mongo.docker.find({"ip" : data.ip}, (result)=>{
-      //           var opts = {
-      //             "host" : result.ip,
-      //             "port" : result.port
-      //           }
-      //           resolve(opts);
-      //
-      //       })
-      //   })
-      //
-      //   Promise.all([findDocker]).then((data)=>{
-      //         var docker = null;
-      //         var hostconfig = data[0];
-      //
-      //         if(hostconfig.host !== getServerIp()  && hostconfig.host !== "default") {
-      //           self.setRemoteDocker(hostconfig)
-      //           docker = self.remoteDocker;
-      //         }else {
-      //           docker = defaultDocker;
-      //         }
-      //
-      //         docker.ping((err,data)=>{
-      //           // console.log(err);
-      //           // console.log(data);
-      //               if(err !== null) {
-      //
-      //                 callback({err : err.code, statusCode : 500});
-      //
-      //               }else {
-      //
-      //                 lists[type].docker = docker;
-      //                 callback({statusCode : 200});
-      //
-      //               }
-      //         })
-      //   });
-      //
-      //
-      // };
 
       self.authCheck = function(data, callback){
           mongo.auth.find(data, (result)=>{
             self.docker.checkAuth(result).then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));
           });
       }
+
+
     }).call(Settings);
 
 
@@ -1001,7 +974,7 @@
           host : data.host,
           port : data.port
         }
-        console.log(data);
+        // console.log(data);
         var docker =  getSwarmDocker(self, data.host, hostconfig);
 
         return docker.swarmInspect().then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));

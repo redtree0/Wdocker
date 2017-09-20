@@ -38,10 +38,10 @@ $(function  () {
         var data = data.msg;
         $("#managers").children().remove();
         $("#workers").children().remove();
-        $("#leader").removeClass("simple_with_animation");
+        $("#leader").removeClass("sortable");
 
         var leaderNode = $("#leader").find("li");
-        leaderNode.removeClass("highlight");
+        leaderNode.removeClass("isLoaded");
         leaderNode.addClass("isLeader");
         for(var i in data){
             // console.log(data[i]);
@@ -49,7 +49,7 @@ $(function  () {
             var nodeID = data[i].ID;
             var hostname = data[i].Description.Hostname;
             var hostIP = data[i].Status.Addr;
-            var State = data[i].Status.State;
+            var state = data[i].Status.State;
             var version = data[i].Version.Index;
             var availability = data[i].Spec.Availability;
             // $("#index" + rowIndex)
@@ -75,7 +75,8 @@ $(function  () {
               }
             }
             var $li = $("<li/>").attr({
-              class : "highlight loaded",
+              // class : "isLoaded loaded",
+              "class" : "isNode",
               "ip" : hostIP ,
               "port" : port,
               "nodeID" : nodeID,
@@ -83,11 +84,16 @@ $(function  () {
               "availability" : availability
             }).html(node);
 
+            if(state === "down"){
+              $li.addClass("isDown");
+            }
             if(isLeader && role === "manager" ){
             }
             else if(role === "manager" ){
+              $li.addClass("isManager");
               $("#managers").append($li);
             }else if(role === "worker"){
+              $li.addClass("isWorker");
               $("#workers").append($li);
             }
         }
@@ -97,7 +103,7 @@ $(function  () {
   }
 
 
-    $("#leader").addClass("simple_with_animation");
+    $("#leader").addClass("sortable");
     $(".update").hide();
     $("#leave").hide();
     $("#reload").hide();
@@ -116,7 +122,7 @@ $(function  () {
               var node = data.ip ;
               hosts.push({ "ip" : data.ip , "port" : data.port });
               var $li = $("<li/>").attr({
-                class : "highlight",
+                class : "isLoaded",
                 "data-id" : data.ip ,
                 "ip" : data.ip ,
                 "data-name" : data.port,
@@ -131,8 +137,8 @@ $(function  () {
     function initDragable(){
       var adjustment;
 
-      var group =  $("ol.simple_with_animation").sortable({
-        group: 'simple_with_animation',
+      var group =  $("ol.sortable").sortable({
+        group: 'sortable',
         pullPlaceholder: false,
         delay: 500,
 
@@ -153,7 +159,7 @@ $(function  () {
           if($(container.target).attr('id')=== "leader" && $(container.target).children().length >= 1){
             return  $item.parent("ol")[0] == container.el[0];
           } else
-          if($item.is(".highlight"))
+          if($item.is(".isLoaded"))
           return true;
           else  if($item.is(".placeholder")){
             return  $item.parent("ol")[0] == container.el[0];
@@ -209,9 +215,10 @@ $(function  () {
 
     }
 
-    var socket = io();
-    var Socket = require("./module/io");
-    var client = new Socket(socket, $('body'));
+    // var socket = io();
+    // var Socket = require("./module/io");
+    // var client = new Socket(socket, $('body'));
+    // var main = require("./module/main");
     var dialog = require("./module/dialog.js");
     var config = require("./module/config");
 
@@ -282,7 +289,8 @@ $(function  () {
         eventName : "LeaveSwarm",
         clickEvent : function(client, eventName, table){
           return function(){
-              client.sendEvent(COMPLETE.DO, eventName , true, ()=>{
+            const FORCE = (!$("#force").prop("checked"));
+              client.sendEvent(COMPLETE.DO, eventName , FORCE, ()=>{
                 refresh();
               });
             }
@@ -301,7 +309,7 @@ $(function  () {
                       var ip = $(this).attr("ip");
                       var port = $(this).attr("port");
 
-                      if(!$(this).hasClass("loaded")){
+                      if(!$(this).hasClass("isNode")){
                         lists.push({"ip" : ip , "port" : port});
                       }
                   });
@@ -369,8 +377,6 @@ $(function  () {
     $all.completeEvent = function(data, callback){
       // console.log(arguments);
       if(hasValue(data)){
-        var dialog = require("./module/dialog.js");
-
         var finished = new dialog("Swarm & Node", data);
         finished.setDefaultButton('Close[Enker]', 'btn-primary create');
         finished.show();
@@ -380,6 +386,8 @@ $(function  () {
 
     var main = require("./module/main.js");
     main.init($all);
+    var client = main.getSocket();
+
 
 
     $(document).on('click','.delete', function(){

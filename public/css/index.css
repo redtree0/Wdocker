@@ -225,3 +225,12 @@ body {
 .navbar-custom .navbar-link:hover {
   color: #fdf60d;
 }
+
+ul.mlist{
+  margin-bottom: 0px;
+  width : auto;
+}
+ul.mlist li{
+  list-style-type: none;
+    width : auto;
+}

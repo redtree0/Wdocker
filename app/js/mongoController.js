@@ -4,6 +4,7 @@ var dbLists = require("./mongo.js");
 var dockerDB = dbLists.docker;
 var systemDB = dbLists.system;
 var authDB = dbLists.auth;
+var terminalDB = dbLists.terminal;
 
 var mongo = function(db){
   this.db = db;
@@ -88,11 +89,13 @@ mongo.prototype.destroy = function(callback) {
 var docker = new mongo(dockerDB);
 var system = new mongo(systemDB);
 var auth = new mongo(authDB);
+var terminal = new mongo(terminalDB);
 
 var lists = {
    "docker" : docker,
    "system" : system,
-   "auth" : auth
+   "auth" : auth,
+   "terminal" : terminal
 };
 
 module.exports = lists;

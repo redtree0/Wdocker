@@ -37,46 +37,44 @@
 											</div>
 											<div class="panel-body">
 
-													<% include ./partials/connectDocker %>
+													<!-- <% include ./partials/connectDocker %> -->
 													<!-- <form class="form-horizontal" > -->
+													<div class="row">
+														<div class="col-md-2">
+														</div>
+														<div class="col-md-6">
+																<div class="alert alert-info text-center" id ="path" style="height : 30px" >
+																</div>
+															</div>
+															<div class="col-md-2">
+																<input type="text" class="form-control" id="imageTag" placeholder="imageName:tag">
+															</div>
+															<div class="col-md-1">
+																	<button id="build" class="btn btn-success  btn-block"><span class="glyphicon glyphicon-hdd"></span>Build</button>
+															</div>
+
+															<div class="col-md-1">
+																<button id="save" class="btn btn-primary btn-block"><span class="glyphicon glyphicon-floppy-disk"></span>Save</button>
+															</div>
+
+
+													</div>
 													<div class="row">
 
 														<div class="form-group">
 															<div class="col-md-2" style="text-align : left">
-
-																<div class="alert alert-danger" id ="filename" >
-																</div>
 																<div id="jstree">
 																</div>
 															</div>
 
 															<div class="col-md-10">
-																<div class="form-group">
-																	<div class="alert alert-info" id ="path">
-																	</div>
-																</div>
-																<textarea id="editor" name="code"></textarea>
+																<textarea id="editor" name="code" ></textarea>
 															</div>
 														</div>
 
 													</div>
-													<!-- </form> -->
-													<div class="row">
-														<div class="col-md-2">
-														</div>
-														<div class="col-md-4">
-															<input type="text" class="form-control" id="imageTag" placeholder="imageName:tag">
-														</div>
-														<div class="col-md-2">
-															<button id="build" class="btn btn-success"><span class="glyphicon glyphicon-hdd"></span>Build</button>
-														</div>
-														<div class="col-md-4">
-															<button class="btn btn-primary update"><span class="glyphicon glyphicon-floppy-disk"></span>Save</button>
-														</div>
-													</div>
-													<p><span class="glyphicon glyphicon-exclamation-sign"></span>
-														Test
-													</p>
+
+
 											</div>
 									</div>
 

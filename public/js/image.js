@@ -9,7 +9,17 @@
           title: '이미지',
           sortable : true,
           halign : "center",
-          align : "center"
+          align : "center",
+          width : "30%",
+          formatter : function (value , row, index){
+
+            var mine = value.map((value)=>{
+              return "<li><label>" +  "<input type='radio' name='optradio' value='"+ value + "'>  " + value + "</label></li>"
+            })
+
+            var result = "<ul class='text-left mlist'>" + mine.join("") + "</ul>"
+            return result;
+          }
       }
       ,{
           field: 'Created',
@@ -39,8 +49,21 @@
           title: 'RepoDigests'
       },{
           field: 'Size',
-          title: 'Size'
-      }];
+          title: 'Size',
+          halign : "center",
+          align : "center"
+      }
+      // , {
+      //   field: 'Push',
+      //   title: 'Push',
+      //   halign : "center",
+      //   align : "center",
+      //   width : "5%",
+      //   formatter : function (value , row, index){
+      //     return "<button type='button' class='btn btn-success push'>Push</button>"
+      //   }
+      // }
+    ];
       const searchcolumns = [{
               checkbox: true,
               title: 'Check'
@@ -120,7 +143,7 @@ $(function(){
         client.completeEvent = function(data, callback){
              if(hasValue(data)){
 
-                  var finished = new dialog("이미지", JSON.stringify(data), $("body"));
+                  var finished = new dialog("이미지", JSON.stringify(data));
                   finished.setDefaultButton('Close[Enker]', 'btn-primary create');
                   finished.show();
                   callback;
@@ -131,7 +154,7 @@ $(function(){
           $progressbar.css("width", '0%');
           // console.log($progressbar);
           // console.log($msgdiag);
-          var popup = new dialog("이미지 다운 중", $msgdiag.show(), $("body"));
+          var popup = new dialog("이미지 다운 중", $msgdiag.show());
           // console.log(popup);
           var $status = $("#status");
           client.listen("progress", (event)=> {
@@ -169,7 +192,6 @@ $(function(){
     }
   };
   $all.connect = {};
-  $all.connect.dockerinfo = "image";
 
   $all.table = {};
   $all.table.main = {
@@ -177,7 +199,37 @@ $(function(){
     hideColumns : ["Id",  "ParentId", "Created", "RepoDigests"],
     columns : columns,
     jsonUrl : '/myapp/image/data/'+ getHostIP(),
-    isExpend : true
+    isExpend : false,
+    clickRow : function  (client, row, $element, field) {
+            // if(field === "Push"){
+            //     // console.log(row);
+            //     // console.log(row.RepoTags[0]);
+            //     var lists = row.RepoTags;
+            //     var mine = lists.map((image)=>{
+            //       var imageTag = image.split(":");
+            //       return {
+            //         name : imageTag[0],
+            //         tag : imageTag[1]
+            //       }
+            //     });
+            //     console.log(mine);
+            //     return ;
+            //     // console.log(imageTag.split(":"));
+            //     var $pushingImage = $("#pushingImage");
+            //      var popup = new dialog("이미지 업로드 중", $pushingImage.show());
+            //      client.listen("pushingImage", (data)=>{
+            //                  // console.log("pushingImage");
+            //                  // console.log(data);
+            //            if(data=== true){
+            //                popup.close(5000);
+            //            }
+            //            $pushingImage.append(data.status + "<br/>");
+            //      });
+            //
+            //      popup.show();
+            //
+            // }
+    }
   };
   $all.table.sub = {
     $table : $(".dataTable"),
@@ -197,10 +249,78 @@ $(function(){
       clickEvent : clickDefault
   };
 
+  $all.event.tag = {
+      $button : $("#tag"),
+      eventName : "TagImages",
+      clickEvent : (client, eventName, table)=>{
+        return function(){
+          var imageTag = $("#rename").val();
+          if(imageTag === null || imageTag === "" || imageTag === undefined){
+            return;
+          }
+          if(imageTag.split(":").length <= 1){
+            return ;
+          }
+          if(imageTag.split(":").includes("")){
+            return ;
+          }
+          var lists = table.getCheckedLists();
+          if(lists.length !== 1){
+            console.log("check Table");
+            return ;
+          };
+          // console.log(table.getCheckedLists());
+          // console.log(imageTag.split(":"));
+          // console.log(lists[0].RepoTags[0]);
+          var opts = {
+                     repo : imageTag.split(":")[0],
+                     tag : imageTag.split(":")[1],
+                     orgImage : lists[0].RepoTags[0]
+          };
+          // console.log(opts);
+          // return ;
+          client.sendEventTable(eventName, opts);
+        };
+      }
+  };
+
   $all.event.push = {
-      $button : $(".push"),
+      $button : $("#push"),
       eventName : "PushImages",
-      clickEvent : clickDefault
+      clickEvent : (client, eventName, table)=>{
+        return function(){
+          var checkedImage = $('.mlist li label input[name=optradio]:checked').val();
+          // console.log( $('.mlist li label input[name=optradio]:checked').closest('tr'));
+          if(checkedImage === undefined){
+            return ;
+          }
+          $.getJSON("/myapp/auth/data.json", function(json, textStatus) {
+              // console.log(json.username);
+              var repo = checkedImage.split("/")[0];
+              var username = json[0].username;
+              if(repo !== username){
+                console.log("check Image");
+                return ;
+              }
+              var opts = {
+                name : checkedImage.split(":")[0],
+                tag : checkedImage.split(":")[1]
+              };
+              client.sendEvent(COMPLETE.NOT, "PushImages", opts);
+              var $pushingImage = $("#pushingImage");
+              var popup = new dialog("이미지 업로드 중", $pushingImage.show());
+              client.listen("pushingImage", (data)=>{
+                if(data=== true){
+                  popup.close(5000);
+                }
+                $pushingImage.append(data.status + "<br/>");
+              });
+
+              popup.show();
+          });
+
+        }
+      }
   };
   //
   $all.completeEvent = function(data, callback){
@@ -212,42 +332,56 @@ $(function(){
     }
   };
 
+
+    // $all.table.main.offLoaded = function(){
+    //     // $("#containerMenu").off();
+    //     $(".push").off();
+    // }
+
+    // $all.table.main.loaded = function(client, host, imageTable){
+    //   var $expand = $("#expand").clone();
+    //   var $pushingImage = $("#pushingImage");
+    //   $pushingImage.hide();
+    //   // $("#expand").remove();
+    //   var isExpand = false;
+    //   $(".push").off();
+    //   console.log(client.getToken());
+    //
+    //   imageTable.$table.on("expand-row.bs.table", function (e, index, row, $detail){
+    //     console.log(client.getToken());
+    //     if(isExpand) {
+    //       isExpand = false;
+    //       imageTable.$table.bootstrapTable("collapseAllRows");
+    //     }else {
+    //       isExpand = true;
+    //       $detail.append($expand);
+    //       $expand.show();
+    //         // $(".push").off();
+    //         $(".push").click((e)=>{
+    //           var opts = {
+    //             name : $("#repositoryImage").val(),
+    //             tag : $("#repositoryTag").val()
+    //           };
+    //
+    //             client.sendEvent(COMPLETE.NOT, "PushImages", opts);
+    //             var popup = new dialog("이미지 업로드 중", $pushingImage.show());
+    //             client.listen("pushingImage", (data)=>{
+    //               // console.log("pushingImage");
+    //               // console.log(data);
+    //               if(data=== true){
+    //                 popup.close(5000);
+    //               }
+    //               $pushingImage.append(data.status + "<br/>");
+    //             });
+    //             popup.show();
+    //         });
+    //       };
+    //     });
+    // }
     var main = require("./module/main.js");
     main.init($all);
-    $all.table.main.offLoaded = function(){
-        // $("#containerMenu").off();
-        $(".push").off();
-    }
-    $all.table.main.loaded = function(client, host, Table){
-        var $expand = $("#expand").clone();
-        $("#expand").remove();
-        var isExpand = false;
-        var imageTable = Table;
-        imageTable.$table.on("expand-row.bs.table", function (e, index, row, $detail){
-          if(isExpand) {
-            isExpand = false;
-            imageTable.$table.bootstrapTable("collapseAllRows");
-          }else {
-            $detail.append($expand);
-            $expand.show();
-            isExpand = true;
 
-              $(".push").click((e)=>{
-                var opts = {
-                  name : $("#repositoryImage").val(),
-                  tag : $("#repositoryTag").val()
-                };
-
-                  client.sendEventTable("PushImages", imageTable, opts);
-
-              });
-            };
-          });
-    }
-
-
-
-    // $all.table.sub.loaded = function(client, host, Table){
+    // $all.table.main.loaded = function(client, host, Table){
     //           var searchTable = Table;
     //           searchTable.$table.on("check.bs.table",  function (e, row, $element) {  /// 테이블 한 Row check box 선택 시
     //             $(':checkbox').not(this).prop('checked', false);

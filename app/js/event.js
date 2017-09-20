@@ -160,9 +160,6 @@ var image = function(server, host){
 	 	 var image = p.image;
 		 image.getTaskDocker(host, (docker)=>{
 					 image.docker = docker;
-					 function onProgress(progress){
-						 server.sendEvent("progress", progress);
-					 }
 
 				   server.listen("SearchImages", function(data, fn){
 				     		image.search(data, fn);
@@ -177,16 +174,23 @@ var image = function(server, host){
 			       		image.remove(data, fn);
 			     });
 
+           server.listen("TagImages", function(data, fn) {
+			       		image.tag(data, fn);
+			     });
+
 					 server.listen("PushImages", function(data, fn) {
+                function onProgress(progress){
+                  server.sendEvent("pushingImage", progress);
+                }
+
 						 		image.push(data, onProgress, fn);
 					 });
 
 					 server.listen("build", function(data, fn){
 							 function onProgress(progress, err){
-
 								 server.sendEvent("buildingImage", progress);
 							 }
-
+                // console.log(data);
 						 		image.build(data, onProgress);
 					 });
 	 });
@@ -240,6 +244,14 @@ var dockerfile = function(server) {
   server.listen("UpdateFile", function(data, fn){
    var jsonPath = path.join(data.path);
 
+   try{
+     if(fs.lstatSync(jsonPath).isDirectory()){
+      //  console.log("filter");
+       return fn({"statusCode" : "500"});
+     }
+   }catch(e){
+     console.log(e);
+   }
     fs.writeFile(jsonPath, data.context, 'utf8', function(err) {
         fn(true);
     });
@@ -475,6 +487,10 @@ var settings = function(server){
 	server.listen('authCheck', function(data, fn) {
 		settings.authCheck(data, fn);
 	});
+
+  // server.listen('setDefault', function(data, fn) {
+  //   settings.setDefault(data, fn);
+  // });
 }
 
 

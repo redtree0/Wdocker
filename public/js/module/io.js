@@ -133,6 +133,12 @@ var clientsocket = (function clientsocket(io, $body) {
         return socket.disconnect();
     };
 
+
+    this.getToken = function(){
+        var self = this;
+        var socket =  self.socket;
+        return socket.query.token;
+    };
     // /** @method  - onlyEvent
     // *  @description 소켓 데이터 송신 함수
     // *  @param {String} eventName - 소켓 이벤트 명

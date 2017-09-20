@@ -45,9 +45,19 @@ $(function(){
       var $all = {};
       $all.init = function(){
             $.getJSON("/myapp/auth/data.json",(data)=>{
-              $("#user").val(data[0].user);
-              $("#password").val(data[0].password);
-              $("#email").val(data[0].email);
+              if(data.length > 0){
+
+                $("#username").val(data[0].username);
+                $("#password").val(data[0].password);
+                $("#email").val(data[0].email);
+              }
+            });
+            $.getJSON("/myapp/terminal/data.json",(data)=>{
+              if(data.length > 0){
+                $("#webUser").val(data[0].user);
+                $("#webPassword").val(data[0].password);
+              }
+
             });
       };
       // $all.form = {};
@@ -57,11 +67,11 @@ $(function(){
         columns : columns,
         jsonUrl : '/myapp/settings/data.json',
         isExpend : false,
-        clickRow : function  (e, row, $element, field) {
-          var dialog = require("./module/dialog.js");
-          var socket = io();
-          var Socket = require("./module/io");
-          var client = new Socket(socket, $('body'));
+        clickRow : function  (client, row, $element, field) {
+          // var dialog = require("./module/dialog.js");
+          // var socket = io();
+          // var Socket = require("./module/io");
+          // var client = new Socket(socket, $('body'));
 
             if(field === "PING"){
                 var opts = {
@@ -80,10 +90,12 @@ $(function(){
               var opts = {
                 _id : row._id,
               }
-              client.sendEventTable("DELETE", $(".jsonTable"), opts, (data)=>{
+              // client.sendEventTable("DELETE", $(".jsonTable"), opts, (data)=>{
+              client.sendEvent(COMPLETE.NOT, "DELETE", opts, (data)=>{
                 var finished = new dialog("삭제", data);
                 finished.setDefaultButton('Close[Enker]', 'btn-primary create');
                 finished.show();
+                refresh();
               });
             }
           }
@@ -114,6 +126,39 @@ $(function(){
             var finished = new dialog("Authentication",  data);
             finished.show();
           });
+      });
+
+      $("#setDefault").click((e)=>{
+        const DEFAULT = "admin";
+        var opts = {
+          user : DEFAULT,
+          password : DEFAULT
+        }
+        $.ajax({
+          type: 'POST',
+          url: "/myapp/terminal/data",
+          contentType: 'application/json',
+          dataType: 'json',
+          data: opts,
+          success: function(){
+            console.log("success");
+          },
+          error: function (jqXHR, textStatus, errorThrown){
+            console.log("error");
+            console.log(errorThrown);
+          }
+        });
+
+
+        // const DEFAULT = "admin";
+        // var opts = {
+        //   user : DEFAULT,
+        //   password : DEFAULT
+        // }
+        //   client.sendEvent(COMPLETE.NOT, "setDefault", opts, (data)=>{
+        //     var finished = new dialog("Web Terminal",  data);
+        //     finished.show();
+        //   });
       });
 
 });

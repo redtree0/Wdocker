@@ -100,6 +100,27 @@ socketEvents(SOCKET);
 
 
 //////////////////////// WEBSOCKEFIY /////////////////////////////////////////////////
+// var os = require("os");
+//
+//
+// function getServerIp() {
+//     var ifaces = os.networkInterfaces();
+//     var result = '';
+//     for (var dev in ifaces) {
+//         var alias = 0;
+//         if(dev === "eth0"){
+//           ifaces[dev].forEach(function(details) {
+//             if (details.family == 'IPv4' && details.internal === false) {
+//               result = details.address;
+//               ++alias;
+//             }
+//           });
+//         }
+//     }
+//
+//     return result;
+// }
+
 const websockifyConfig = {
   source: '192.168.0.108:9000',
   target: '192.168.0.108:5901',
@@ -142,8 +163,8 @@ function getPluginData(pluginName, callback) {
 wsServer.on('request', function(request) {
   // console.log(Object.keys(request));
   // console.log(request.resource);
-  if(request.resource === "/"){
-
+  if(request.resource === "/"){  /////// websocket 과 socketio 구분
+    ///////// websocket 만 filter
     var wsClient = request.accept('', request.origin)
 
     wsClient.on('message', function(wsReq) {

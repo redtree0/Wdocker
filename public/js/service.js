@@ -61,11 +61,7 @@ $(function(){
   };
   $all.form.getSettingValue = function(getThis) {
     var self = getThis.data;
-    // console.log(self.$replicas.val());
-    // console.log(getThis);
-    // console.log(self);
-    // console.log(self.$image);
-    // console.log(self.$image.text());
+
     return {
       "Image" : self.$image.text().trim(),
       "Name" : self.$name.val(),
@@ -96,9 +92,25 @@ $(function(){
   $all.form.create.$labelAdd = $("#labelAdd");
   $all.form.create.$labellists = $("#labellists");
 
+  $all.form.create.loaded = function(client){
+      console.log(client);
+      var host = client.getToken();
+      var jsonUrl = "/myapp/node/data/" + host;
+      $.getJSON(jsonUrl, function(json, textStatus) {
+            if(json.hasOwnProperty("statusCode") && json.statusCode !== 200){
+                var msg = new dialog("서비스", "Swarm Leader or Manager 아닙니다.");
+                msg.show();
+                refresh();
+            }
+      });
+      // "/myapp/node/data/" + host
+      return ;
+      refresh();
+  };
 
   $all.form.create.initDropdown = function(self, host){
     var self = self.data;
+    // console.log(self);
     var jsonUrl = null
     var local = getHostIP();
     if(host === null || host === undefined){
@@ -106,8 +118,8 @@ $(function(){
     }else {
       jsonUrl = "/myapp/image/data/" + host;
     }
-    var $contextMenu =   self.data.$imageMenu;
-    var $dropDown =   self.data.$image;
+    var $contextMenu =   self.$imageMenu;
+    var $dropDown =   self.$image;
     var attr = "RepoTags";
     var index = 0;
     initDropdown(jsonUrl, $contextMenu, $dropDown,{ "attr" :  attr, "index" : index });
@@ -117,8 +129,8 @@ $(function(){
     }else {
       jsonUrl = "/myapp/network/data/" + host;
     }
-    var $contextMenu =   self.data.$networkMenu;
-    var $dropDown =   self.data.$network;
+    var $contextMenu =   self.$networkMenu;
+    var $dropDown =   self.$network;
     var attr = "Name";
     // var index = 0;
     var opts = {
@@ -131,97 +143,7 @@ $(function(){
     initDropdown(jsonUrl, $contextMenu, $dropDown, opts);
   }
 
-  // $all.form.update = {};
-  // $all.form.update.getSelector = function (){
-  //   return {
-  //     "data" : {
-  //
-  //       $imageMenu : $("#imageMenu"),
-  //       $image : $('#imageDropDownNew'),
-  //       $networkMenu : $("#networkMenu"),
-  //       $network : $('#networkDropDownNew'),
-  //       $name : $("#serviceNameNew"),
-  //       $command : $("#commandNew"),
-  //       $replicas : $("#replicasNew"),
-  //       $portAdd : $("#portAddNew"),
-  //       $portlists : $("#portlistsNew"),
-  //       $protocol :  $("#protocolNew"),
-  //       $containerPort : $("#containerPortNew"),
-  //       $hostPort : $("#hostPortNew"),
-  //       $labelAdd : $("#labelAddNew"),
-  //       $labellists : $("#labellistsNew"),
-  //       $key :  $("#keyNew"),
-  //       $value :  $("#valueNew"),
-  //       portlistsNew : [],
-  //       labellistsNew : []
-  //     }
-  //   }
-  // };
-  // $all.form.update.$form = $("#detail");
-  // $all.form.update.formEvent = "UpdateService";
-  //
-  // $all.form.update.initUpdateForm = function(self, row, client){
-  //     var data = row;
-  //     var getSelector = self.getSelector()
-  //     var self = getSelector.data;
-  //
-  //     var Id = data.ID;
-  //     var version = data.Version.Index;
-  //
-  //     self.$name.val(data.Spec.Name);
-  //     self.$command.val(data.Spec.TaskTemplate.ContainerSpec.Command);
-  //     self.$replicas.val(data.Spec.Mode.Replicated.Replicas);
-  //
-  //
-  //     $.getJSON("/myapp/network/" + data.Spec.TaskTemplate.Networks["0"].Target, function(data){
-  //       initDropdown("/myapp/network/data.json", self.$networkMenu, self.$network,
-  //       {"attr" : "Name", "selected" : data.Name});
-  //     });
-  //     initDropdown("/myapp/image/data.json", self.$imageMenu, self.$image ,
-  //     {"attr" :  "RepoTags", "index" :  0, "selected" :  data.Spec.TaskTemplate.ContainerSpec.Image.split("@")[0]});
-  //     // var labellistsNew = [];
-  //     [data.Spec.Labels].some((val)=>{
-  //       for(var i in val){
-  //         var filter = {
-  //           key : i,
-  //           value : val[i]
-  //         };
-  //         self.labellistsNew.push(filter);
-  //       }
-  //     });
-  //     var $inputLabels = [self.$key, self.$value];
-  //     initPortLists(self.$labellists, self.labellistsNew, self.$labelAdd,  $inputLabels );
-  //
-  //     self.portlistsNew = data.Spec.EndpointSpec.Ports.filter((val)=>{   delete val.PublishMode;  return val; });
-  //     var $dataLists =  [self.$protocol, self.$containerPort, self.$hostPort ];
-  //     // console.log(portlistsNew);
-  //     initPortLists(self.$portlists, self.portlistsNew, self.$portAdd,  $dataLists );
-  //
-  //     $("#update").click((e)=>{
-  //       var config = require("./module/config");
-  //       // var socket = io();
-  //       // var Socket = require("./module/io");
-  //       // var client = new Socket(socket, $('body'));
-  //       // var self = $all.form.update.getSelector
-  //       config.setService($all.form.getSettingValue(getSelector)
-  //       , self.labellistsNew
-  //       , self.portlistsNew);
-  //       // $all.form.update.getSelector
-  //       // (settings.form.getSettingValue(self), self.labellists,  self.portlists );
-  //       var opts = config.getService();
-  //       opts.Id = Id;
-  //       opts.version = version;
-  //       console.log("table");
-  //       console.log($(".jsonTable"));
-  //       client.sendEvent(COMPLETE.DO, "UpdateService", opts, ()=>{
-  //         refresh();
-  //       });
-  //     });
-  // }
-
   $all.connect = {};
-  $all.connect.dockerinfo = "service";
-
 
   $all.table = {};
   $all.table.main = {
@@ -258,95 +180,6 @@ $(function(){
 
     var main = require("./module/main.js");
     main.init($all);
-  // var serviceTable = main.getMainTable();
-  // var client = main.getSocket();
-  // var $detail = $("#detail");
-  // $("#update").click((e)=>{
-  //   function setSettings (json, labellists, portArray){
-  //     var config = require("./config");
-  //     var self = settings.form.settingMethod;
-  //     config[self.set](json, labellists, portArray);
-  //
-  //     return  config[self.get]();
-  //   }
-  //   // console.log(self.getSettingValue());
-  //   var opts = setSettings(settings.form.getSettingValue(self), self.labellists,  self.portlists ); /// docker 데이터 설정
-  //
-  //
-  //       client.sendEventTable(self.formEvent, settings.mainTable, opts);
-  // });
-  // serviceTable.clickRow($detail);
-  // var clone = $("#hiddenForm").clone().attr("id", "updateForm");
-  // var input = clone.find("input");
-  // input.each((i, element )=>{
-  //   var originId = $(element).attr("id");
-  //   $(element).attr("id", originId + "New");
-  // });
-  // var button = (clone.find("button"));
-  // button.each((i, element)=>{
-  //   var originId = $(element).attr("id");
-  //   $(element).attr("id", originId + "New");
-  // });
-  //
-  // var div = (clone.find("div"));
-  // div.each((i, element)=>{
-  //   var originId = $(element).attr("id");
-  //   $(element).attr("id", originId + "New");
-  // });
-  // clone.append($("<button/>").addClass("btn btn-primary").attr("id", "update").text("Update"));
-  // $detail.append(clone);
-
-
-  // var clone = $.extend({}, ("#hiddenForm")).attr("id", "updateForm");
-  // serviceTable.$table.on('click-row.bs.table', function (r, e, f){
-  //
-  //   // var portlists = [];
-  //   // clone.show();
-  //   // $detail.children().show();
-  //   var data = e;
-  //
-  //   $("#serviceNameNew").val(data.Spec.Name);
-  //   $("#commandNew").val(data.Spec.TaskTemplate.ContainerSpec.Command);
-  //   $("#replicasNew").val(data.Spec.Mode.Replicated.Replicas);
-  //   // var portlists = new Array();
-  //   // console.log(data.Spec.EndpointSpec.Ports);
-  //   var portlistsNew = data.Spec.EndpointSpec.Ports.filter((val)=>{   delete val.PublishMode;  return val; });
-  //   // delete portinfo.PublishMode;
-  //   // portlists = (portinfo);
-  //
-  //     $.getJSON("/myapp/network/" + data.Spec.TaskTemplate.Networks["0"].Target, function(data){
-  //       initDropdown("/myapp/network/data.json", $("#networkMenu"),  $("#networkDropDownNew"),
-  //       {"attr" : "Name", "selected" : data.Name});
-  //     });
-  //   initDropdown("/myapp/image/data.json", $("#imageMenu"), $("#imageDropDownNew") ,
-  //       {"attr" :  "RepoTags", "index" :  0, "selected" :  data.Spec.TaskTemplate.ContainerSpec.Image.split("@")[0]});
-  //   var $portlistsNew = $("#portlistsNew");
-  //   createList($portlistsNew, portlistsNew);
-  //   clickDeleteList($portlistsNew, portlistsNew);
-  //
-  //   $("#portAddNew").click((e)=>{
-  //     e.preventDefault();
-  //     var $protocol =  $("#protocolNew");
-  //     var $containerPort = $("#containerPortNew");
-  //     var $hostPort = $("#hostPortNew");
-  //
-  //     var $array = [$containerPort, $hostPort, $protocol];
-  //     var state = true;
-  //     for (var i in $array) {
-  //       if(!(hasValue($array[i].val()))){
-  //         state = false;
-  //       }
-  //     }
-  //     if(state) {
-  //       // console.log(portlists);
-  //       insertArray(portlistsNew, $array);
-  //       createList ( $portlistsNew, portlistsNew );
-  //     }
-  //   });
-  //
-  // });
-
-
 
 
 });

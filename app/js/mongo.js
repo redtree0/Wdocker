@@ -39,10 +39,15 @@ var system = new Schema({
 });
 
 var auth = new Schema({
-  user : String,
+  username : String,
   password : String,
   email : String,
   serveraddress : String
+});
+
+var terminal = new Schema({
+  user : String,
+  password : String
 });
 
 
@@ -50,5 +55,6 @@ var auth = new Schema({
 module.exports = {
   "docker" : mongoose.model('docker', docker),
   "system" : mongoose.model('system', system),
-  "auth" : mongoose.model('auth', auth)
+  "auth" : mongoose.model('auth', auth),
+  "terminal" : mongoose.model('terminal', terminal)
 } ;

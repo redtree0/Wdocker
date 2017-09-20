@@ -1,38 +1,105 @@
 "use strict";
 
 $(function(){
-  const COMPLETE = {
-    DO : true,
-    NOT : false
-  }
+    const COMPLETE = {
+      DO : true,
+      NOT : false
+    }
 
-  var filePath = null;
-  var $path = $("#path");
-  var $fileName = $("#filename");
-  var $editor = $("#editor");
-  var socket = io();
-  var Socket = require("./module/io");
-  var client = new Socket(socket, $('body'));
-  var dialog = require("./module/dialog");
+    var $path = $("#path");
+    var dialog = require("./module/dialog");
 
-  var $jstree = $("#jstree");
+    var $jstree = $("#jstree");
+    var editor = CodeMirror.fromTextArea(document.getElementById("editor"), {
+      lineNumbers: true,
+      mode: "dockerfile"
+    });
+    editor.setSize(950, 440);
+    var $all = {};
+    // $all.connect = {};
+    // $all.connect.dockerinfo = "image";
+    $all.lists = [];
+    $all.init = function(client){
+      var client = client;
+      var $jstree = $("#jstree");
 
-  var $all = {};
-  $all.connect = {};
-  $all.connect.dockerinfo = "image";
+      // console.log(this);
+      this.lists = initJstree();
 
-  var main = require("./module/main.js");
-  main.init($all);
+      function dirtreeRefresh(path){
+        // console.log("refresh");
+        var defaultPath = "";
+        if(path === null || path === undefined){
+          defaultPath = "";
+        }else{
+          defaultPath = path;
+        }
+        // console.log(defaultPath);
+        client.sendEvent(COMPLETE.NOT, "dirtree", defaultPath, (data)=>{
+          jstreeRefresh($jstree, data);
+        });
 
-  var editor = CodeMirror.fromTextArea(document.getElementById("editor"), {
-    lineNumbers: true,
-    mode: "dockerfile"
-  });
+        function jstreeRefresh($jstree, newTree){
+          $jstree.jstree(true).settings.core.data = newTree;
+          $jstree.jstree(true).refresh();
+        }
+      }
+
+
+      $jstree.on("click", ".jstree-anchor", function(e) {
+
+            var node =   $jstree.jstree(true).get_node($(this)).original;
+            var path = node.path;
+            // console.log(node.path);
+            // $path.text(node.path);
+
+            $path.html(node.path);
+            var type = node.type;
+            if(type === "file"){
+              client.sendEvent(COMPLETE.NOT, "ReadFile", path, (data)=>{
+                  editor.setValue(data);
+              });
+            }
+
+      });
+
+        $jstree.on("dblclick", ".jstree-anchor", function(e) {
+        // var text = $('#jstree').jstree(true).get_node($(this)).text;
+        var node =   $jstree.jstree(true).get_node($(this)).original;
+        var path = node.path;
+        var type = node.type;
+        if (type === "directory") {
+          // console.log(path);
+            dirtreeRefresh(path);
+        }
+      });
 
 
 
-function reportMenu ($node) {
-          function changePath(path, renew, isReNew){
+      function initJstree(){
+        // var client = main.getSocket();
+        var lists = [];
+        client.sendEvent(COMPLETE.NOT, "dirtree", "", (data)=>{
+                  lists = data;
+                  // console.log(JSON.stringify(lists));
+                $jstree.jstree({
+                      'plugins': ["wholerow", "contextmenu"],
+                       'core' : {
+                          'data' : lists,
+                          "check_callback" : true,
+                          'themes': {
+                              'name': 'proton',
+                              'responsive': true
+                            }
+                      }, "contextmenu":{
+                           "items": reportMenu
+                         }
+                    });
+                    return lists;
+        });
+
+
+        function changePath(path, renew, isReNew){
             var originPath = path;
             var splitPath = originPath.split("/");
             if(isReNew){
@@ -42,242 +109,181 @@ function reportMenu ($node) {
             return  splitPath.join("/");
           }
 
-           var tree = $("#jstree").jstree(true);
-           return {
-               "CreateDirectroy": {
-                   "separator_before": false,
-                   "separator_after": false,
-                   "label": "새 폴더",
-                   "action": function (obj) {
-                       $node = tree.create_node($node);
-                       console.log($node);
 
-                       tree.edit($node, "",  ($node)=>{
-                         var newDirectory = tree.get_text($node);
-                         var parentId = (tree.get_parent($node));
-                         var parentPath = tree.get_node(parentId).original.path;
-                         var newPath = changePath(parentPath, newDirectory, false);
-                         console.log(newPath);
-                         var opts = {
-                           path : parentPath,
-                           name : newDirectory
-                         }
-                         client.sendEvent(COMPLETE.NOT, "CreateDirectory", opts);
-                         socket.emit("dirtree", "", (data)=>{
-                            jstreeRefresh($jstree, data);
-                         });
-                       });
+        function reportMenu ($node) {
+          // console.log("reportMenu");
+                  //  var client = main.getSocket();
+                   var tree = $("#jstree").jstree(true);
+                   return {
+                       "CreateDirectroy": {
+                           "separator_before": false,
+                           "separator_after": false,
+                           "label": "새 폴더",
+                           "action": function (obj) {
+                               $node = tree.create_node($node);
+                              //  console.log($node);
 
-                   }
-               },
-               "CreateFile": {
-                   "separator_before": false,
-                   "separator_after": false,
-                   "label": "새 파일",
-                   "action": function (obj) {
-                       $node = tree.create_node($node);
-                       console.log($node);
+                               tree.edit($node, "",  ($node)=>{
+                                 var newDirectory = tree.get_text($node);
+                                 var parentId = (tree.get_parent($node));
+                                 var parentPath = tree.get_node(parentId).original.path;
+                                 var newPath = changePath(parentPath, newDirectory, false);
+                                //  console.log(newPath);
+                                 var opts = {
+                                   path : parentPath,
+                                   name : newDirectory
+                                 }
+                                 client.sendEvent(COMPLETE.NOT, "CreateDirectory", opts);
+                                 dirtreeRefresh();
+                               });
 
-                       tree.edit($node, "",  ($node)=>{
-                        //  "glyphicon glyphicon-file"
-                         tree.set_icon($node, "glyphicon glyphicon-file");
-                         var newFile = tree.get_text($node);
-                         var parentId = (tree.get_parent($node));
-                         var parentPath = tree.get_node(parentId).original.path;
+                           }
+                       },
+                       "CreateFile": {
+                           "separator_before": false,
+                           "separator_after": false,
+                           "label": "새 파일",
+                           "action": function (obj) {
+                               $node = tree.create_node($node);
+                              //  console.log($node);
 
-                         var opts = {
-                           path : parentPath,
-                           name : newFile
-                         }
-                         client.sendEvent(COMPLETE.NOT, "CreateFile", opts);
-                         client.sendEvent(COMPLETE.NOT, "dirtree", "", (data)=>{
-                              jstreeRefresh($jstree, data);
-                          });
-                        //  console.log(parentPath);
-                       });
-                   }
-               },
-               "Rename": {
-                   "separator_before": false,
-                   "separator_after": false,
-                   "label": "이름 수정",
-                   "action": function (obj) {
-                       tree.edit($node, "", ($node)=>{
-                         console.log(tree.get_text($node));
-                         console.log($node.original.path);
-                         var rename = tree.get_text($node);
-                         var originPath = $node.original.path;
-                        //  var splitPath = originPath.split("/");
-                        //  splitPath.pop();
-                        //  splitPath.push(rename);
-                        //  var renewPath = splitPath.join("/");
-                        var renewPath = changePath(originPath, rename, true);
-                         var opts ={
-                           origin : originPath,
-                           renew : renewPath
-                         }
-                          client.sendEvent(COMPLETE.NOT, "RenameFile", opts);
-                       });
-                   }
-               },
-               "Remove": {
-                   "separator_before": false,
-                   "separator_after": false,
-                   "label": "삭제",
-                   "action": function (obj) {
-                       var type = ($node.original.type);
-                       var deletePath = ($node.original.path);
-                       tree.delete_node($node);
-                       var opts = {
-                         type : type,
-                         path : deletePath
-                       };
-                       client.sendEvent(COMPLETE.NOT, "RemoveFile", opts, completeEvent);
+                               tree.edit($node, "",  ($node)=>{
+                                //  "glyphicon glyphicon-file"
+                                 tree.set_icon($node, "glyphicon glyphicon-file");
+                                 var newFile = tree.get_text($node);
+                                 var parentId = (tree.get_parent($node));
+                                 var parentPath = tree.get_node(parentId).original.path;
 
-                       console.log($node);
-                       console.log(obj);
-                   }
+                                 var opts = {
+                                   path : parentPath,
+                                   name : newFile
+                                 }
+                                 client.sendEvent(COMPLETE.NOT, "CreateFile", opts);
+                                 dirtreeRefresh();
+
+                               });
+                           }
+                       },
+                       "Rename": {
+                           "separator_before": false,
+                           "separator_after": false,
+                           "label": "이름 수정",
+                           "action": function (obj) {
+                               tree.edit($node, "", ($node)=>{
+
+                                 var rename = tree.get_text($node);
+                                 var originPath = $node.original.path;
+
+                                var renewPath = changePath(originPath, rename, true);
+                                 var opts ={
+                                   origin : originPath,
+                                   renew : renewPath
+                                 }
+                                  client.sendEvent(COMPLETE.NOT, "RenameFile", opts);
+                               });
+                           }
+                       },
+                       "Remove": {
+                           "separator_before": false,
+                           "separator_after": false,
+                           "label": "삭제",
+                           "action": function (obj) {
+                               var type = ($node.original.type);
+                               var deletePath = ($node.original.path);
+                               tree.delete_node($node);
+                               var opts = {
+                                 type : type,
+                                 path : deletePath
+                               };
+                               client.sendEvent(COMPLETE.NOT, "RemoveFile", opts);
+                               //
+                              //  console.log($node);
+                              //  console.log(obj);
+                           }
+                       }
+                   };
                }
-           };
-       }
 
 
-  var lists = [];
-  lists = initJstree(lists);
-  function initJstree(lists){
-    client.sendEvent(COMPLETE.NOT, "dirtree", "", (data)=>{
-              lists = data;
-              console.log(JSON.stringify(lists));
-              $('#jstree').jstree({
-                  'plugins': ["wholerow", "contextmenu"],
-                   'core' : {
-                      'data' : lists,
-                      "check_callback" : true,
-                      'themes': {
-                          'name': 'proton',
-                          'responsive': true
-                        }
-                  }, "contextmenu":{
-                       "items": reportMenu
-                     }
-                });
-                return lists;
+      }
+    }
+    $all.completeEvent = function completeEvent(data, callback){
+      if(data){
+        var $editor = $("#editor");
+        // console.log(data);
+        $editor.text("");
+      }
+      // callback;
+    }
+    var main = require("./module/main.js");
+    main.init($all);
+    var client = main.getSocket();
+
+
+
+    var $building = $("#building");
+    var popup = new dialog("이미지 생성", $building);
+
+    client.listen("buildingImage", (data)=>{
+          if(data.hasOwnProperty("stream")){
+            $building.append(data.stream + "<br />");
+          }
+          if(data === true){
+            popup.close(5000);
+          }
+
     });
-  }
-
-
-function jstreeRefresh($jstree, newTree){
-  $jstree.jstree(true).settings.core.data = newTree;
-  $jstree.jstree(true).refresh();
-}
-
-
-      function findNodeIndex(text){
-        for(var i in lists){
-          if(text === lists[i].text){
-            return i;
+    function fileSave(callback){
+          var context = editor.getValue();
+          var path = $path.text().trim();
+          if(path === ""){
+            return ;
           }
-        }
-      }
-      $('#jstree').on("click", ".jstree-anchor", function(e) {
-
-            var node = $('#jstree').jstree(true).get_node($(this)).original;
-            var path = node.path;
-            console.log(node.path);
-            $path.text(node.path);
-            $fileName.text(node.text);
-
-      });
-
-      $('#jstree').on("dblclick", ".jstree-anchor", function(e) {
-        var text = $('#jstree').jstree(true).get_node($(this)).text;
-        var node = $('#jstree').jstree(true).get_node($(this)).original;
-        var path = node.path;
-        var type = node.type;
-        if(type === "file"){
-          client.sendEvent(COMPLETE.NOT, "ReadFile", path, (data)=>{
-              editor.setValue(data);
-          });
-        }else if (type === "directory") {
-          client.sendEvent(COMPLETE.NOT, "dirtree", path , (data)=>{
-              var lists = data;
-               $('#jstree').jstree(true).settings.core.data = lists;
-               $('#jstree').jstree(true).refresh();
-            });
-        }
-      });
-
-
-
-      function completeEvent(data, callback){
-        if(data){
-          console.log(data);
-          $fileName.val("");
-          $editor.text("");
-        }
-        callback;
-      }
-
-
-
-      $(".update").click(function(e) {
-          e.preventDefault();
-          console.log("update click");
-
-          // fileNode.setName($fileName.val());
-          // fileNode.setContext(editor.getValue());
+          if(context === ""){
+            return ;
+          }
           var opts ={
-            path : $path.text(),
-            context : editor.getValue()
+            "path" : path,
+            "context" : context
           }
-          client.sendEvent(COMPLETE.NOT, "UpdateFile", opts, completeEvent);
-      });
 
+          client.sendEvent(COMPLETE.NOT, "UpdateFile", opts);
+          callback();
+    }
 
-      $("#build").click(()=>{
-        var $imageTag = $("#imageTag");
+    $("#save").click(function(e) {
+        e.preventDefault();
+         fileSave();
+    });
 
-        function changePath(path, renew, isReNew){
-          var originPath = path;
-          var splitPath = originPath.split("/");
-          if(isReNew){
-            splitPath.pop();
+    $("#build").click(()=>{
+          function changePath(path, renew, isReNew){
+              var originPath = path;
+              var splitPath = originPath.split("/");
+              if(isReNew){
+                splitPath.pop();
+              }
+              splitPath.push(renew);
+              return  splitPath.join("/");
           }
-          splitPath.push(renew);
-          return  splitPath.join("/");
-        }
+            // var client = main.getSocket();
 
-          var opts ={
-            parentPath : changePath($path.text(), "", true),
-            path : $path.text(),
-            name : $fileName.text(),
-            context : editor.getValue(),
-            imageTag : $imageTag.val()
-          };
+          fileSave(()=>{
+              var $imageTag = $("#imageTag");
+              if(!$imageTag.val()){
+                return ;
+              }
 
-          client.sendEvent(COMPLETE.NOT, "build", opts, (data, callback)=>{
-            console.log(data);
-            if(data){
-              console.log("done");
-            }
+              var opts ={
+                path : $path.text().trim(),
+                imageTag : $imageTag.val()
+              };
 
-            callback;
+              client.sendEvent(COMPLETE.NOT, "build", opts);
+              popup.show();
           });
-          var $building = $("#building");
-          console.log($building);
-          var popup = new dialog("이미지 생성", $building);
-          // popup.appendButton('Search', 'btn-primary create',
-          client.listen("buildingImage", (data)=>{
-            console.log(data);
-            if(data.hasOwnProperty("stream")){
-              $building.append(data.stream + "<br />");
-            }
-            // if(data === true) {
-            //   popup.close(5000);
-            // }
-          })
-          popup.show();
-      });
 
+
+    });
 
 });

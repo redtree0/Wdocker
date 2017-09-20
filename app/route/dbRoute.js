@@ -2,12 +2,34 @@
 
 
 module.exports = function(dbRoute){
+
+
   var express = require('express');
   var router = express.Router();
   var docker = dbRoute.docker;
   var system = dbRoute.system;
   var auth = dbRoute.auth;
+  var terminal = dbRoute.terminal;
   var mongo = require("../js/mongoController");
+
+  var os = require("os");
+  function getServerIp() {
+      var ifaces = os.networkInterfaces();
+      var result = '';
+      for (var dev in ifaces) {
+          var alias = 0;
+          if(dev === "eth0"){
+            ifaces[dev].forEach(function(details) {
+              if (details.family == 'IPv4' && details.internal === false) {
+                result = details.address;
+                ++alias;
+              }
+            });
+          }
+      }
+
+      return result;
+  }
 
   router.use(function timeLog(req, res, next) {
     // console.log('Time: ', Date.now());
@@ -32,36 +54,38 @@ module.exports = function(dbRoute){
   });
 
     router.post('/auth', function(req, res){
-        if(req.body.user !== null && req.body.password !== null){
-          mongo.auth.destroy(req,res);
+        if(req.body.username !== null && req.body.password !== null){
+          if(mongo.auth !== undefined){
+            mongo.auth.destroy(req,res);
+          }
           var opts = {
-            "user" : req.body.user,
+            "username" : req.body.username,
             "password" : req.body.password,
             "email" : req.body.email,
             "serveraddress" : "https://index.docker.io/v1/"
+            // "serveraddress" : "https://index.docker.io/v1"
           };
+          console.log(opts);
           mongo.auth.save(opts, res.redirect("/myapp/settings"));
         }
     });
 
-    function getServerIp() {
-  			var os = require("os");
-  			var ifaces = os.networkInterfaces();
-  			var result = '';
-  			for (var dev in ifaces) {
-  					var alias = 0;
-  					if(dev === "eth0"){
-  						ifaces[dev].forEach(function(details) {
-  							if (details.family == 'IPv4' && details.internal === false) {
-  								result = details.address;
-  								++alias;
-  							}
-  						});
-  					}
-  			}
+    router.post('/terminal/data', function(req, res){
+        if(req.body.user !== null && req.body.password !== null){
+          if(mongo.terminal !== undefined){
+            mongo.terminal.destroy(req,res);
+          }
 
-  			return result;
-  	}
+          var opts = {
+            "user" : req.body.user,
+            "password" : req.body.password
+          };
+          mongo.terminal.save(opts, res.redirect("/myapp/settings"));
+        }
+    });
+
+
+
 
 
       router.get('/swarm/system/data.json', function(req, res){
@@ -71,7 +95,7 @@ module.exports = function(dbRoute){
 
 
     router.use(function timeLog(req, res, next) {
-      console.log('Time: ', Date.now());
+      // console.log('Time: ', Date.now());
       res.setHeader("Content-Type", "application/json");
 
       next();
@@ -90,6 +114,14 @@ module.exports = function(dbRoute){
             res.json(db);
         })
   });
+
+  router.get('/terminal/data.json', function(req,res){
+        terminal.find(function(err, db){
+            if(err) return res.status(500).send({error: 'database failure'});
+            res.json(db);
+        });
+  });
+
 
   router.delete('/settings/:_id', function(req, res){
     // var db = new dockerDB();
