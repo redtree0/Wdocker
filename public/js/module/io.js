@@ -171,6 +171,7 @@ var clientsocket = (function clientsocket(io, $body) {
     */
     this.listen = function (eventName, callback) {
         var socket =  this.socket;
+        console.log("listen " + eventName);
         ///// socket.on (eventName, callback)
         //// eventName 소켓 이벤트 명
         //// callback 데이터 받을 시 실행 콜백 함수

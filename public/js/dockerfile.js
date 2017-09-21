@@ -224,15 +224,7 @@ $(function(){
     var $building = $("#building");
     var popup = new dialog("이미지 생성", $building);
 
-    client.listen("buildingImage", (data)=>{
-          if(data.hasOwnProperty("stream")){
-            $building.append(data.stream + "<br />");
-          }
-          if(data === true){
-            popup.close(5000);
-          }
 
-    });
     function fileSave(callback){
           var context = editor.getValue();
           var path = $path.text().trim();
@@ -248,7 +240,7 @@ $(function(){
           }
 
           client.sendEvent(COMPLETE.NOT, "UpdateFile", opts);
-          callback();
+          // callback();
     }
 
     $("#save").click(function(e) {
@@ -256,7 +248,22 @@ $(function(){
          fileSave();
     });
 
+    client.listen("buildingImage", (data)=>{
+          if(typeof data === "object" && data.hasOwnProperty("stream")){
+            $building.append(data.stream + "<br />");
+          }else {
+            $building.append(JSON.stringify(data));
+          }
+          // console.log(data);
+          if(data === true){
+            popup.close(5000);
+          }
+
+    });
+
+
     $("#build").click(()=>{
+          $building.text("");
           function changePath(path, renew, isReNew){
               var originPath = path;
               var splitPath = originPath.split("/");
@@ -268,7 +275,7 @@ $(function(){
           }
             // var client = main.getSocket();
 
-          fileSave(()=>{
+          // fileSave(()=>{
               var $imageTag = $("#imageTag");
               if(!$imageTag.val()){
                 return ;
@@ -281,7 +288,7 @@ $(function(){
 
               client.sendEvent(COMPLETE.NOT, "build", opts);
               popup.show();
-          });
+          // });
 
 
     });

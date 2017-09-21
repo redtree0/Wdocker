@@ -110,16 +110,24 @@ var eventLists = function(io){
 					});
 
 					server.listen("AttachContainer", function(data, fn){
-
+              var containerId = (data).toString().substring(0, 12);
 							function stdin(stream){
-									server.listen("AttachStdin", stream);
+									// server.listen("AttachStdin", stream);  //exec
+                  server.listen("AttachStdin", (data)=>{
+                    // console.log(data);
+                    stream.write(data + "\n");
+                  });
 							}
 
 							function stdout(stream){
 									// server.sendEvent("AttachStdout",  stream.pipe(stdout));
 									// stream.setEncoding('ascii');
 									stream.on('data', function(data){
-										server.sendEvent("AttachStdout", data.toString());
+                    var result = data.toString();
+
+                    server.sendEvent("AttachStdout", result);
+
+                    // console.log(result.substr(-2).trim() === "#");
 
 									});
 									stream.on('end', function(end) {
@@ -204,7 +212,8 @@ var image = function(server, host){
 					 });
 
 					 server.listen("build", function(data, fn){
-							 function onProgress(progress, err){
+							 function onProgress(progress){
+
 								 server.sendEvent("buildingImage", progress);
 							 }
                 // console.log(data);

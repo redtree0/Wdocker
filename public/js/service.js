@@ -111,7 +111,12 @@ $(function(){
     var self = self.data;
     // console.log(self);
     var jsonUrl = null
-    var hostId = getHostId(host);
+    var hostId = null;
+    if(host === null || host === undefined){
+      hostId = getHostId(getHostIP());
+    }else {
+      hostId = getHostId(host);
+    }
 
     jsonUrl = "/myapp/image/data/" + hostId;
 

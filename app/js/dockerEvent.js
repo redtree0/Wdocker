@@ -451,48 +451,61 @@
      self.attach = function(data, stdin, stdout, stderr){
        var docker = self.docker;
        var container = docker.getContainer(data);
-       return stdin((data, fn)=>{
-         fn(true);
-        //  callback(true);
-         var options = {
-           Cmd: data.split(" "),
+      //  return stdin((data, fn)=>{
+      //    fn(true);
+      //   //  callback(true);
+      //   var cmd = data.split(" ");
+      //   // cmd.unshift("-c");
+      //   // cmd.unshift("bash");
+      //   console.log(cmd);
+      //    var options = {
+      //      Cmd: cmd,
+      //      AttachStdin: true,
+      //      AttachStdout: true,
+      //      AttachStderr: true,
+      //      DetachKeys: "ctrl-c",
+      //      Tty : true
+      //    };
+       //
+      //    container.exec(options, function(err, exec) {
+      //     //  console.log(exec);
+      //      if (err) return;
+      //     // console.log(exec);
+      //      exec.start({hijack: true, stdin: true, Tty : true, Detach : false},function(err, stream) {
+      //             //  console.log(err);
+      //             if(data === "exit"){
+      //               // console.log(data);
+      //               // stream.end();
+      //               container.stop();
+      //             }
+       //
+      //             stream.setEncoding('utf8');
+      //              stderr(stream);
+      //              stdout(stream);
+      //              // stdin(stream);
+      //              docker.modem.demuxStream(stream, process.stdout, process.stderr);
+      //      });
+       //
+      //    });
+      var options = {
+           Cmd: ["/bin/bash"],
            AttachStdin: true,
            AttachStdout: true,
            AttachStderr: true,
            DetachKeys: "ctrl-c",
            Tty : true
          };
+      container.exec(options, function(err, exec) {
+         exec.start({hijack: true, stdin: true, Tty : true, Detach : false},function(err, stream) {
+           //// exex stream attach에 넣기
+            container.attach({hijack: true, stream: true, stdin: true, stdout: true, stderr: true}, function (err, Stream) {
 
-         container.exec(options, function(err, exec) {
-          //  console.log(exec);
-           if (err) return;
-          // console.log(exec);
-           exec.start({hijack: true, stdin: true, Tty : true, Detach : false},function(err, stream) {
-                  //  console.log(err);
-                  if(data === "exit"){
-                    console.log(data);
-                    // stream.end();
-                    container.stop();
-                  }
-
-                  stream.setEncoding('utf8');
-                   stderr(stream);
-                   stdout(stream);
-                   // stdin(stream);
-                   docker.modem.demuxStream(stream, process.stdout, process.stderr);
-           });
-
-         });
-       });
-      //  container.attach({ stream: true, stdin: true, stdout: true, stderr: true}, function (err, stream) {
-       //
-      //      if(err) {
-      //        stderr(stream, err);
-      //      }
-      //     //  console.log(process.stdout);
-      //      stdin(stream);
-      //      stdout(stream);
-       //
+              stderr(stream);
+              stdin(stream);
+              stdout(stream);
+            });
+          });
+      });
       //  });
      };
    }).call(Container);
@@ -615,6 +628,7 @@
           if (err) return callback(err);
           var docker = self.docker;
          //  console.log(server);
+        //  console.log("stream");
           docker.modem.followProgress(stream, onFinished, onProgress);
 
            function onFinished(err, output) {
@@ -629,6 +643,7 @@
 
            }
            function onProgress(event) {
+            //  console.log(event);
               callback(event);
            }
     }

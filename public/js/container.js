@@ -141,9 +141,12 @@ $(function(){
 
     var self = self.data;
     var jsonUrl = null
-
-    var hostId = getHostId(host);
-    // if(host === null || host === undefined){
+    var hostId = null;
+    if(host === null || host === undefined){
+      hostId = getHostId(getHostIP());
+    }else {
+      hostId = getHostId(host);
+    }
     //   jsonUrl = "/myapp/image/data/" + local;
     // }else {
     //   jsonUrl = "/myapp/image/data/" + host;
