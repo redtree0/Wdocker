@@ -69,83 +69,123 @@
   //       // })
   //       // console.log(container.docker);
   // });
+  var mongo = require("../js/mongoController");
+  function myPromise(hostId, callback){
+    new Promise(function(resolve, reject){
+      mongo.docker.show(resolve)
+    }).then((data)=>{
 
-  router.get( '/container/data.json' , (req, res) => {
-        p.container.getAllLists({all: true}, resCallback.bind(null, res), failureCallback.bind(null, res));
-  });
+          var hostinfo = data.filter((value)=>{
+            if(value._id.toString() === hostId){
+              return value.ip;
+            }
+          });
+          var host = hostinfo[0].ip;
+          // callback(host);
+          callback(host);
+    })
+  };
+
+  function getDockerJSON( host, dockerType, res, opts){
+    p[dockerType].getTaskDocker(host, (docker)=>{
+      if(docker){
+
+        var config = {};
+        // console.log(docker);
+
+        if(opts !== undefined){
+          // console.log(opts);
+          if(opts.hasOwnProperty("config") && opts.config !== null){
+              config = opts.config;
+          }
+          if(opts.hasOwnProperty("res") && opts.res !== null){
+            p[dockerType].getAllLists(config, resCallback.bind(null, res, opts.res), failureCallback.bind(null, res), docker);
+          }else {
+            p[dockerType].getAllLists(config, resCallback.bind(null, res), failureCallback.bind(null, res), docker);
+          }
+        }else {
+            p[dockerType].getAllLists(config, resCallback.bind(null, res), failureCallback.bind(null, res), docker);
+          }
+
+        // }
+
+      }else {
+        res.json(true);
+      }
+    });
+  };
+
+  // router.get( '/container/data.json' , (req, res) => {
+  //       p.container.getAllLists({all: true}, resCallback.bind(null, res), failureCallback.bind(null, res));
+  // });
 
   router.get( '/container/data/:host' , (req, res) => {
 
-        var host = req.params.host;
-
-        p.container.getTaskDocker(host, (docker)=>{
-          if(docker){
-            // console.log(docker);
-            p.container.getAllLists({all: true}, resCallback.bind(null, res), failureCallback.bind(null, res), docker);
-          }else {
-            res.json(true);
-          }
+        var hostId = req.params.host;
+        myPromise(hostId , (host)=>{
+              var opts = {
+                config : {all : true}
+              };
+              getDockerJSON( host, "container", res, opts);
         });
-        // res.json(true);
-        // p.container.getAllLists({all: true}, resCallback.bind(null, res), failureCallback.bind(null, res));
+
   });
 
-  router.get( '/network/data.json' , (req, res) => {
-        p.network.getAllLists({}, resCallback.bind(null, res), failureCallback.bind(null, res));
-  });
+  // router.get( '/network/data.json' , (req, res) => {
+  //       p.network.getAllLists({}, resCallback.bind(null, res), failureCallback.bind(null, res));
+  // });
 
   router.get( '/network/data/:host' , (req, res) => {
 
-        var host = req.params.host;
+        // var host = req.params.host;
+        //
+        // p.network.getTaskDocker(host, (docker)=>{
+        //   if(docker){
+        //     // console.log(docker);
+        //     p.network.getAllLists({}, resCallback.bind(null, res), failureCallback.bind(null, res), docker);
+        //   }else {
+        //     res.json(true);
+        //   }
+        // });
 
-        p.network.getTaskDocker(host, (docker)=>{
-          if(docker){
-            // console.log(docker);
-            p.network.getAllLists({}, resCallback.bind(null, res), failureCallback.bind(null, res), docker);
-          }else {
-            res.json(true);
-          }
+        var hostId = req.params.host;
+        myPromise(hostId , (host)=>{
+
+              getDockerJSON( host, "network", res);
         });
 
   });
 
-  router.get( '/image/data.json' , (req, res) => {
-        p.image.getAllLists({}, resCallback.bind(null, res), failureCallback.bind(null, res));
-  });
+  // router.get( '/image/data.json' , (req, res) => {
+  //       p.image.getAllLists({}, resCallback.bind(null, res), failureCallback.bind(null, res));
+  // });
 
   router.get( '/image/data/:host' , (req, res) => {
 
-        var host = req.params.host;
+        var hostId = req.params.host;
+        myPromise(hostId , (host)=>{
 
-        p.image.getTaskDocker(host, (docker)=>{
-          if(docker){
-            // console.log(docker);
-            p.image.getAllLists({}, resCallback.bind(null, res), failureCallback.bind(null, res), docker);
-          }else {
-            res.json(true);
-          }
+              getDockerJSON( host, "image", res)
         });
 
   });
 
-  router.get( '/volume/data.json' , (req, res) => {
-      p.volume.getAllLists({}, resCallback.bind(null, res, "Volumes"), failureCallback.bind(null, res));
-  });
+  // router.get( '/volume/data.json' , (req, res) => {
+  //     p.volume.getAllLists({}, resCallback.bind(null, res, "Volumes"), failureCallback.bind(null, res));
+  // });
 
   router.get( '/volume/data/:host' , (req, res) => {
 
-        var host = req.params.host;
-
-        p.volume.getTaskDocker(host, (docker)=>{
-          if(docker){
-            // console.log(docker);
-            p.volume.getAllLists({}, resCallback.bind(null, res, "Volumes"), failureCallback.bind(null, res), docker);
-          }else {
-            res.json(true);
+        var hostId = req.params.host;
+        myPromise(hostId , (host)=>{
+          var opts = {
+            res : "Volumes"
           }
+              getDockerJSON( host, "volume", res, opts)
         });
 
   });
+
   router.get( '/swarm/data.json' , (req, res) => {
     p.swarm.getAllLists({}, resCallback.bind(null, res), failureCallback.bind(null, res));
   });
@@ -161,45 +201,63 @@
   //   p.task.inspect({id : id}, resCallback.bind(null, res), failureCallback.bind(null, res));
   // });
   router.get( '/task/data/:host' , (req, res) => {
-      var host = req.params.host;
+    //   var host = req.params.host;
+    //
+    // p.task.getTaskDocker(host, (docker)=>{
+    //   if(docker){
+    //     p.task.getAllLists({}, resCallback.bind(null, res), failureCallback.bind(null, res), docker);
+    //   }else {
+    //     res.json(true);
+    //   }
+    // });
 
-    p.task.getTaskDocker(host, (docker)=>{
-      if(docker){
-        p.task.getAllLists({}, resCallback.bind(null, res), failureCallback.bind(null, res), docker);
-      }else {
-        res.json(true);
-      }
+    var hostId = req.params.host;
+    myPromise(hostId , (host)=>{
+          getDockerJSON( host, "task", res)
     });
+
   });
 
-  router.get( '/node/data.json' , (req, res) => {
-      p.node.getAllLists({}, resCallback.bind(null, res), failureCallback.bind(null, res));
-  });
+  // router.get( '/node/data.json' , (req, res) => {
+  //     p.node.getAllLists({}, resCallback.bind(null, res), failureCallback.bind(null, res));
+  // });
 
   router.get( '/node/data/:host' , (req, res) => {
-        var host = req.params.host;
+        // var host = req.params.host;
+        //
+        // p.node.getTaskDocker(host, (docker)=>{
+        //   if(docker){
+        //     p.node.getAllLists({}, resCallback.bind(null, res), failureCallback.bind(null, res), docker);
+        //   }else {
+        //     res.json(true);
+        //   }
+        // });
 
-        p.node.getTaskDocker(host, (docker)=>{
-          if(docker){
-            p.node.getAllLists({}, resCallback.bind(null, res), failureCallback.bind(null, res), docker);
-          }else {
-            res.json(true);
-          }
+        var hostId = req.params.host;
+        myPromise(hostId , (host)=>{
+              getDockerJSON( host, "node", res)
         });
-  });
-  router.get( '/service/data.json' , (req, res) => {
-    p.service.getAllLists({}, resCallback.bind(null, res), failureCallback.bind(null, res));
-  });
-  router.get( '/service/data/:host' , (req, res) => {
-      var host = req.params.host;
 
-    p.service.getTaskDocker(host, (docker)=>{
-      if(docker){
-        // console.log(docker);
-        p.service.getAllLists({}, resCallback.bind(null, res), failureCallback.bind(null, res), docker);
-      }else {
-        res.json(true);
-      }
+  });
+  // router.get( '/service/data.json' , (req, res) => {
+  //   p.service.getAllLists({}, resCallback.bind(null, res), failureCallback.bind(null, res));
+  // });
+  router.get( '/service/data/:host' , (req, res) => {
+    //   var host = req.params.host;
+    //
+    // p.service.getTaskDocker(host, (docker)=>{
+    //   if(docker){
+    //     // console.log(docker);
+    //     p.service.getAllLists({}, resCallback.bind(null, res), failureCallback.bind(null, res), docker);
+    //   }else {
+    //     res.json(true);
+    //   }
+    // });
+
+    var hostId = req.params.host;
+    myPromise(hostId , (host)=>{
+      // console.log(host);
+          getDockerJSON( host, "service", res)
     });
   });
 

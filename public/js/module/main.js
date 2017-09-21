@@ -1,14 +1,50 @@
 
 "use strict";
+
 // web cilent 기능 함축 클로저
+
+
 var main = (function(){
+
+  // var hostLists = null;
+  // $.ajax({
+  //   url: '/myapp/settings/data.json',
+  //   async: false,
+  //   dataType: 'json',
+  //   success: function (json) {
+  //     hostLists = json;
+  //   }
+  // });
+
     var settings = {};
     var Socket = require("./io");
 
+    function getHostId(host){
+      var hostLists = null;
+      $.ajax({
+        url: '/myapp/settings/data.json',
+        async: false,
+        dataType: 'json',
+        success: function (json) {
+          hostLists = json;
+        }
+      });
+      var hostinfo = hostLists.filter((value)=>{
+        if(value.ip === host){
+          return value;
+        }
+      })
+      var hostid = (hostinfo[0]._id);
+      return hostid;
+    }
+
     function getNewConnection(host){
+      var hostid =  getHostId(host);
+      // return ;
       var socket = io({
         query: {
-         token : host
+        //  token : host
+          token : hostid
         },
         secure : true
       }); /// wss
@@ -16,6 +52,7 @@ var main = (function(){
     }
 
     const LOCAL = getHostIP();
+
     var client = getNewConnection(LOCAL);
     var table = require("./table.js");
     var dialog = require("./dialog.js");
@@ -227,7 +264,7 @@ var main = (function(){
             return;
           }
           var self = settings.form.create;
-          
+
           self.$newForm.off();
           self.$newForm.click((e)=>{
             e.preventDefault();
@@ -240,6 +277,7 @@ var main = (function(){
                 self.initDropdown(self, host);
             }
             if(self.hasOwnProperty("loaded")){
+              console.log(client);
               self.loaded(client);
             }
             if(self.hasOwnProperty("more")){
@@ -375,8 +413,9 @@ var main = (function(){
                    var org = url;
                    var tmp = org.split("/");
                    tmp.pop();
-
-                   var newUrl = (tmp.join("/") + "/"+  $("#connectDropDown").text());
+                   var host = $("#connectDropDown").text();
+                   var hostId = getHostId(host);
+                   var newUrl = (tmp.join("/") + "/"+  hostId);
                   //  console.log(newUrl);
                    return newUrl;
                  }
@@ -446,5 +485,8 @@ var main = (function(){
     }
 
 })();
+
+
+
 
 module.exports = main;

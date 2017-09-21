@@ -26,37 +26,51 @@ var eventLists = function(io){
 				console.log("socket");
 				var token = socket.handshake.query.token;
 				console.log(token);
-				// console.log(socket.query.token);
-				// socket.test = "test";
-				// console.log(socket);
 
-        var server = new Socket(socket);
-				// var Container = p.container;
-				// console.log("server");
-				// console.log(server);
-        // container(server, new Container());
-        // // network(server);
-        // // image(server)
-        // // volume(server);
-        // // dockerfile(server);
-				// // terminal(server);
-				// settings(server, p.settings);
-				// // swarm(server);
-				// // node(server);
-				// // service(server);
-				// // task(server);
-				var host = token;
-				container(server, host);
-				network(server, host);
-				image(server, host)
-        volume(server, host);
-        dockerfile(server);
-				terminal(server);
-				settings(server);
-				swarm(server);
-				node(server);
-				service(server, host);
-				task(server);
+        new Promise(function(resolve, reject){
+          mongo.docker.show(resolve)
+        }).then((data)=>{
+
+              var hostinfo = data.filter((value)=>{
+                if(value._id.toString() === token){
+                  return value.ip;
+                }
+              });
+
+              var server = new Socket(socket);
+              var host = hostinfo[0].ip;
+              console.log(host);
+              container(server, host);
+              network(server, host);
+              image(server, host)
+              volume(server, host);
+              dockerfile(server);
+              terminal(server);
+              settings(server);
+              swarm(server);
+              node(server);
+              service(server, host);
+              task(server);
+        });
+        // console.log("before");
+        // console.log(host);
+        // console.log("after");
+        return ;
+
+        // var server = new Socket(socket);
+
+				// var host = token;
+				// container(server, host);
+				// network(server, host);
+				// image(server, host)
+        // volume(server, host);
+        // dockerfile(server);
+				// terminal(server);
+				// settings(server);
+				// swarm(server);
+				// node(server);
+				// service(server, host);
+				// task(server);
   }
 
   var container = function(server, host){
@@ -167,6 +181,9 @@ var image = function(server, host){
 
 
 				   server.listen("PullImages", function(data, fn) {
+             function onProgress(progress){
+               server.sendEvent("progress", progress);
+             }
 								image.create(data, onProgress, fn);
 			     });
 
@@ -526,32 +543,17 @@ var swarm = function(server){
 
 var node = function(server){
 	var node = p.node;
-	// server.listen("StartNode", function(data, fn){
-	// 	// var opts = {force : data};
-	// 	// console.log(data);
-	// 	p.node.start(data);
-	// 	// mongo.system.show();
-	// 	// p.node.start(data, fn);
-	// 	// mongo.system.find()
-	// });
+
 	server.listen("LoadNode", function(data , fn){
 		// console.log(data);
 		node.load(data, fn);
 	});
 
-	// server.listen("StopNode", function(data, fn){
-	// 	// var opts = {force : data};
-	// 	// console.log(data);
-	// 	// p.swarm.throwNode(data, fn);
-	// });
-
 	server.listen("RemoveNode", function(data, fn){
 		node.remove(data, fn);
 	});
 
-	// server.listen("UpdateNode", function(data, fn){
-	// 	p.node.update(data, fn);
-	// });
+
 };
 
 var service = function(server, host){

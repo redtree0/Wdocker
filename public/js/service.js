@@ -93,7 +93,7 @@ $(function(){
   $all.form.create.$labellists = $("#labellists");
 
   $all.form.create.loaded = function(client){
-      console.log(client);
+      // console.log(client);
       var host = client.getToken();
       var jsonUrl = "/myapp/node/data/" + host;
       $.getJSON(jsonUrl, function(json, textStatus) {
@@ -105,30 +105,24 @@ $(function(){
       });
       // "/myapp/node/data/" + host
       return ;
-      refresh();
   };
 
   $all.form.create.initDropdown = function(self, host){
     var self = self.data;
     // console.log(self);
     var jsonUrl = null
-    var local = getHostIP();
-    if(host === null || host === undefined){
-      jsonUrl = "/myapp/image/data/" + local;
-    }else {
-      jsonUrl = "/myapp/image/data/" + host;
-    }
+    var hostId = getHostId(host);
+
+    jsonUrl = "/myapp/image/data/" + hostId;
+
     var $contextMenu =   self.$imageMenu;
     var $dropDown =   self.$image;
     var attr = "RepoTags";
     var index = 0;
     initDropdown(jsonUrl, $contextMenu, $dropDown,{ "attr" :  attr, "index" : index });
 
-    if(host === null || host === undefined){
-      jsonUrl = "/myapp/network/data/" + local;
-    }else {
-      jsonUrl = "/myapp/network/data/" + host;
-    }
+    jsonUrl = "/myapp/network/data/" + hostId;
+
     var $contextMenu =   self.$networkMenu;
     var $dropDown =   self.$network;
     var attr = "Name";
@@ -150,7 +144,7 @@ $(function(){
     $table : $(".jsonTable"),
     hideColumns : ["Id", "ImageID", "Ports", "Mounts", "HostConfig", "NetworkingSettings"],
     columns : columns,
-    jsonUrl : '/myapp/service/data/' + getHostIP(),
+    jsonUrl : '/myapp/service/data/' + getHostId(getHostIP()),
   };
 
   $all.event = {};

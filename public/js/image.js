@@ -53,16 +53,6 @@
           halign : "center",
           align : "center"
       }
-      // , {
-      //   field: 'Push',
-      //   title: 'Push',
-      //   halign : "center",
-      //   align : "center",
-      //   width : "5%",
-      //   formatter : function (value , row, index){
-      //     return "<button type='button' class='btn btn-success push'>Push</button>"
-      //   }
-      // }
     ];
       const searchcolumns = [{
               checkbox: true,
@@ -149,6 +139,7 @@ $(function(){
                   callback;
               }
           }
+          console.log(client);
           client.sendEventTable("PullImages", searchTable);
           var $progressbar = $(".progress-bar");
           $progressbar.css("width", '0%');
@@ -175,8 +166,7 @@ $(function(){
                 }else if (event === true) {
                     popup.close(5000);
                     $(".results").hide();
-                    ///////////////////////////////////////////////////////////////////
-                    imageTable.refresh();
+                    refresh();
                 }
             });
 
@@ -198,38 +188,8 @@ $(function(){
     $table : $(".jsonTable"),
     hideColumns : ["Id",  "ParentId", "Created", "RepoDigests"],
     columns : columns,
-    jsonUrl : '/myapp/image/data/'+ getHostIP(),
-    isExpend : false,
-    clickRow : function  (client, row, $element, field) {
-            // if(field === "Push"){
-            //     // console.log(row);
-            //     // console.log(row.RepoTags[0]);
-            //     var lists = row.RepoTags;
-            //     var mine = lists.map((image)=>{
-            //       var imageTag = image.split(":");
-            //       return {
-            //         name : imageTag[0],
-            //         tag : imageTag[1]
-            //       }
-            //     });
-            //     console.log(mine);
-            //     return ;
-            //     // console.log(imageTag.split(":"));
-            //     var $pushingImage = $("#pushingImage");
-            //      var popup = new dialog("이미지 업로드 중", $pushingImage.show());
-            //      client.listen("pushingImage", (data)=>{
-            //                  // console.log("pushingImage");
-            //                  // console.log(data);
-            //            if(data=== true){
-            //                popup.close(5000);
-            //            }
-            //            $pushingImage.append(data.status + "<br/>");
-            //      });
-            //
-            //      popup.show();
-            //
-            // }
-    }
+    jsonUrl : '/myapp/image/data/'+ getHostId(getHostIP()),
+    isExpend : false
   };
   $all.table.sub = {
     $table : $(".dataTable"),
@@ -333,93 +293,11 @@ $(function(){
   };
 
 
-    // $all.table.main.offLoaded = function(){
-    //     // $("#containerMenu").off();
-    //     $(".push").off();
-    // }
-
-    // $all.table.main.loaded = function(client, host, imageTable){
-    //   var $expand = $("#expand").clone();
-    //   var $pushingImage = $("#pushingImage");
-    //   $pushingImage.hide();
-    //   // $("#expand").remove();
-    //   var isExpand = false;
-    //   $(".push").off();
-    //   console.log(client.getToken());
-    //
-    //   imageTable.$table.on("expand-row.bs.table", function (e, index, row, $detail){
-    //     console.log(client.getToken());
-    //     if(isExpand) {
-    //       isExpand = false;
-    //       imageTable.$table.bootstrapTable("collapseAllRows");
-    //     }else {
-    //       isExpand = true;
-    //       $detail.append($expand);
-    //       $expand.show();
-    //         // $(".push").off();
-    //         $(".push").click((e)=>{
-    //           var opts = {
-    //             name : $("#repositoryImage").val(),
-    //             tag : $("#repositoryTag").val()
-    //           };
-    //
-    //             client.sendEvent(COMPLETE.NOT, "PushImages", opts);
-    //             var popup = new dialog("이미지 업로드 중", $pushingImage.show());
-    //             client.listen("pushingImage", (data)=>{
-    //               // console.log("pushingImage");
-    //               // console.log(data);
-    //               if(data=== true){
-    //                 popup.close(5000);
-    //               }
-    //               $pushingImage.append(data.status + "<br/>");
-    //             });
-    //             popup.show();
-    //         });
-    //       };
-    //     });
-    // }
     var main = require("./module/main.js");
     main.init($all);
 
-    // $all.table.main.loaded = function(client, host, Table){
-    //           var searchTable = Table;
-    //           searchTable.$table.on("check.bs.table",  function (e, row, $element) {  /// 테이블 한 Row check box 선택 시
-    //             $(':checkbox').not(this).prop('checked', false);
-    //             $element.prop('checked', true);
-    //           });
-    //
-    //           searchTable.$table.on("check-all.bs.table",  function (e, row, $element) {  /// 테이블 한 Row check box 선택 시
-    //             $(':checkbox').prop('checked', false);
-    //           });
-    //
-    // }
-        // var client = main.getSocket();
         var searchTable = main.getSubTable();
-        // var imageTable = main.getMainTable();
 
-        // var $expand = $("#expand").clone();
-        // $("#expand").remove();
-        // var isExpand = false;
-        // imageTable.$table.on("expand-row.bs.table", function (e, index, row, $detail){
-        //   if(isExpand) {
-        //     isExpand = false;
-        //     imageTable.$table.bootstrapTable("collapseAllRows");
-        //   }else {
-        //     $detail.append($expand);
-        //     $expand.show();
-        //     isExpand = true;
-        //
-        //       $(".push").click((e)=>{
-        //         var opts = {
-        //           name : $("#repositoryImage").val(),
-        //           tag : $("#repositoryTag").val()
-        //         };
-        //
-        //           client.sendEventTable("PushImages", imageTable, opts);
-        //
-        //       });
-        //     };
-        //   });
 
         searchTable.$table.on("check.bs.table",  function (e, row, $element) {  /// 테이블 한 Row check box 선택 시
           $(':checkbox').not(this).prop('checked', false);

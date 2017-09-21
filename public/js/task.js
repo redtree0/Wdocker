@@ -77,9 +77,9 @@ $(function(){
   main.init($all);
 
   function loadTask(host) {
-
+    var hostId = getHostId(host);
     $(".dockerNode").children().remove();
-    var nodeUrl = "/myapp/node/data/" + host;
+    var nodeUrl = "/myapp/node/data/" + hostId;
     $.getJSON( nodeUrl, (data)=>{
       // console.log(data);
       if(data.hasOwnProperty("statusCode")){
@@ -125,11 +125,9 @@ $(function(){
           id : nodeID
         }).html(msg) );
       }
-      var taskUrl = "/myapp/task/data/" + host;
-      console.log(taskUrl);
+      var taskUrl = "/myapp/task/data/" + hostId;
+      
       $.getJSON(taskUrl , (data)=>{
-        console.log(data);
-
         // console.log(data);
         if(data.hasOwnProperty("json") && data.json.hasOwnProperty("message")){
 

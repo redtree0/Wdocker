@@ -214,3 +214,22 @@ function refresh(){
 function getHostIP(){
   return window.location.host;
 }
+
+function getHostId(host){
+    var hostLists = null;
+    $.ajax({
+      url: '/myapp/settings/data.json',
+      async: false,
+      dataType: 'json',
+      success: function (json) {
+        hostLists = json;
+      }
+    });
+    var hostinfo = hostLists.filter((value)=>{
+      if(value.ip === host){
+        return value;
+      }
+    })
+    var hostid = (hostinfo[0]._id);
+    return hostid;
+}

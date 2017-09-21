@@ -149,7 +149,7 @@ $(function(){
       "$table" : $(".jsonTable"),
       "hideColumns" : ["EnableIPv6", "Labels", "IPAM", "Containers", "Options", "Created", "Id"],
       "columns" : columns,
-      "jsonUrl" : '/myapp/network/data/' + getHostIP(),
+      "jsonUrl" : '/myapp/network/data/' + getHostId(getHostIP()),
       isExpend : false
     };
 
@@ -212,7 +212,7 @@ $(function(){
   }
   $all.table.main.loaded = function(client, host, networkTable){
 
-    var jsonUrl = '/myapp/container/data/' + host;
+    var jsonUrl = '/myapp/container/data/' + getHostId(host);
     var $contextMenu = $("#containerMenu")  ;
     var $dropDown =   $("#containerDropDown");
     var attr = "Names";

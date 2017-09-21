@@ -138,14 +138,17 @@ $(function(){
   $all.form.create.$labellists = $("#labellists");
 
   $all.form.create.initDropdown = function(self, host){
+
     var self = self.data;
     var jsonUrl = null
-    var local = getHostIP();
-    if(host === null || host === undefined){
-      jsonUrl = "/myapp/image/data/" + local;
-    }else {
-      jsonUrl = "/myapp/image/data/" + host;
-    }
+
+    var hostId = getHostId(host);
+    // if(host === null || host === undefined){
+    //   jsonUrl = "/myapp/image/data/" + local;
+    // }else {
+    //   jsonUrl = "/myapp/image/data/" + host;
+    // }
+    jsonUrl = "/myapp/image/data/" + hostId;
     // console.log(jsonUrl);
     // jsonUrl = '/myapp/image/data.json';
     var $contextMenu =   self.$imageMenu;
@@ -154,11 +157,12 @@ $(function(){
     var index = 0;
     initDropdown(jsonUrl, $contextMenu, $dropDown, { attr : attr, index :  index} );
 
-    if(host === null || host === undefined){
-      jsonUrl = "/myapp/volume/data/" + local;
-    }else {
-      jsonUrl = "/myapp/volume/data/" + host;
-    }
+    // if(host === null || host === undefined){
+    //   jsonUrl = "/myapp/volume/data/" + local;
+    // }else {
+    //   jsonUrl = "/myapp/volume/data/" + host;
+    // }
+    jsonUrl = "/myapp/volume/data/" + hostId;
     // console.log(jsonUrl);
 
     // jsonUrl = '/myapp/volume/data.json';
@@ -168,11 +172,12 @@ $(function(){
 
     initDropdown(jsonUrl, $contextMenu, $dropDown, { attr : attr } );
 
-    if(host === null || host === undefined){
-      jsonUrl = "/myapp/network/data/" + local;
-    }else {
-      jsonUrl = "/myapp/network/data/" + host;
-    }
+    // if(host === null || host === undefined){
+    //   jsonUrl = "/myapp/network/data/" + local;
+    // }else {
+    //   jsonUrl = "/myapp/network/data/" + host;
+    // }
+    jsonUrl = "/myapp/network/data/" + hostId;
     // console.log(jsonUrl);
     // jsonUrl = '/myapp/network/data.json';
     var $contextMenu =   self.$networkMenu;
@@ -208,7 +213,7 @@ $(function(){
     $table : $(".jsonTable"),
     hideColumns : ["Id", "ImageID", "Ports", "Mounts", "HostConfig", "Labels", "NetworkingSettings", "Status"],
     columns : columns,
-    jsonUrl : '/myapp/container/data/' + getHostIP(),
+    jsonUrl : '/myapp/container/data/' + getHostId(getHostIP()),
     isExpend : false,
     clickRow : function  (client, row, $element, field) {
       // console.log("click");
@@ -293,7 +298,16 @@ $(function(){
       callback;
     }
   };
-
+  // var mine = null;
+  // $.getJSON('/myapp/settings/data.json', function(json, textStatus) {
+  //   // console.log(json);
+  //   mine = json;
+  //   console.log(mine);
+  //   // return json;
+  // });
+  // $all.getId = function(){
+  //   return mine;
+  // }
     var main = require("./module/main.js");
     main.init($all);
     var containerTable = main.getMainTable();

@@ -97,7 +97,7 @@ $(function(){
   $all.table.main = {
     $table : $(".jsonTable"),
     columns : columns,
-    jsonUrl : '/myapp/volume/data/' + getHostIP(),
+    jsonUrl : '/myapp/volume/data/' + getHostId(getHostIP()),
   };
   $all.event = {};
   function clickDefault(client, eventName, table){
