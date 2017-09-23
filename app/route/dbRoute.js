@@ -7,9 +7,8 @@ module.exports = function(dbRoute){
   var express = require('express');
   var router = express.Router();
   var docker = dbRoute.docker;
-  var system = dbRoute.system;
-  var auth = dbRoute.auth;
-  var terminal = dbRoute.terminal;
+
+  var admin = dbRoute.admin;
   var mongo = require("../js/mongoController");
 
   var os = require("os");
@@ -53,46 +52,145 @@ module.exports = function(dbRoute){
       }
   });
 
-    router.post('/auth', function(req, res){
-        if(req.body.username !== null && req.body.password !== null){
-          if(mongo.auth !== undefined){
-            mongo.auth.destroy(req,res);
-          }
-          var opts = {
-            "username" : req.body.username,
-            "password" : req.body.password,
-            "email" : req.body.email,
-            "serveraddress" : "https://index.docker.io/v1/"
-            // "serveraddress" : "https://index.docker.io/v1"
-          };
-          console.log(opts);
-          mongo.auth.save(opts, res.redirect("/myapp/settings"));
-        }
-    });
 
-    router.post('/terminal/data', function(req, res){
-        if(req.body.user !== null && req.body.password !== null){
-          if(mongo.terminal !== undefined){
-            mongo.terminal.destroy(req,res);
-          }
+      router.get('/admin/data', function(req,res){
+            var sess = req.session;
+            if(sess.userid === undefined || sess.userid === null){
+              // return res.json(false);
+              return res.json(false);
+              // return  res.redirect("/myapp/settings");
+            }
+                if(req.body.cpass === req.body.pass){
 
-          var opts = {
-            "user" : req.body.user,
-            "password" : req.body.password
-          };
-          mongo.terminal.save(opts, res.redirect("/myapp/settings"));
-        }
-    });
+                  var opts = {
+                    "username" : sess.username,
+                    "password" : sess.password,
+                  }
 
-
-
-
-
-      router.get('/swarm/system/data.json', function(req, res){
-        mongo.system.show((data)=>{res.json(data)});
-        // mongo.system.destroy(req,res);
+                  mongo.admin.find(opts, (match)=>{
+                    if(match){
+                      opts.auth = match.auth;
+                      res.json(opts);
+                    }else {
+                      res.json(false);
+                    }
+                  });
+                  // res.json(true);
+                }
       });
 
+      router.post('/admin/data', function(req,res){
+        if(req.body.username !== null && req.body.password !== null){
+          if(mongo.admin !== undefined){
+            mongo.admin.count((cnt)=>{
+              if(cnt === 0){
+                var defaultID = {
+                  "username" : "admin",
+                  "password" : "admin"
+                }
+                mongo.admin.save(defaultID);
+                }
+              });
+            }
+            var opts = {
+              "username" : req.body.username,
+              "password" : req.body.password
+            }
+
+            mongo.admin.find(opts, (match)=>{
+              if(match){
+                var sess = req.session;
+                sess.userid = '_' + Math.random().toString(36).substr(2, 9);
+
+                sess.username = match.username;
+                sess.password = match.password;
+                res.json(true);
+              }else {
+                res.json(false);
+              }
+            });
+          }
+
+      });
+
+      router.post('/admin/new', function(req,res){
+          if(req.body.username !== null && req.body.password !== null){
+                var opts = {
+                  "username" : req.body.username,
+                  "password" : req.body.password
+                }
+                // console.log("do");
+                mongo.admin.save(opts);
+                res.json(true);
+
+          }else {
+            res.json(false);
+          }
+
+      });
+
+      router.post('/admin/update', function(req,res){
+        var sess = req.session;
+        if(sess.userid === undefined || sess.userid === null){
+          // return res.json(false);
+          return  res.redirect("/myapp/settings");
+        }
+        if(req.body.cpass !== null && req.body.pass !== null){
+                if(req.body.cpass === req.body.pass){
+
+                  var opts = {
+                    "username" : sess.username,
+                    "password" : req.body.cpass
+                  }
+                  var filter = {
+                    "username" : sess.username,
+                    "password" : sess.password
+                  }
+                  // console.log(opts);
+                  mongo.admin.update(filter,opts, (data)=>{
+                    if(data){
+                      return res.redirect("/myapp/login");
+                    }
+                  });
+                  // res.json(true);
+                }
+
+          }else {
+            return  res.redirect("/myapp/settings");
+          }
+
+      });
+
+
+      router.post('/admin/update/auth', function(req,res){
+              var sess = req.session;
+              if(sess.userid === undefined || sess.userid === null){
+                return  res.redirect("/myapp/settings");
+              }
+              if(req.body.username !== null && req.body.password !== null && req.body.email !== null){
+                        var opts = {
+                          "username" : req.body.username,
+                          "password" : req.body.password,
+                          "email" : req.body.email,
+                          "serveraddress" : "https://index.docker.io/v1/"
+                        }
+                        var filter = {
+                          "username" : sess.username,
+                          "password" : sess.password
+                        }
+                        // console.log(opts);
+                        mongo.admin.update(filter,opts, "auth",(data)=>{
+                          if(data){
+                            return res.redirect("/myapp/settings");
+                          }
+                        });
+                        // res.json(true);
+                      }
+                else {
+                  return  res.redirect("/myapp/settings");
+                }
+
+            });
 
     router.use(function timeLog(req, res, next) {
       // console.log('Time: ', Date.now());
@@ -108,36 +206,6 @@ module.exports = function(dbRoute){
         })
   });
 
-  router.get('/auth/data.json', function(req,res){
-        auth.find(function(err, db){
-            if(err) return res.status(500).send({error: 'database failure'});
-            res.json(db);
-        })
-  });
-
-  router.get('/terminal/data.json', function(req,res){
-        terminal.find(function(err, db){
-            if(err) return res.status(500).send({error: 'database failure'});
-            res.json(db);
-        });
-  });
-
-
-  router.delete('/settings/:_id', function(req, res){
-    // var db = new dockerDB();
-    docker.remove({ _id: req.params._id }, function(err, output){
-        if(err) return res.status(500).json({ error: "database failure" });
-
-        /* ( SINCE DELETE OPERATION IS IDEMPOTENT, NO NEED TO SPECIFY )
-        if(!output.result.n) return res.status(404).json({ error: "book not found" });
-        res.json({ message: "book deleted" });
-        */
-
-        res.status(204).end();
-    });
-
-
-});
 
   return router;
 };

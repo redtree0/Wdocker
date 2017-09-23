@@ -188,8 +188,10 @@ var main = (function(){
                   /// 테이블 중 기본으로 감출 컬럼은 숨김
                   mainTable.hideColumns(self.hideColumns);
                 }
-
-                mainTable.checkAllEvents(); /// checked Box 클릭 이벤트
+                var colCheckbox = mainTable.getColumns()[0];
+                if(colCheckbox.hasOwnProperty("checkbox") && colCheckbox.checkbox){
+                  mainTable.checkAllEvents(); /// checked Box 클릭 이벤트
+                }
 
                 mainTable.clickRowAddColor("success"); /// 테이블 클릭 시 색상 변경
 

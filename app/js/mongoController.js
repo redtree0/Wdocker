@@ -2,23 +2,14 @@
 var dbLists = require("./mongo.js");
 
 var dockerDB = dbLists.docker;
-var systemDB = dbLists.system;
-var authDB = dbLists.auth;
-var terminalDB = dbLists.terminal;
+
+var adminDB = dbLists.admin;
 
 var mongo = function(db){
   this.db = db;
   this.instence = new db();
 };
 
-// var db = new docker();
-// console.log(db);
-// db.ip = req.body.ip;
-// db.port = req.body.port;
-// // db.user =req.body.user;
-// // db.password = req.body.password;
-// // console.log(req);
-// db.save(function(err){
 mongo.prototype.save = function(data, callback){
   var self = this;
   for(var i in data){
@@ -57,9 +48,6 @@ mongo.prototype.find = function(data, callback) {
 
 mongo.prototype.show = function(callback) {
   var self = this;
-  // self.db.findById(req.params.id, function (err, db) {
-  //   if(err) { return handleError(res, err); }
-  //   if(!db) { return res.send(404); }
 
   self.db.find(function(err, db){
         if(err) return ({error: 'database failure'});
@@ -86,16 +74,63 @@ mongo.prototype.destroy = function(callback) {
     );
 };
 
+mongo.prototype.count = function(callback) {
+  var self = this;
+  self.db.count({}, function(err, count) {
+      if(err) return ({error: 'database failure'});
+      if(typeof callback === "function") {
+        return  callback(count);
+      }else {
+        return  (count);
+      }
+  });
+};
+
+mongo.prototype.update = function(filter,data, attr,callback) {
+
+  var self = this;
+  if(arguments.length === 3){
+    callback = attr;
+    attr = null;
+  }
+
+  self.db.findOne(filter, function(err, db){
+        if(err) return ({error: 'database failure'});
+
+        for(var i in data){
+          // if(data.hasO)
+            if(attr === null){
+              if(data.hasOwnProperty(i)){
+                db[i] = data[i];
+              }
+            }else {
+              if(data.hasOwnProperty(i) && db[attr].hasOwnProperty(i)){
+                db[attr][i] = data[i];
+              }
+            }
+        }
+        db.save(function(err, db){
+
+          if(err) {
+              callback(err);
+          }else {
+            callback(true);
+          }
+        });
+    });
+}
+
+
+
+//     });
+// }
+
 var docker = new mongo(dockerDB);
-var system = new mongo(systemDB);
-var auth = new mongo(authDB);
-var terminal = new mongo(terminalDB);
+var admin = new mongo(adminDB);
 
 var lists = {
    "docker" : docker,
-   "system" : system,
-   "auth" : auth,
-   "terminal" : terminal
+   "admin" : admin
 };
 
 module.exports = lists;

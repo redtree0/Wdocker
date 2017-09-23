@@ -233,3 +233,23 @@ function getHostId(host){
     var hostid = (hostinfo[0]._id);
     return hostid;
 }
+
+
+function userlogin(name, password, callback){
+  $.getJSON("/myapp/admin/data",function(json, textStatus){
+      var login = {
+        username: name,
+        password: password
+      };
+
+      if(json !== false){
+        if(JSON.stringify(json) === JSON.stringify(login)){
+          callback("some token");
+        } else{
+          callback(false);
+        }
+
+      }
+
+   });
+};

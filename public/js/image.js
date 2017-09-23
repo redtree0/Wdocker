@@ -2,9 +2,6 @@
 'use strict';
 
   const columns = [{
-          checkbox: true,
-          title: 'Check'
-      },{
           field: 'RepoTags',
           title: '이미지',
           sortable : true,
@@ -206,7 +203,18 @@ $(function(){
   $all.event.remove = {
       $button : $(".remove"),
       eventName : "RemoveImages",
-      clickEvent : clickDefault
+      clickEvent : (client, eventName, table)=>{
+        return function(){
+          var checkedImage = $('.mlist li label input[name=optradio]:checked').val();
+          // console.log( $('.mlist li label input[name=optradio]:checked').closest('tr'));
+          if(checkedImage === undefined){
+            alert("삭제할 이미지 선택하세요.");
+            return ;
+          }
+          // console.log(checkedImage);
+          client.sendEvent(COMPLETE.DO, eventName, checkedImage);
+        };
+      }
   };
 
   $all.event.tag = {
@@ -224,18 +232,16 @@ $(function(){
           if(imageTag.split(":").includes("")){
             return ;
           }
-          var lists = table.getCheckedLists();
-          if(lists.length !== 1){
-            console.log("check Table");
+          var checkedImage = $('.mlist li label input[name=optradio]:checked').val();
+          if(checkedImage === undefined){
+            alert("변경할 이미지 선택하세요.");
             return ;
-          };
-          // console.log(table.getCheckedLists());
-          // console.log(imageTag.split(":"));
-          // console.log(lists[0].RepoTags[0]);
+          }
+
           var opts = {
                      repo : imageTag.split(":")[0],
                      tag : imageTag.split(":")[1],
-                     orgImage : lists[0].RepoTags[0]
+                     orgImage : checkedImage
           };
           // console.log(opts);
           // return ;
@@ -252,19 +258,21 @@ $(function(){
           var checkedImage = $('.mlist li label input[name=optradio]:checked').val();
           // console.log( $('.mlist li label input[name=optradio]:checked').closest('tr'));
           if(checkedImage === undefined){
+            console.log("not choose");
             return ;
           }
-          $.getJSON("/myapp/auth/data.json", function(json, textStatus) {
-              // console.log(json.username);
+          $.getJSON("/myapp/admin/data", function(json, textStatus) {
+
               var repo = checkedImage.split("/")[0];
-              var username = json[0].username;
-              if(repo !== username){
+              var authUser = json.auth.username;
+              if(repo !== authUser){
                 console.log("check Image");
                 return ;
               }
               var opts = {
                 name : checkedImage.split(":")[0],
-                tag : checkedImage.split(":")[1]
+                tag : checkedImage.split(":")[1],
+                auth : json.auth
               };
               client.sendEvent(COMPLETE.NOT, "PushImages", opts);
               var $pushingImage = $("#pushingImage");

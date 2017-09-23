@@ -18,6 +18,9 @@ var table = (function Table($table, columns){
 });
 
 (function(){
+  this.getColumns = function(){
+    return this.columns;
+  }
 
   this.getCheckedLists = function(){
     return this.checkedRowLists;
@@ -114,26 +117,26 @@ var table = (function Table($table, columns){
   //  *  @param {Object} data - 테이블에 갱신할 데이터 json array
   //  */ down grade
   this.clickRow = function ($detail) {
-    function addNewRow( _id ){
-      return $('<div/>', { class: "row", id : _id });
-    }
-    function addRowText( _class,  _text){
-      return $('<div/>', { class: _class, text: _text });
-    }
+    // function addNewRow( _id ){
+    //   return $('<div/>', { class: "row", id : _id });
+    // }
+    // function addRowText( _class,  _text){
+    //   return $('<div/>', { class: _class, text: _text });
+    // }
 
-    (this.$table).on('click-row.bs.table', function (r, e, f){
-      var data = e;
-
-      $detail.find("div").remove();
-      $.each(data, (key, value)=>{
-        if(key == "0") { // key 0 인 값 제외
-          return true;
-        }
-        $detail.append(addRowText("col-md-6", key));
-        if(value){
-          $detail.append(addRowText("col-md-6", value));
-        }
-      });
+    (this.$table).on('click-row.bs.table', function (e,	row, $element, field){
+      // var data = e;
+      //
+      // $detail.find("div").remove();
+      // $.each(data, (key, value)=>{
+      //   if(key == "0") { // key 0 인 값 제외
+      //     return true;
+      //   }
+      //   $detail.append(addRowText("col-md-6", key));
+      //   if(value){
+      //     $detail.append(addRowText("col-md-6", value));
+      //   }
+      // });
 
     });
   }

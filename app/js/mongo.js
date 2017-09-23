@@ -27,34 +27,24 @@ var docker = new Schema({
   // password : String
 });
 
-var system = new Schema({
-  swarmIP : String,
-  swarmPort : String,
-  token : {
-    manager : String,
-    worker : String
-  }
-  // ,user : String,
-  // password : String
-});
-
-var auth = new Schema({
+var admin = new Schema({
   username : String,
   password : String,
-  email : String,
-  serveraddress : String
+  auth : {
+    username : String,
+    password : String,
+    email : String,
+    serveraddress : String
+  }
 });
 
-var terminal = new Schema({
-  user : String,
-  password : String
-});
 
 
 
 module.exports = {
   "docker" : mongoose.model('docker', docker),
-  "system" : mongoose.model('system', system),
-  "auth" : mongoose.model('auth', auth),
-  "terminal" : mongoose.model('terminal', terminal)
+  // "system" : mongoose.model('system', system),
+  // "auth" : mongoose.model('auth', auth),
+  // "terminal" : mongoose.model('terminal', terminal),
+  "admin" :  mongoose.model('admin', admin)
 } ;

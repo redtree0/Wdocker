@@ -27,11 +27,29 @@ var args    = require('yargs').argv
 
 var socketEvents  = require('./js/event');
 
-////////////////////////////////////////////////////////////////////////////
-const WEBPATH = '/myapp';
+////////////////////////// SECURETY //////////////////////////////
 // app.use(express.urlencoded());
-app.use(bodyParser.json());
+app.disable('x-powered-by'); //// 보안설청
+/// 참고 http://expressjs.com/ko/advanced/best-practice-security.html
+var session = require('express-session');
+app.set('trust proxy', 1) // trust first proxy
+
+app.use( session({
+    genid: function(req) {
+       return '_' + Math.random().toString(36).substr(2, 9);// use UUIDs for session IDs
+   },
+   secret: '@#@$MYSIGN#@$#$',
+   resave: false,
+   saveUninitialized: true,
+   cookie: { secure: true }
+  })
+);
+////////////////////////////////////////////////////////////////////////
+const WEBPATH = '/myapp';
+
+app.use(bodyParser.json()); // json
 app.use(bodyParser.urlencoded({ extended: true }));
+
 
 app.use(WEBPATH, express.static(path.join(__dirname, '/../public')));
 
@@ -100,26 +118,6 @@ socketEvents(SOCKET);
 
 
 //////////////////////// WEBSOCKEFIY /////////////////////////////////////////////////
-// var os = require("os");
-//
-//
-// function getServerIp() {
-//     var ifaces = os.networkInterfaces();
-//     var result = '';
-//     for (var dev in ifaces) {
-//         var alias = 0;
-//         if(dev === "eth0"){
-//           ifaces[dev].forEach(function(details) {
-//             if (details.family == 'IPv4' && details.internal === false) {
-//               result = details.address;
-//               ++alias;
-//             }
-//           });
-//         }
-//     }
-//
-//     return result;
-// }
 
 const websockifyConfig = {
   source: '192.168.0.108:9000',

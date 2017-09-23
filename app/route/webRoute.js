@@ -12,68 +12,106 @@
     next();
   });
   var path = require('path');
-  router.get('/tmp', (req, res) => {
-        res.render("tmp.ejs");
+
+
+  router.get('/login', (req, res) => {
+    res.render("login.ejs");
   });
+
+  router.get('/logout', (req, res) => {
+    var sess = req.session;
+       if(sess.username){
+           req.session.destroy(function(err){
+               if(err){
+                   console.log(err);
+               }else{
+                   res.redirect('/myapp/login');
+               }
+           })
+       }else{
+           res.redirect('/myapp/login');
+       }
+  });
+
+  function checkSession(req, res, ejsFile){
+    var sess = req.session;
+    if(sess.userid === undefined || sess.userid === null){
+      res.setHeader("Content-Type", "text/html");
+      res.redirect('/myapp/login');
+    }else {
+      res.render(ejsFile);
+    }
+  }
+
+
   router.get('/index', (req, res) => {
-        res.render("index.ejs");
+      const EJS_File = "index.ejs";
+      checkSession(req, res, EJS_File);
   });
 
   router.get('/container', (req, res) => {
-        res.render("container.ejs");
+    const EJS_File = "container.ejs";
+    checkSession(req, res, EJS_File);
   });
 
 
   router.get('/network', (req, res) => {
-        res.render("network.ejs");
+    const EJS_File = "network.ejs";
+    checkSession(req, res, EJS_File);
   });
 
   router.get('/image', (req, res) => {
-        res.render("image.ejs");
+    const EJS_File = "image.ejs";
+    checkSession(req, res, EJS_File);
   });
 
   router.get('/volume', (req, res) => {
-        res.render("volume.ejs");
+    const EJS_File = "volume.ejs";
+    checkSession(req, res, EJS_File);
   });
 
   router.get('/swarm' , (req, res) => {
-        res.render("swarm.ejs");
+    const EJS_File = "swarm.ejs";
+    checkSession(req, res, EJS_File);
   });
 
   router.get('/node', (req, res) => {
-        res.render("node.ejs");
+    const EJS_File = "node.ejs";
+    checkSession(req, res, EJS_File);
   });
 
   router.get('/terminal' , (req, res) => {
-        res.render("terminal.ejs");
-  });
-
-  router.get('/graph', (req, res) => {
-        res.render("graph.ejs");
+    const EJS_File = "terminal.ejs";
+    checkSession(req, res, EJS_File);
   });
 
   router.get('/dockerfile' ,  (req, res) => {
-        res.render("dockerfile.ejs");
+    const EJS_File = "dockerfile.ejs";
+    checkSession(req, res, EJS_File);
   });
 
   router.get('/service' ,  (req, res) => {
-        res.render("service.ejs");
+    const EJS_File = "service.ejs";
+    checkSession(req, res, EJS_File);
   });
 
   router.get('/task' ,  (req, res) => {
-        res.render("task.ejs");
+    const EJS_File = "task.ejs";
+    checkSession(req, res, EJS_File);
   });
-
-  router.get('/test' ,  (req, res) => {
-        res.render("test.ejs");
-  });
+  //
+  // router.get('/test' ,  (req, res) => {
+  //       res.render("test.ejs");
+  // });
 
   router.get('/settings' , (req, res) => {
-        res.render("settings.ejs");
+    const EJS_File = "settings.ejs";
+    checkSession(req, res, EJS_File);
   });
 
   router.get('/vnc' , (req, res) => {
-        res.render("vnc.ejs");
+    const EJS_File = "vnc.ejs";
+    checkSession(req, res, EJS_File);
   });
 
   ////// html에서 외부 html 파일 로딩하기 위해  iframe 활용

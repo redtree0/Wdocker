@@ -331,24 +331,6 @@ $(function(){
             $terminal.enable();
           });
 
-           function userlogin(name, password, callback){
-             $.getJSON("/myapp/terminal/data.json",(data)=>{
-               var user = null;
-               var pass = null;
-               if(data.length > 0){
-                 user = (data[0].user);
-                 pass = (data[0].password);
-               }else {
-                 user = "admin";
-                 pass = "admin";
-               }
-               if((name === user) && (password === pass)){
-                 callback("some token");
-               } else {
-                 callback(false);
-               }
-             });
-           }
           //  console.log($terminal);
             $terminal =  $("#terminal").terminal((command, term) => {
               // client.sendEvent(COMPLETE.NOT,'stdin', command);

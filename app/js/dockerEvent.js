@@ -665,7 +665,8 @@
     *  @return {Function} doTask
     */
     self.remove = function (data, callback) {
-      return self.doTask(data, callback,  "remove");
+      // return self.doTask(data, callback,  "remove");
+      return self.docker.getImage(data).remove().then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));
     };
 
     /** @method  - tag
@@ -701,16 +702,16 @@
           if(data){
             var image = self.docker.getImage(data.name +":" + data.tag);
 
-            mongo.auth.show((result)=>{
-              var auth = {
-                username : result[0].username,
-                password :  result[0].password,
-                email : result[0].email,
-                serveraddress : result[0].serveraddress
-              };
-              image.push(data, dockerStream.bind(self, onProgress), auth);
+            // mongo.auth.show((result)=>{
+            //   var auth = {
+            //     username : result[0].username,
+            //     password :  result[0].password,
+            //     email : result[0].email,
+            //     serveraddress : result[0].serveraddress
+            //   };
+              image.push(data, dockerStream.bind(self, onProgress), data.auth);
 
-            });
+            // });
           }
           callback(true);
         //  self.doTask(data, callback, opts ,"push");
@@ -856,9 +857,9 @@
       };
 
       self.authCheck = function(data, callback){
-          mongo.auth.find(data, (result)=>{
-            self.docker.checkAuth(result).then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));
-          });
+          data.serveraddress = "https://index.docker.io/v1/"
+          self.docker.checkAuth(data).then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));
+
       }
 
 
