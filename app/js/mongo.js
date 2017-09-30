@@ -12,7 +12,8 @@ db.once('open', function(){
 });
 
 // ,'users_test'
-mongoose.connect('mongodb://localhost/nocker', function(err) {
+mongoose.connect('mongodb://localhost/wave', { useMongoClient: true })
+  .catch((err)=>{
     if (err) {
       throw err
     }
