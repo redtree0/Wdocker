@@ -1,6 +1,7 @@
 
 var Docker = require('dockerode');
 var fs     = require('fs');
+var path = require("path");
 
 module.exports = function(opts) {
 
@@ -33,11 +34,15 @@ module.exports = function(opts) {
         return new Boolean(false);
       }
   }
-
+  var dockerPath = path.join(path.dirname(__dirname), "docker");
+  if(!fs.existsSync(dockerPath)){
+    fs.mkdir(dockerPath, function(err) {
+    });
+  }
   if(state) {
     var keydir = null;
     if(opts.hasOwnProperty("host")){
-      keydir = '.docker/' + opts.host;
+      keydir = path.join(dockerPath, opts.host);
     }
     if(fs.existsSync(keydir)){
       opts.protocol = 'https';
