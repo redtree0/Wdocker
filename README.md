@@ -48,7 +48,7 @@ Node.js 설치
 </code>
 
 <code>
-   npm install
+   npm install --production
 </code>
 <code>
   openssl genrsa 1024 > key.pem  
