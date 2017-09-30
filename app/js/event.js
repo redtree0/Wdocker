@@ -19,11 +19,32 @@ var eventLists = function(io){
   });
 
 };
+
+var os = require("os");
+
+
+function getServerIp() {
+    var ifaces = os.networkInterfaces();
+    var result = '';
+    for (var dev in ifaces) {
+        var alias = 0;
+        if(dev === "eth0"){
+          ifaces[dev].forEach(function(details) {
+            if (details.family == 'IPv4' && details.internal === false) {
+              result = details.address;
+              ++alias;
+            }
+          });
+        }
+    }
+
+    return result;
+}
   // console.log(io);
   //  io.on('connection', function(socket) {
   function onConnect(socket) {
 				socket.handshake.secure = true;
-				console.log("socket");
+				// console.log("socket");
 				var token = socket.handshake.query.token;
 				console.log(token);
 
@@ -33,13 +54,18 @@ var eventLists = function(io){
 
               var hostinfo = data.filter((value)=>{
                 if(value._id.toString() === token){
-                  return value.ip;
+                  return value;
                 }
               });
 
               var server = new Socket(socket);
-              var host = hostinfo[0].ip;
-              console.log(host);
+              var host = null;
+
+              if(hostinfo.length !== 0){
+                host = hostinfo[0].ip;
+              }else {
+                host =  getServerIp();
+              }
               container(server, host);
               network(server, host);
               image(server, host)
@@ -111,11 +137,15 @@ var eventLists = function(io){
 
 					server.listen("AttachContainer", function(data, fn){
               var containerId = (data).toString().substring(0, 12);
-							function stdin(stream){
+							function stdin(stream, container){
 									// server.listen("AttachStdin", stream);  //exec
                   server.listen("AttachStdin", (data)=>{
                     // console.log(data);
-                    stream.write(data + "\n");
+                    if(data === "exit"){
+                      container.stop();
+                    }else {
+                      stream.write(data + "\n");
+                    }
                   });
 							}
 

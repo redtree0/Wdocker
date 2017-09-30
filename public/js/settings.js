@@ -29,7 +29,7 @@ const columns = [{
       align : "center",
       width : "5%",
       formatter : function (value , row, index){
-        return "<button type='button' class='btn btn-danger remove'><span class='glyphicon glyphicon-remove'></span></button>"
+        return "<bfutton type='button' class='btn btn-danger remove'><span class='glyphicon glyphicon-remove'></span></button>"
       }
     }];
 
@@ -102,6 +102,19 @@ $(function(){
           client.sendEventTable(eventName, table);
         };
       }
+
+      $("#add").click((e)=>{
+
+      });
+      $all.event.add = {
+        $button : $("#add"),
+        eventName : "DELETE",
+        clickEvent :   (client, eventName, table)=>{
+            return function(){
+              table.refresh();
+            };
+          }
+      }
       $all.event.remove = {
           $button : $(".remove"),
           eventName : "DELETE",
@@ -123,6 +136,8 @@ $(function(){
             finished.show();
           });
       });
+
+
 
 
 });

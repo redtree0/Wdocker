@@ -22,6 +22,7 @@ var main = (function(){
     function getHostId(host){
       var hostLists = null;
       $.ajax({
+        method: "GET",
         url: '/myapp/settings/data.json',
         async: false,
         dataType: 'json',
@@ -29,13 +30,18 @@ var main = (function(){
           hostLists = json;
         }
       });
-      var hostinfo = hostLists.filter((value)=>{
-        if(value.ip === host){
-          return value;
-        }
-      })
-      var hostid = (hostinfo[0]._id);
-      return hostid;
+      if(hostLists.length !== 0){
+
+        var hostinfo = hostLists.filter((value)=>{
+          if(value.ip === host){
+            return value;
+          }
+        })
+        var hostid = (hostinfo[0]._id);
+        return hostid;
+      }else {
+        return "notExist"
+      }
     }
 
     function getNewConnection(host){

@@ -501,7 +501,7 @@
             container.attach({hijack: true, stream: true, stdin: true, stdout: true, stderr: true}, function (err, Stream) {
 
               stderr(stream);
-              stdin(stream);
+              stdin(stream, container);
               stdout(stream);
             });
           });
@@ -820,13 +820,17 @@
       */
       self.ping = function (data, callback) {
         // console.log(data);
-
+        var local = getServerIp();
+        var docker = null;
         if(data.hasOwnProperty("host") && data.hasOwnProperty("port")){
-          var docker = new Docker(data);
+          if(local === data.host){
+            docker = new Docker();
+          }else {
+            docker = new Docker(data);
+          }
+
           docker.ping((err,data)=>{
-              // callback(err, data);
-              // console.log(data);
-              // console.log(err);
+
               if(err !== null){
                   callback({err : err, data: data, statusCode : 500});
               }else {
@@ -852,7 +856,7 @@
           if(err) {
             callback(err);
           }
-          callback(true);
+          callback({statusCode : 200});
         });
       };
 
@@ -1107,7 +1111,7 @@
               "Role" : "worker",
               "Availability" : "pause"
             };
-
+            // console.log(opts);
         node.update(opts).then((data)=>{
           node.remove({force : true}).then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));
         }).catch((err)=>{

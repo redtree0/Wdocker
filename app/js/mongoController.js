@@ -19,8 +19,8 @@ mongo.prototype.save = function(data, callback){
           if(err){
               return err;
           }
-      });
-      callback;
+          callback;
+   });
 };
 
 mongo.prototype.create = function(req, res) {
@@ -52,8 +52,10 @@ mongo.prototype.show = function(callback) {
   self.db.find(function(err, db){
         if(err) return ({error: 'database failure'});
         if(typeof callback === "function") {
+          // console.log(db);
           return  callback(db);
         }else {
+          // console.log("db");
           return  (db);
         }
     });

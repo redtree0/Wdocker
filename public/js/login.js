@@ -1,6 +1,6 @@
 $(function() {
     $('#login').bootstrapLogin({
-        title : "Docker",
+        title : "Docker Wave",
         onSubmit: function(username, password) {
           $.post("/myapp/admin/data",
           {
@@ -31,10 +31,7 @@ $(function() {
         signup.appendButton('Sign Up', 'btn-primary create', ()=>{
           var username = $username.val().trim();
           var password = $password.val().trim();
-          console.log(username);
-          console.log(password);
           if(username === undefined || username === null || password === undefined || password === null){
-            console.log("de");
             return;
           }
           if(password !== $cpassword.val().trim()){

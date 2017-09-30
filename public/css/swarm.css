@@ -1,0 +1,97 @@
+body.dragging, body.dragging * {
+cursor: move !important;
+}
+ol.vertical {
+  margin: 0 0 9px 0;
+  /*margin: 10px;*/
+  min-height: 30px;
+}
+.dragged {
+position: absolute;
+opacity: 0.5;
+z-index: 2000;
+}
+ol.sortable li, ol.serialization li, ol.default li {
+  cursor: pointer;
+}
+ol li.placeholder{
+list-style-type: none;
+position: absolute;
+}
+ol li.placeholder::before {
+  content: "";
+
+  border-color: transparent green;
+  border-style: solid;
+  border-width: 0.35em 0 0.35em 0.45em;
+  display: block;
+  height: 0;
+  width: 0;
+  left: -1em;
+  top: 0.9em;
+  position: absolute;
+}
+
+
+.isLoaded {
+list-style-type: none;
+  background-color: white;
+  margin : 10px;
+   border-radius: 5px;
+   border-width: 2px;
+  border-color: gray;
+  border-style: groove;
+  font-size: large;
+/*.text-success;*/
+}
+
+.isLeader {
+list-style-type: none;
+  background-color: #FADBD8 ;
+  margin : 10px;
+   border-radius: 5px;
+   border-width: 2px;
+  border-color: gray;
+  border-style: groove;
+  font-size: large;
+/*.text-success;*/
+}
+
+.isNode {
+list-style-type: none;
+  margin : 10px;
+   border-radius: 5px;
+   border-width: 2px;
+  border-color: gray;
+  border-style: groove;
+  font-size: large;
+/*.text-success;*/
+}
+
+.isWorker {
+  background-color: #FEF9E7;
+}
+
+.isManager {
+  background-color: #EBF5FB;
+}
+
+.isDown {
+  background-color: #EBEDEF  ;
+  color : #EC7063;
+}
+
+li span{
+  display:none;
+  visibility: hidden;
+  padding:3px;
+  line-height:8px;
+  cursor:pointer;
+  position:absolute;
+  right:0px;
+  left : 20%;
+  top:0px;
+}
+li:hover span{
+visibility: visible;
+}

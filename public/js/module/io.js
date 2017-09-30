@@ -139,6 +139,13 @@ var clientsocket = (function clientsocket(io, $body) {
         var socket =  self.socket;
         return socket.query.token;
     };
+
+
+    this.deleteListener = function(eventName){
+      var self = this;
+      var socket =  self.socket;
+      socket.removeListener(eventName);
+    }
     // /** @method  - onlyEvent
     // *  @description 소켓 데이터 송신 함수
     // *  @param {String} eventName - 소켓 이벤트 명

@@ -2,24 +2,10 @@
 <html>
   <head>
     <% include ./partials/head %>
-    <script src='/myapp/js/bundle/task.bundle.js'></script>
-  </head>
-  <style>
-    /*html, body { height: 100%; margin: 0; }*/
-    div .node {
-      width : 30%;
-      height: 300px;
-      display: block;
-      /*height: auto;*/
-      padding : 5px;
-      margin-left : 5px;
-      margin-top : 10px;
-     }
+    <link rel="stylesheet" href="/myapp/css/task.css">
 
-     div .dockerNode{
-       margin-left: 25px;
-     }
-</style>
+  </head>
+
   <body>
     <% include ./partials/topnav %>
     <div class="container-fluid">
@@ -35,7 +21,7 @@
                     <div class="panel-body">
                         <% include ./partials/connectDocker %>
                         <table data-pagination="true" class="table table-striped jsonTable"></table>
-                        
+
                         <p><span class="glyphicon glyphicon-exclamation-sign"></span>
                           해당 호스트가 swarm 구성이 되있을 경우, 재 기능을 안할 수 있습니다.
                           다른 node 상태 확인하시오.
@@ -56,4 +42,6 @@
     </div>
 
   </body>
+      <% include ./partials/load %>
+      <script src='/myapp/js/bundle/task.bundle.js'></script>
 </html>

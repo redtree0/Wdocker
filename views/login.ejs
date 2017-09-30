@@ -4,10 +4,7 @@
 <head>
   <% include ./partials/head %>
   <link href='/myapp/lib/css/bootstrap-login.css' rel='stylesheet' type='text/css'>
-  <script src="/myapp/lib/js/bootstrap-login.js"></script>
-  <!-- <script src="/myapp/lib/js/bootstrap-dialog.min.js"></script>
-  <link rel="stylesheet" href="/myapp/lib/css/bootstrap-dialog.min.css"> -->
-  <script src='/myapp/js/bundle/login.bundle.js'></script>
+
 
 </head>
 
@@ -40,5 +37,8 @@
 
 </body>
 
+<% include ./partials/load %>
+<script src="/myapp/lib/js/bootstrap-login.js"></script>
 
+<script src='/myapp/js/bundle/login.bundle.js'></script>
 </html>

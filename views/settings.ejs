@@ -3,8 +3,7 @@
   <head>
     <% include ./partials/head %>
 
-    <script src='/myapp/js/bundle/settings.bundle.js'></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.10/jquery.mask.js"></script>
+
 
   </head>
   <body>
@@ -20,7 +19,7 @@
                             <h4 class ="text-left">Docker Settings</h4>
                         </div>
                           <div class="panel-body">
-                            <form class="form-horizontal" action="/myapp/settings" method="post" >
+                            <form class="form-horizontal" action="/myapp/settings/data.json" method="post" >
                               <div class="form-group row">
                                 <label for="name" class="col-md-2 control-label">Docker Host IP  </label>
                                 <div class="col-md-6">
@@ -33,7 +32,7 @@
                                   <input type="number" class="form-control" id="port" min="1" max="65535"   name="port" placeholder="port number">
                                 </div>
                                 <div class="col-md-2">
-                                  <button type="submit" class="btn btn-default btn-primary btn-block">Add</button>
+                                  <button type="submit" id="add" class="btn btn-default btn-primary btn-block">Add</button>
                                 </div>
                               </div>
                             </form>
@@ -112,4 +111,7 @@
     </div>
 
   </body>
+  <% include ./partials/load %>
+  <script src='/myapp/js/bundle/settings.bundle.js'></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.10/jquery.mask.js"></script>
 </html>

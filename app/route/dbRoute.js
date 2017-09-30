@@ -37,47 +37,33 @@ module.exports = function(dbRoute){
     next();
   });
 
-  router.post('/settings', function(req, res){
-      if(req.body.ip === null || req.body.port === null){
-        if(req.body.ip !== getServerIp()){
-          res.render("settings.ejs");
-          return false;
-        }
-      }else {
-        var opts = {
-          "ip" : req.body.ip,
-          "port" :  req.body.port
-        }
-        mongo.docker.save(opts, res.render("settings.ejs"));
-      }
-  });
 
 
-      router.get('/admin/data', function(req,res){
-            var sess = req.session;
-            if(sess.userid === undefined || sess.userid === null){
-              // return res.json(false);
-              return res.json(false);
-              // return  res.redirect("/myapp/settings");
-            }
-                if(req.body.cpass === req.body.pass){
-
-                  var opts = {
-                    "username" : sess.username,
-                    "password" : sess.password,
-                  }
-
-                  mongo.admin.find(opts, (match)=>{
-                    if(match){
-                      opts.auth = match.auth;
-                      res.json(opts);
-                    }else {
-                      res.json(false);
-                    }
-                  });
-                  // res.json(true);
-                }
-      });
+      // router.get('/admin/data', function(req,res){
+      //       var sess = req.session;
+      //       if(sess.userid === undefined || sess.userid === null){
+      //         // return res.json(false);
+      //         return res.json(false);
+      //         // return  res.redirect("/myapp/settings");
+      //       }
+      //           if(req.body.cpass === req.body.pass){
+      //
+      //             var opts = {
+      //               "username" : sess.username,
+      //               "password" : sess.password,
+      //             }
+      //
+      //             mongo.admin.find(opts, (match)=>{
+      //               if(match){
+      //                 opts.auth = match.auth;
+      //                 res.json(opts);
+      //               }else {
+      //                 res.json(false);
+      //               }
+      //             });
+      //             // res.json(true);
+      //           }
+      // });
 
       router.post('/admin/data', function(req,res){
         if(req.body.username !== null && req.body.password !== null){
@@ -192,18 +178,43 @@ module.exports = function(dbRoute){
 
             });
 
-    router.use(function timeLog(req, res, next) {
-      // console.log('Time: ', Date.now());
-      res.setHeader("Content-Type", "application/json");
+    // router.use(function timeLog(req, res, next) {
+    //   // console.log('Time: ', Date.now());
+    //   res.setHeader("Content-Type", "application/json");
+    //
+    //   next();
+    // });
 
-      next();
-    });
+    var docker = mongo.docker;
+    router.post('/settings/data.json', function(req, res){
+           if(req.body.ip === null || req.body.port === null){
+             if(req.body.ip !== getServerIp()){
+               res.render("settings.ejs");
+               return false;
+             }
+           }else {
+             var opts = {
+               "ip" : req.body.ip,
+               "port" :  req.body.port
+             }
+            //  docker.save(opts, res.redirect("/myapp/settings"));
+             docker.save(opts, res.render("settings.ejs"));
+           }
+   });
+
 
   router.get('/settings/data.json', function(req,res){
-        docker.find(function(err, db){
-            if(err) return res.status(500).send({error: 'database failure'});
-            res.json(db);
-        })
+        docker.count((cnt)=>{
+          if(cnt === 0){
+            var defaultHost = {
+              "ip" : getServerIp(),
+              "port" : null
+            }
+            docker.save(defaultHost, docker.show((json)=>{res.json(json)}));
+          }else {
+            docker.find(docker.show((json)=>{res.json(json)}));
+          }
+          });
   });
 
 

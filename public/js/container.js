@@ -75,6 +75,8 @@ $(function(){
   }
   var dialog = require("./module/dialog.js");
 
+  var $terminal = null;
+
   var $all = {};
   $all.init = function(){
     $("#terminal").hide();
@@ -160,26 +162,14 @@ $(function(){
     var index = 0;
     initDropdown(jsonUrl, $contextMenu, $dropDown, { attr : attr, index :  index} );
 
-    // if(host === null || host === undefined){
-    //   jsonUrl = "/myapp/volume/data/" + local;
-    // }else {
-    //   jsonUrl = "/myapp/volume/data/" + host;
-    // }
     jsonUrl = "/myapp/volume/data/" + hostId;
-    // console.log(jsonUrl);
 
-    // jsonUrl = '/myapp/volume/data.json';
     var $contextMenu =   self.$volumeMenu;
     var $dropDown =   self.$volume;
     var attr = "Name";
 
     initDropdown(jsonUrl, $contextMenu, $dropDown, { attr : attr } );
 
-    // if(host === null || host === undefined){
-    //   jsonUrl = "/myapp/network/data/" + local;
-    // }else {
-    //   jsonUrl = "/myapp/network/data/" + host;
-    // }
     jsonUrl = "/myapp/network/data/" + hostId;
     // console.log(jsonUrl);
     // jsonUrl = '/myapp/network/data.json';
@@ -221,31 +211,45 @@ $(function(){
     clickRow : function  (client, row, $element, field) {
       // console.log("click");
       if(field === "Attach"){
-
-          if(row.State !== "running" && $("#terminal").is(":visible")){
-            // console.log("hide");
-            $("#terminal").hide();
-          }
-          else if($element.find(".exit").length > 0){
-            $("#terminal").hide();
-            $element.find(".exit").attr({
-              class : "btn btn-success attach"
-            }).text("Attach");
+        // if($("#terminal").is(":visible")){
+        //   if(row.State !== "running" ){
+        //     $("#terminal").hide();
+        //     if($terminal !== null){
+        //       $terminal.destroy();
+        //       refresh();
+        //     }
+        //   }
+          // else if($element.find(".exit").length > 0){
+          //   $("#terminal").hide();
+          //   $element.find(".exit").attr({
+          //     class : "btn btn-success attach"
+          //   }).text("Attach");
+          //   // console.log($terminal);
+          //   if($terminal !== null){
+          //     $terminal.destroy();
+          //     refresh();
+          //   }
+          // }
+          if(row.State === "running" ){
+            // console.log($("#terminal"));
+            $("#terminal").show();
+            // console.log(row);
             if($terminal !== null){
               $terminal.destroy();
             }
+            // $element.find(".attach").attr({
+            //   class : "btn btn-danger exit"
+            // }).text("exit");
+            var containerId = row.Id;
+            client.sendEvent(COMPLETE.NOT,'AttachContainer', containerId);
+            terminal(containerId, client);
+          }else {
+            alert("컨테이너가 시작되지 않았습니다.");
+            refresh();
           }
-          else if(row.State === "running" ){
-              // console.log($("#terminal"));
-              $("#terminal").show();
-              // console.log(row);
-              terminal(row.Id);
-              $element.find(".attach").attr({
-                class : "btn btn-danger exit"
-              }).text("exit");
-
         }
-      }
+        // else if(row.State === "running" ){
+      // }
     }
   };
 
@@ -253,6 +257,9 @@ $(function(){
   function clickDefault(client, eventName, table){
     return function(){
       client.sendEventTable(eventName, table);
+      if($terminal !== null){
+        refresh();
+      }
     };
   }
   $all.event.create = {
@@ -301,67 +308,58 @@ $(function(){
       callback;
     }
   };
-  // var mine = null;
-  // $.getJSON('/myapp/settings/data.json', function(json, textStatus) {
-  //   // console.log(json);
-  //   mine = json;
-  //   console.log(mine);
-  //   // return json;
-  // });
-  // $all.getId = function(){
-  //   return mine;
-  // }
+
     var main = require("./module/main.js");
     main.init($all);
     var containerTable = main.getMainTable();
 
 
-     var $terminal = null;
 
-     function terminal(containerId){
-        var client = main.getSocket();
-          // console.log(containerId);
-          client.listen('AttachStderr', function(data) {
-            $terminal.error(String(data));
-          });
-          client.listen('AttachStdout', function(data) {
-            $terminal.echo(String(data));
-          });
-          client.listen('AttachEnable', function() {
-            $terminal.enable();
-          });
+     function terminal(containerId, client){
 
-          //  console.log($terminal);
             $terminal =  $("#terminal").terminal((command, term) => {
-              // client.sendEvent(COMPLETE.NOT,'stdin', command);
+
                  client.sendEvent(COMPLETE.NOT,'AttachStdin', command);
-                 var cmd = $.terminal.parse_command(command);
                  return ;
 
            }, {
                  login : userlogin,
-                 prompt: containerId.substring(0,16) + "# ",
+                 prompt: "Prompt #> ",
                  greetings: false,
                  history : true,
                  exit: true,
 
                  onInit: function(term){
                        term.echo("컨테이너 접속 완료");
+                       client.deleteListener('AttachStderr');
+                       client.deleteListener('AttachStdout');
+                       client.deleteListener('AttachEnable');
 
-                       client.sendEvent(COMPLETE.NOT,'AttachContainer', containerId);
+
+                       client.listen('AttachStderr', function(data) {
+                         $terminal.error(String(data));
+                       });
+                       client.listen('AttachStdout', function(data) {
+                         $terminal.echo(String(data));
+                       });
+                       client.listen('AttachEnable', function() {
+                         $terminal.enable();
+                       });
+                      //  client.sendEvent(COMPLETE.NOT,'AttachContainer', containerId);
                  },
                  onBeforeLogin: function(term){
-                  //  console.log(term);
+
                  },
                  onBeforeCommand : function(term){
                   //  console.log(term);
                  },
                  onExit : function(term){
                       client.sendEvent(COMPLETE.NOT,'AttachStdin', "exit");
-                      containerTable.refresh();
+                      // containerTable.refresh();
                       term.destroy();
                        $("#terminal").hide();
-                      refresh();
+                       refresh();
+
                  }
            });
 

@@ -101,7 +101,7 @@ var table = (function Table($table, columns){
       }
       // console.log(init.url);
       // console.log(jsonUrl);
-      (this.$table).bootstrapTable('refresh', {url : init.url}); /// 테이블 data로 새로 로드
+      (this.$table).bootstrapTable('refresh', {url : init.url, silent: true}); /// 테이블 data로 새로 로드
     }
 
     /** @method  - reset

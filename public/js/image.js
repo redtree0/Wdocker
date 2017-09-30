@@ -213,6 +213,7 @@ $(function(){
           }
           // console.log(checkedImage);
           client.sendEvent(COMPLETE.DO, eventName, checkedImage);
+          table.refresh();
         };
       }
   };

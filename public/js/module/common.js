@@ -207,7 +207,7 @@ function isSwarm(){
 }
 
 function refresh(){
-  setTimeout(()=>{location.reload(true)}, 3000);
+  setTimeout(()=>{location.reload(true)}, 1500);
 }
 
 

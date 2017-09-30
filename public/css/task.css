@@ -1,0 +1,14 @@
+  /*html, body { height: 100%; margin: 0; }*/
+  div .node {
+    width : 30%;
+    height: 300px;
+    display: block;
+    /*height: auto;*/
+    padding : 5px;
+    margin-left : 5px;
+    margin-top : 10px;
+   }
+
+   div .dockerNode{
+     margin-left: 25px;
+   }

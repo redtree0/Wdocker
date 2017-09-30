@@ -35,7 +35,20 @@ module.exports = function(opts) {
   }
 
   if(state) {
+    var keydir = null;
+    if(opts.hasOwnProperty("host")){
+      keydir = '.docker/' + opts.host;
+    }
+    if(fs.existsSync(keydir)){
+      opts.protocol = 'https';
+      opts.ca = fs.readFileSync(keydir + '/ca.pem');
+      opts.cert = fs.readFileSync(keydir + '/cert.pem');
+      opts.key = fs.readFileSync(keydir + '/key.pem');
+    }
+    // console.log(opts);
     var docker = new Docker(opts);
+    // console.log("In Docker");
+    // console.log(docker);
   } else {
     var docker = new Docker({ socketPath: socket });
   }

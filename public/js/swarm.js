@@ -334,43 +334,43 @@ $(function  () {
           }
       };
 
-      $all.event.delete = {
-            $button : $(".update"),
-            eventName : "UpdateSwarm",
-            clickEvent : function(client, eventName, table){
-              return function(){
-                        var node = $(this).parent();
-                        var nodeType = (node.closest('ol').attr("id"));
-                        var opts = {
-                          "host" : node.attr("ip"),
-                          "port" : node.attr("port"),
-                          "nodeID" : node.attr("nodeID"),
-                          "Version" : node.attr("version"),
-                          "Availability" : node.attr("availability")
-                        }
-                        console.log(opts);
-                        node.remove();
-                        var leader = getLeader();
-                        var removeOpts = {
-                          "leader" : leader,
-                          "remove" : opts
-                        }
-
-                        // console.log($(this));
-
-                        client.sendEvent(COMPLETE.DO, "RemoveNode", removeOpts, (data)=>{
-
-                             client.sendEvent(COMPLETE.NOT, "ThrowNode", opts, (data)=>{
-
-                                 var finished = new dialog("Swarm & Node", data);
-                                 finished.setDefaultButton('Close[Enker]', 'btn-primary create');
-                                 finished.show();
-                             });
-
-                         });
-                  }
-              }
-          }
+      // $all.event.delete = {
+      //       $button : $(".delete"),
+      //       eventName : "RemoveNode",
+      //       clickEvent : function(client, eventName, table){
+      //         return function(){
+      //                   var node = $(this).parent();
+      //                   var nodeType = (node.closest('ol').attr("id"));
+      //                   var opts = {
+      //                     "host" : node.attr("ip"),
+      //                     "port" : node.attr("port"),
+      //                     "nodeID" : node.attr("nodeID"),
+      //                     "Version" : node.attr("version"),
+      //                     "Availability" : node.attr("availability")
+      //                   }
+      //                   console.log(opts);
+      //                   node.remove();
+      //                   var leader = getLeader();
+      //                   var removeOpts = {
+      //                     "leader" : leader,
+      //                     "remove" : opts
+      //                   }
+      //
+      //                   // console.log($(this));
+      //
+      //                   client.sendEvent(COMPLETE.NOT, "RemoveNode", removeOpts, (data)=>{
+      //
+      //                        client.sendEvent(COMPLETE.NOT, "ThrowNode", opts, (data)=>{
+      //                           console.log("callbacked");
+      //                            var finished = new dialog("Swarm & Node", data);
+      //                            finished.setDefaultButton('Close[Enker]', 'btn-primary create');
+      //                            finished.show();
+      //                        });
+      //
+      //                    });
+      //             }
+      //         }
+      //     }
 
 
 
@@ -409,9 +409,9 @@ $(function  () {
           "remove" : opts
         }
 
-        client.sendEvent(COMPLETE.DO, "RemoveNode", removeOpts, (data)=>{
+        client.sendEvent(COMPLETE.NOT, "RemoveNode", removeOpts, (data)=>{
 
-             client.sendEvent(COMPLETE.DO, "ThrowNode", opts, (data)=>{
+             client.sendEvent(COMPLETE.NOT, "ThrowNode", opts, (data)=>{
                 //  console.log(data);
                 //  console.log(nodeType);
                  var finished = new dialog("Swarm & Node", data);
