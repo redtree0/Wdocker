@@ -118,10 +118,33 @@ socketEvents(SOCKET);
 
 
 //////////////////////// WEBSOCKEFIY /////////////////////////////////////////////////
+var os = require("os");
+
+
+function getServerIp() {
+    var ifaces = os.networkInterfaces();
+    var result = '';
+    for (var dev in ifaces) {
+        var alias = 0;
+        if(dev === "eth0"){
+          ifaces[dev].forEach(function(details) {
+            if (details.family == 'IPv4' && details.internal === false) {
+              result = details.address;
+              ++alias;
+            }
+          });
+        }
+    }
+
+    return result;
+}
+var local = getServerIp();
 
 const websockifyConfig = {
-  source: '192.168.0.108:9000',
-  target: '192.168.0.108:5901',
+  //   source: '192.168.0.108:9000',
+  //   target: '192.168.0.108:5901',
+  source: local + ':9000',
+  target: local + ':5901',
   web : "../views/",
   cert: '../cert.pem',
   key: '../key.pem'
