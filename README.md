@@ -47,9 +47,16 @@ Node.js 설치
   curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash - sudo apt-get install -y nodejs
 </code>
 
+wave 설치
+<code>
+git clone https://github.com/redtree0/Wdocker.git
+sudo chmod -R 744 Wdocker/
+</code>
+
 <code>
    npm install --production
 </code>
+
 <code>
   openssl genrsa 1024 > key.pem  
   sudo bash -c "openssl genrsa 1024 > key.pem"
@@ -63,6 +70,7 @@ Node.js 설치
  webpack
  cd app
  sudo node index.js
+
 </code>
 
 시연 영상
