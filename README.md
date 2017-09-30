@@ -57,5 +57,12 @@ Node.js 설치
   openssl req -x509 -new -key key.pem > cert.pem
   sudo bash -c "openssl req -x509 -new -key key.pem > cert.pem"   
 </code>
+
+<code>
+ npm install -g webpack
+ webpack
+ cd app
+ sudo node index.js
+</code>
 시연 영상
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/c-Oy501Wf6A&feature=youtu.be/0.jpg)](https://www.youtube.com/watch?v=c-Oy501Wf6A&feature=youtu.be)
