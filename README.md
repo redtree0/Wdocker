@@ -148,7 +148,7 @@ Wave는 웹 기반 원격 Docker 관리 도구입니다.
 	dockerd --tlsverify --tlscacert=ca.pem --tlscert=server-cert.pem --tlskey=server-key.pem -H=0.0.0.0:2376
 
   # ca.pem, cert.pem, key.pem 파일을 sftp로 Wave 서버에 옮긴다.
-	# Wave서버에 "Wave 경로 설치 경로"/app/.docker/$HOST에 넣는다.
+	# Wave서버에 "Wave 경로 설치 경로"/app/docker/$HOST에 넣는다.
 </pre>
 링크: [docker TLS 설정][docker-tls]
 [docker-tls]: https://docs.docker.com/engine/security/https/
