@@ -444,7 +444,8 @@ var main = (function(){
          var $hostPort = $("#hostPort"); /// 호스트 노출 포트
          var $dataLists = [$protocol, $containerPort, $hostPort];
 
-         initPortLists(self.$portlists, self.portlists, self.$portAdd,  $dataLists  );
+        //  initPortLists(self.$portlists, self.portlists, self.$portAdd,  $dataLists  );
+         initLists(self.$portlists, self.portlists, self.$portAdd,  $dataLists  );
        },
        /** @method  - initLabelLists
         *  @description form 에서 port 정보 추기 및 삭제 기능
@@ -459,7 +460,8 @@ var main = (function(){
          var $value = $("#value");
          var $dataLists = [$key, $value];
 
-         initPortLists(self.$labellists, self.labellists, self.$labelAdd,  $dataLists  );
+        //  initPortLists(self.$labellists, self.labellists, self.$labelAdd,  $dataLists  );
+         initLists(self.$labellists, self.labellists, self.$labelAdd,  $dataLists  );
        },
        /** @method  - socketButtonEvent
         *  @description 버튼 클릭시 발생하는 소켓 이벤트 초기화

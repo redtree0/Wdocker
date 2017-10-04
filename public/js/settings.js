@@ -103,9 +103,7 @@ $(function(){
         };
       }
 
-      $("#add").click((e)=>{
-
-      });
+      
       $all.event.add = {
         $button : $("#add"),
         eventName : "DELETE",

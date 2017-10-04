@@ -170,10 +170,11 @@ function createElement( _element, _class,  _text, _id, _type){
   return $(_element, { class: _class, text: _text , id: _id, type: _type});
 }
 
-function initPortLists($portlists, portlists, $portAdd, $dataLists){
-  createList($portlists, portlists);
-  clickDeleteList($portlists, portlists);
-  $portAdd.click((e)=>{
+// function initPortLists($portlists, portlists, $portAdd, $dataLists){
+function initLists($lists, lists, $Add, $dataLists){
+  createList($lists, lists);
+  clickDeleteList($lists, lists);
+  $Add.click((e)=>{
     e.preventDefault();
 
     var state = true;
@@ -183,8 +184,8 @@ function initPortLists($portlists, portlists, $portAdd, $dataLists){
       }
     }
     if(state) {
-      insertArray(portlists, $dataLists);
-      createList ( $portlists, portlists );
+      insertArray(lists, $dataLists);
+      createList ( $lists, lists );
     }
   });
 }

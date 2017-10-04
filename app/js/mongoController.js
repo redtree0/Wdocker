@@ -111,6 +111,7 @@ mongo.prototype.update = function(filter,data, attr,callback) {
               }
             }
         }
+        // console.log(db);
         db.save(function(err, db){
 
           if(err) {

@@ -174,19 +174,5 @@
     });
   });
 
-  router.get( '/admin/data/' , (req, res) => {
-
-    var sess = req.session;
-    if(sess.userid === undefined || sess.userid === null){
-      return res.json(false);
-    }else {
-      var sessUser = {
-        username : sess.username,
-        password : sess.password
-      }
-      return res.json(sessUser);
-    }
-  });
-
 
 module.exports = router;

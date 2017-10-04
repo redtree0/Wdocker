@@ -72,21 +72,6 @@
       }
       return callback(result);
     };
-    // /** @method  - get
-    // *  @description 실행할 Promise를 GET함
-    // *  @param {Object} data - promise 데이터
-    // *  @param {Object} opts - docker 실행 시 필요한 옵션
-    // *  @param {String} method - docker에서 실행할 메소드
-    // *  @return {Array} lists - Promise Array
-    // */
-    // self.getWorkingDocker = function () {
-    //       var self = this;
-    //       if(self.remoteDocker !== null){
-    //           return self.remoteDocker;
-    //       }else {
-    //         return  self.docker;
-    //       }
-    // };
 
     /** @method  - get
     *  @description 실행할 Promise를 GET함
@@ -176,7 +161,7 @@
       }else {
         docker = self.docker;
       }
-      console.log(docker);
+      // console.log(docker);
       if(self.getLists !== null){
         var dockerInfo = docker[self.getLists](opts);
         return new Promise(function(resolve, reject){
@@ -239,11 +224,7 @@
 
                 docker = new Docker();
                 return dockerHeathCheck(docker, "docker");
-                // return self.ping(docker, (err, data)=>{
-                //     if(err === null){
-                //       callback(docker);
-                //     }
-                // });
+
               }
     }
 
@@ -405,49 +386,49 @@
        return self.doTask(data, callback, "unpause");
      }
 
-     /** @method  - stats
-     *  @description docker container stats GET
-     *  @param {Object} data - 설정 데이터
-     *  @param {Function} callback - 클라이언트로 보낼 callback
-     *  @return {object} Promise
-     */
-     self.stats = function (data, callback) {
-       var container = (self.docker).getContainer(data);
-
-       return new Promise(function (resolve, reject) {
-         resolve(container.stats({"stream": false}));
-       }).then(callback);
-     }
-
-     /** @method  - top
-     *  @description docker container top GET
-     *  @param {Object} data - 설정 데이터
-     *  @param {Function} callback - 클라이언트로 보낼 callback
-     *  @return {object} Promise
-     */
-     self.top = function (data, callback){
-       var container = (self.docker).getContainer(data);
-       return new Promise(function (resolve, reject) {
-         resolve(container.top ({"ps_args": "aux"}));
-       }).then(callback);
-     };
-
-     /** @method  - logs
-     *  @description docker container logs GET
-     *  @param {Object} data - 설정 데이터
-     *  @param {Function} callback - 클라이언트로 보낼 callback
-     *  @return {object} Promise
-     */
-     self.logs = function (data, callback){
-       var container = self.docker.getContainer(data);
-       return new Promise(function (resolve, reject) {
-         //  "follow" : true, , "stderr": true
-         container.logs ({ "stdout" : true}).then((data)=>{
-           console.log(data);
-         });
-         resolve(container.logs ({ "stdout" : true}));
-       });
-     }
+    //  /** @method  - stats
+    //  *  @description docker container stats GET
+    //  *  @param {Object} data - 설정 데이터
+    //  *  @param {Function} callback - 클라이언트로 보낼 callback
+    //  *  @return {object} Promise
+    //  */
+    //  self.stats = function (data, callback) {
+    //    var container = (self.docker).getContainer(data);
+     //
+    //    return new Promise(function (resolve, reject) {
+    //      resolve(container.stats({"stream": false}));
+    //    }).then(callback);
+    //  }
+     //
+    //  /** @method  - top
+    //  *  @description docker container top GET
+    //  *  @param {Object} data - 설정 데이터
+    //  *  @param {Function} callback - 클라이언트로 보낼 callback
+    //  *  @return {object} Promise
+    //  */
+    //  self.top = function (data, callback){
+    //    var container = (self.docker).getContainer(data);
+    //    return new Promise(function (resolve, reject) {
+    //      resolve(container.top ({"ps_args": "aux"}));
+    //    }).then(callback);
+    //  };
+     //
+    //  /** @method  - logs
+    //  *  @description docker container logs GET
+    //  *  @param {Object} data - 설정 데이터
+    //  *  @param {Function} callback - 클라이언트로 보낼 callback
+    //  *  @return {object} Promise
+    //  */
+    //  self.logs = function (data, callback){
+    //    var container = self.docker.getContainer(data);
+    //    return new Promise(function (resolve, reject) {
+    //      //  "follow" : true, , "stderr": true
+    //      container.logs ({ "stdout" : true}).then((data)=>{
+    //        console.log(data);
+    //      });
+    //      resolve(container.logs ({ "stdout" : true}));
+    //    });
+    //  }
      self.attach = function(data, stdin, stdout, stderr){
        var docker = self.docker;
        var container = docker.getContainer(data);
@@ -532,12 +513,6 @@
        }
        var list = [];
        var self = this;
-      //  var docker = null;
-      //  if(remoteDocker !== null){
-      //    docker = remoteDocker;
-      //  }else {
-      //    docker = self.docker;
-      //  }
 
        for(var i in data) {
 
@@ -702,19 +677,9 @@
           if(data){
             var image = self.docker.getImage(data.name +":" + data.tag);
 
-            // mongo.auth.show((result)=>{
-            //   var auth = {
-            //     username : result[0].username,
-            //     password :  result[0].password,
-            //     email : result[0].email,
-            //     serveraddress : result[0].serveraddress
-            //   };
               image.push(data, dockerStream.bind(self, onProgress), data.auth);
-
-            // });
           }
           callback(true);
-        //  self.doTask(data, callback, opts ,"push");
       };
 
       /** @method  - create
@@ -1023,28 +988,6 @@
         });
       };
 
-      // /** @method  - join
-      // *  @description swarm join
-      // *  @param {Object} data - 설정 데이터
-      // *  @param {Function} callback - 클라이언트로 보낼 callback
-      // */
-      // self.join = function (data, callback){
-      //
-      //   var hostconfig = {
-      //     host : data.AdvertiseAddr,
-      //     port : data.port
-      //   }
-      //   delete data.port;
-      //
-      //   // console.log(hostconfig);
-      //   self.setRemoteDocker(hostconfig);
-      //
-      //     // console.log(self.remoteDocker);
-      //   return   self.remoteDocker.swarmJoin(data).then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));
-      //   // });
-      //
-      // };
-
       /** @method  - throwNode
       *  @description swarm throw 다른 호스트를 swarm에서 버림
       *  @param {Object} data - 설정 데이터
@@ -1119,28 +1062,7 @@
         });
 
       };
-      //
-      // /** @method  - update
-      // *  @description node update
-      // *  @param {Object} data - 설정 데이터
-      // *  @param {Function} callback - 클라이언트로 보낼 callback
-      // */
-      // self.update = function (data, callback){
-      //
-      //   var tmp = data.lists;
-      //   for(var i in tmp){
-      //     var opts = {
-      //       "id" : tmp[i].ID,
-      //       "version" : tmp[i].Version.Index,
-      //       "Role" : "worker",
-      //       "Availability" : data.Availability
-      //     };
-      //     var node = (self.docker).getNode(tmp[i].ID);
-      //     node.update(opts).catch((err)=>{
-      //       console.log(err);
-      //     }).then(callback);
-      //   }
-      // }
+
 
     }).call(Node);
 
@@ -1230,17 +1152,6 @@
      "service" : Service,
      "task" : Task
    }
-  // var lists = function(){
-  //   var self = this;
-  //   self.container = Container;
-  //   self.network = Network;
-  //   self.image = Image;
-  //   self.volume = Volume;
-  //   self.settings = Settings;
-  //   self.swarm = Swarm;
-  //   self.node = Node;
-  //   self.service = Service;
-  //   self.task = Task;
-  // }
+
 
 module.exports = lists;

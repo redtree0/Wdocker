@@ -39,31 +39,31 @@ module.exports = function(dbRoute){
 
 
 
-      // router.get('/admin/data', function(req,res){
-      //       var sess = req.session;
-      //       if(sess.userid === undefined || sess.userid === null){
-      //         // return res.json(false);
-      //         return res.json(false);
-      //         // return  res.redirect("/myapp/settings");
-      //       }
-      //           if(req.body.cpass === req.body.pass){
-      //
-      //             var opts = {
-      //               "username" : sess.username,
-      //               "password" : sess.password,
-      //             }
-      //
-      //             mongo.admin.find(opts, (match)=>{
-      //               if(match){
-      //                 opts.auth = match.auth;
-      //                 res.json(opts);
-      //               }else {
-      //                 res.json(false);
-      //               }
-      //             });
-      //             // res.json(true);
-      //           }
-      // });
+      router.get('/admin/data', function(req,res){
+            var sess = req.session;
+            if(sess.userid === undefined || sess.userid === null){
+              // return res.json(false);
+              return res.json(false);
+              // return  res.redirect("/myapp/settings");
+            }
+                if(req.body.cpass === req.body.pass){
+
+                  var opts = {
+                    "username" : sess.username,
+                    "password" : sess.password,
+                  }
+
+                  mongo.admin.find(opts, (match)=>{
+                    if(match){
+                      opts.auth = match.auth;
+                      res.json(opts);
+                    }else {
+                      res.json(false);
+                    }
+                  });
+                  // res.json(true);
+                }
+      });
 
       router.post('/admin/data', function(req,res){
         if(req.body.username !== null && req.body.password !== null){
@@ -178,12 +178,6 @@ module.exports = function(dbRoute){
 
             });
 
-    // router.use(function timeLog(req, res, next) {
-    //   // console.log('Time: ', Date.now());
-    //   res.setHeader("Content-Type", "application/json");
-    //
-    //   next();
-    // });
 
     var docker = mongo.docker;
     router.post('/settings/data.json', function(req, res){
@@ -205,15 +199,15 @@ module.exports = function(dbRoute){
 
   router.get('/settings/data.json', function(req,res){
         docker.count((cnt)=>{
-          if(cnt === 0){
-            var defaultHost = {
-              "ip" : getServerIp(),
-              "port" : null
-            }
-            docker.save(defaultHost, docker.show((json)=>{res.json(json)}));
-          }else {
-            docker.find(docker.show((json)=>{res.json(json)}));
-          }
+              if(cnt === 0){
+                var defaultHost = {
+                  "ip" : getServerIp(),
+                  "port" : null
+                }
+                docker.save(defaultHost, docker.show((json)=>{res.json(json)}));
+              }else {
+                docker.find(docker.show((json)=>{res.json(json)}));
+              }
           });
   });
 
