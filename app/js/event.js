@@ -47,7 +47,9 @@ function getServerIp() {
 				// console.log("socket");
 				var token = socket.handshake.query.token;
 				console.log(token);
-
+        if(!token){
+          return ;
+        }
         new Promise(function(resolve, reject){
           mongo.docker.show(resolve)
         }).then((data)=>{
@@ -136,11 +138,12 @@ function getServerIp() {
 					});
 
 					server.listen("AttachContainer", function(data, fn){
+            console.log(data);
               var containerId = (data).toString().substring(0, 12);
 							function stdin(stream, container){
 									// server.listen("AttachStdin", stream);  //exec
                   server.listen("AttachStdin", (data)=>{
-                    // console.log(data);
+                    console.log(data);
                     if(data === "exit"){
                       container.stop();
                     }else {
@@ -213,27 +216,27 @@ var image = function(server, host){
 		 image.getTaskDocker(host, (docker)=>{
 					 image.docker = docker;
 
-				   server.listen("SearchImages", function(data, fn){
+				   server.listen("SearchImage", function(data, fn){
 				     		image.search(data, fn);
 				   });
 
 
-				   server.listen("PullImages", function(data, fn) {
+				   server.listen("PullImage", function(data, fn) {
              function onProgress(progress){
                server.sendEvent("progress", progress);
              }
 								image.create(data, onProgress, fn);
 			     });
 
-			     server.listen("RemoveImages", function(data, fn) {
+			     server.listen("RemoveImage", function(data, fn) {
 			       		image.remove(data, fn);
 			     });
 
-           server.listen("TagImages", function(data, fn) {
+           server.listen("TagImage", function(data, fn) {
 			       		image.tag(data, fn);
 			     });
 
-					 server.listen("PushImages", function(data, fn) {
+					 server.listen("PushImage", function(data, fn) {
                 function onProgress(progress){
                   server.sendEvent("pushingImage", progress);
                 }

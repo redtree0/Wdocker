@@ -36,12 +36,13 @@
     if( data === null ){
           data = false;
     }
+    // console.log(data);
     return  res.json(data);
 
   };
 
   function failureCallback(res, err){
-    console.log(err);
+    // console.log(err);
     return  res.json(err);
   }
 
@@ -76,8 +77,12 @@
               config = opts.config;
           }
           if(opts.hasOwnProperty("res") && opts.res !== null){
+
             p[dockerType].getAllLists(config, resCallback.bind(null, res, opts.res), failureCallback.bind(null, res), docker);
+
           }else {
+            // console.log("do");
+            // console.log(config);
             p[dockerType].getAllLists(config, resCallback.bind(null, res), failureCallback.bind(null, res), docker);
           }
         }else {
@@ -99,6 +104,21 @@
           myPromise(hostId , (host)=>{
             var opts = {
               config : {all : true}
+            };
+            getDockerJSON( host, "container", res, opts);
+          });
+
+
+  });
+
+  router.get( '/container/data/:host/:id' , (req, res) => {
+
+          var hostId = req.params.host;
+          var containerId = req.params.id.toString();
+          console.log(containerId);
+          myPromise(hostId , (host)=>{
+            var opts = {
+              config : { "limit": 1, filters : { id : [containerId] } }
             };
             getDockerJSON( host, "container", res, opts);
           });

@@ -103,16 +103,16 @@ $(function(){
         };
       }
 
-      
-      $all.event.add = {
-        $button : $("#add"),
-        eventName : "DELETE",
-        clickEvent :   (client, eventName, table)=>{
-            return function(){
-              table.refresh();
-            };
-          }
-      }
+
+      // $all.event.add = {
+      //   $button : $("#add"),
+      //   eventName : "DELETE",
+      //   clickEvent :   (client, eventName, table)=>{
+      //       return function(){
+      //         table.refresh();
+      //       };
+      //     }
+      // }
       $all.event.remove = {
           $button : $(".remove"),
           eventName : "DELETE",

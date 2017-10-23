@@ -323,7 +323,8 @@ $(function(){
                  return ;
 
            }, {
-                 login : userlogin,
+                //  login : userlogin,
+                 autologin : true,
                  prompt: "Prompt #> ",
                  greetings: false,
                  history : true,

@@ -242,12 +242,15 @@ function userlogin(name, password, callback){
         username: name,
         password: password
       };
-
+      // console.log(login);
+      // console.log(json);
       if(json !== false){
         if(JSON.stringify(json) === JSON.stringify(login)){
-          callback("some token");
+          // console.log("TOKEN");
+          return callback("some token");
         } else{
-          callback(false);
+          // console.log("FALSE");
+          return callback(false);
         }
 
       }

@@ -7,19 +7,23 @@ var adminDB = dbLists.admin;
 
 var mongo = function(db){
   this.db = db;
-  this.instence = new db();
 };
 
 mongo.prototype.save = function(data, callback){
   var self = this;
+  var instence = new self.db();
   for(var i in data){
-      self.instence[i] = data[i];
+      instence[i] = data[i];
   }
-  self.instence.save(function(err){
+
+  instence.save(function(err, data){
           if(err){
-              return err;
+              console.log(err)
+              // return err;
+          }else {
+            // console.log(data)
+            callback;
           }
-          callback;
    });
 };
 
@@ -50,17 +54,17 @@ mongo.prototype.show = function(callback) {
   var self = this;
 
   self.db.find(function(err, db){
-        if(err) return ({error: 'database failure'});
+        if(err) {
+            return ({error: 'database failure'});
+        }
         if(typeof callback === "function") {
-          // console.log(db);
-          return  callback(db);
+          callback(db);
         }else {
           // console.log("db");
           return  (db);
         }
     });
-    // return res.json(db);
-  // });
+
 };
 
 

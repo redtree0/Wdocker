@@ -109,7 +109,7 @@ $(function(){
 
   $all.form.create.$newForm =  $(".newForm");
   $all.form.create.formName = "이미지 생성";
-  $all.form.create.formEvent = "SearchImages";
+  $all.form.create.formEvent = "SearchImage";
   // $all.form.create.labellists = [];
   // $all.form.create.$labelAdd = $("#labelAdd");
   // $all.form.create.$labellists = $("#labellists");
@@ -137,7 +137,7 @@ $(function(){
               }
           }
           console.log(client);
-          client.sendEventTable("PullImages", searchTable);
+          client.sendEventTable("PullImage", searchTable);
           var $progressbar = $(".progress-bar");
           $progressbar.css("width", '0%');
           // console.log($progressbar);
@@ -202,7 +202,7 @@ $(function(){
 
   $all.event.remove = {
       $button : $(".remove"),
-      eventName : "RemoveImages",
+      eventName : "RemoveImage",
       clickEvent : (client, eventName, table)=>{
         return function(){
           var checkedImage = $('.mlist li label input[name=optradio]:checked').val();
@@ -220,7 +220,7 @@ $(function(){
 
   $all.event.tag = {
       $button : $("#tag"),
-      eventName : "TagImages",
+      eventName : "TagImage",
       clickEvent : (client, eventName, table)=>{
         return function(){
           var imageTag = $("#rename").val();
@@ -253,7 +253,7 @@ $(function(){
 
   $all.event.push = {
       $button : $("#push"),
-      eventName : "PushImages",
+      eventName : "PushImage",
       clickEvent : (client, eventName, table)=>{
         return function(){
           var checkedImage = $('.mlist li label input[name=optradio]:checked').val();
@@ -275,7 +275,7 @@ $(function(){
                 tag : checkedImage.split(":")[1],
                 auth : json.auth
               };
-              client.sendEvent(COMPLETE.NOT, "PushImages", opts);
+              client.sendEvent(COMPLETE.NOT, "PushImage", opts);
               var $pushingImage = $("#pushingImage");
               var popup = new dialog("이미지 업로드 중", $pushingImage.show());
               client.listen("pushingImage", (data)=>{

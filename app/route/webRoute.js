@@ -35,10 +35,17 @@
 
   function checkSession(req, res, ejsFile){
     var sess = req.session;
-    if(sess.userid === undefined || sess.userid === null){
-      res.setHeader("Content-Type", "text/html");
-      res.redirect('/myapp/login');
-    }else {
+    // console.log(sess);
+    var protocol = req.connection.encrypted ? 'https' : 'http';
+    if(protocol === "https"){
+      if(sess.userid === undefined || sess.userid === null){
+        res.setHeader("Content-Type", "text/html");
+        res.redirect('/myapp/login');
+        console.log("redirect");
+      }else {
+        res.render(ejsFile);
+      }
+    }else if(protocol === "http") {
       res.render(ejsFile);
     }
   }

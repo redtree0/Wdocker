@@ -94,8 +94,10 @@
       }
       var list = [];
       var dockerInfo = null;
+      // console.log(data);
       for(var i in data) {
         if(hasGetInfo){  /// getInfo 있는지 여부
+          // console.log(data[i]);
           dockerInfo = self.docker[self.getInfo](data[i][(self.attr)]);
         }else {
           return ;
@@ -121,7 +123,8 @@
     */
     self.dockerPromiseEvent = function(promiselist, callback) {
         var self = this;
-        return Promise.all(promiselist).then(self.successCallback.bind(null, callback) , self.failureCallback.bind(null, callback));
+        // return Promise.all(promiselist).then(self.successCallback.bind(null, callback) , self.failureCallback.bind(null, callback));
+        return Promise.all(promiselist).then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));
     }
 
 
@@ -641,6 +644,7 @@
     */
     self.remove = function (data, callback) {
       // return self.doTask(data, callback,  "remove");
+      console.log(data);
       return self.docker.getImage(data).remove().then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));
     };
 

@@ -18,7 +18,8 @@ $(function() {
 
 
   }, {
-      login : userlogin,
+      // login : userlogin,
+      autologin : true,
       prompt: defaultprompt,
       greetings: 'Welcome to the web shell!!!',
       history : true,
