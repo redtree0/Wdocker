@@ -1,32 +1,13 @@
 "use strict";
 var spin = require("./spinner");
 
-var clientsocket = (function clientsocket(io, $body) {
-  this.socket = io; // client socket 정보
+var clientsocket = (function clientsocket(token, $body) {
+  this.token = token; // client token 정보
+  this.socket = null; // client token 정보
   this.$body = $body; /// spinner 를 위한  $body
+  this.connect();
 });
 
-  // clientsocket.prototype.login = function(callback) {
-  //   this.socket.emit("login", {
-  //     // name: "ungmo2",
-  //     name: "my",
-  //     userid: "test"
-  //   });
-  //   if(typeof callback === "function") {
-  //     callback;
-  //   }
-  // };
-  //
-  // clientsocket.prototype.isFinished = function(callback){
-  //   this.socket.on("isFinished", (data)=>{
-  //     if(data){
-  //       console.log("isFinished");
-  //     }
-  //     if(typeof callback === "function") {
-  //       callback;
-  //     }
-  //   });
-  // };
 
 (function() {
      /** @method  - socketTableEvent
@@ -125,12 +106,25 @@ var clientsocket = (function clientsocket(io, $body) {
         });
     };
 
+    /// 소켓 완료 후 실행 함수 , 바깥에서 기능에 맞게 Overwrite
+    this.connect = function(){
+        var self = this;
+        self.socket = io({
+          query: {
+          //  token : host
+            token : self.token
+          },
+          secure : true,
+        }); /// wss
+        return ;
+    };
 
     /// 소켓 완료 후 실행 함수 , 바깥에서 기능에 맞게 Overwrite
     this.disconnect = function(){
         var self = this;
         var socket =  self.socket;
-        return socket.disconnect();
+        socket.disconnect();
+        return ;
     };
 
 
@@ -146,29 +140,6 @@ var clientsocket = (function clientsocket(io, $body) {
       var socket =  self.socket;
       socket.removeListener(eventName);
     }
-    // /** @method  - onlyEvent
-    // *  @description 소켓 데이터 송신 함수
-    // *  @param {String} eventName - 소켓 이벤트 명
-    // *  @param {Object} data - json data
-    // *  @param {Function} callback - 콜백 함수
-    // *  @return {Function} socket.emit - 소켓 송신
-    // */
-    // this.onlySendEvent = function (eventName, data, callback) {
-    //     var self = this;
-    //
-    //     console.log("do event %s , data %s", eventName, data);
-    //
-    //     var socket =  this.socket;
-    //     ///// socket.emit (eventName, data, callback)
-    //     //// eventName 소켓 이벤트 명
-    //     //// data 서버로 보낼 데이터
-    //     //// callback 서버에서 다시 클라이언트로 보낸 데이터를 받은 후 실행할 콜백 함수
-    //     return socket.emit(eventName, data, (data)=>{
-    //         if(typeof callback === "function"){
-    //           callback(data);
-    //         }
-    //     });
-    // };
 
     /** @method  - listen
     *  @description 소켓 데이터 수신 함수

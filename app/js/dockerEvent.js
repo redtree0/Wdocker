@@ -655,7 +655,8 @@
     *  @return {Function} doTask
     */
     self.tag = function (data, callback) {
-
+      console.log(data);
+      console.log(data.orgImage);
       var image = self.docker.getImage(data.orgImage);
       // data.name +":" + data.tag
       var opts = {

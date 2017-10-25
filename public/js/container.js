@@ -211,36 +211,21 @@ $(function(){
     clickRow : function  (client, row, $element, field) {
       // console.log("click");
       if(field === "Attach"){
-        // if($("#terminal").is(":visible")){
-        //   if(row.State !== "running" ){
-        //     $("#terminal").hide();
-        //     if($terminal !== null){
-        //       $terminal.destroy();
-        //       refresh();
-        //     }
-        //   }
-          // else if($element.find(".exit").length > 0){
-          //   $("#terminal").hide();
-          //   $element.find(".exit").attr({
-          //     class : "btn btn-success attach"
-          //   }).text("Attach");
-          //   // console.log($terminal);
-          //   if($terminal !== null){
-          //     $terminal.destroy();
-          //     refresh();
-          //   }
-          // }
+
           if(row.State === "running" ){
-            // console.log($("#terminal"));
-            $("#terminal").show();
-            // console.log(row);
+
             if($terminal !== null){
               $terminal.destroy();
             }
-            // $element.find(".attach").attr({
-            //   class : "btn btn-danger exit"
-            // }).text("exit");
+            $("#terminal").show();
+
             var containerId = row.Id;
+
+
+            client.disconnect(); /// server단 lisener 중첩으로 인한 연결 끊고 다시 연결
+            client.connect();
+
+
             client.sendEvent(COMPLETE.NOT,'AttachContainer', containerId);
             terminal(containerId, client);
           }else {
@@ -248,8 +233,8 @@ $(function(){
             refresh();
           }
         }
-        // else if(row.State === "running" ){
-      // }
+
+
     }
   };
 
@@ -318,9 +303,9 @@ $(function(){
      function terminal(containerId, client){
 
             $terminal =  $("#terminal").terminal((command, term) => {
-
+                 console.log("do comnad" + command);
                  client.sendEvent(COMPLETE.NOT,'AttachStdin', command);
-                 return ;
+                //  return ;
 
            }, {
                 //  login : userlogin,
@@ -341,6 +326,8 @@ $(function(){
                          $terminal.error(String(data));
                        });
                        client.listen('AttachStdout', function(data) {
+                         console.log(String(data));
+
                          $terminal.echo(String(data));
                        });
                        client.listen('AttachEnable', function() {

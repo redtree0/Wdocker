@@ -225,28 +225,30 @@ $(function(){
         return function(){
           var imageTag = $("#rename").val();
           if(imageTag === null || imageTag === "" || imageTag === undefined){
-            return;
+            alert("이미지 태그 입력해주세요.");
           }
           if(imageTag.split(":").length <= 1){
-            return ;
+            alert("변경할 이미지 선택하세요.");
           }
           if(imageTag.split(":").includes("")){
-            return ;
+            alert("변경할 이미지 선택하세요.");
           }
           var checkedImage = $('.mlist li label input[name=optradio]:checked').val();
           if(checkedImage === undefined){
             alert("변경할 이미지 선택하세요.");
-            return ;
           }
 
           var opts = {
-                     repo : imageTag.split(":")[0],
-                     tag : imageTag.split(":")[1],
+                     repo : imageTag.split(":")[0].toLowerCase(),
+                     tag : imageTag.split(":")[1].toLowerCase(),
                      orgImage : checkedImage
           };
           // console.log(opts);
           // return ;
-          client.sendEventTable(eventName, opts);
+          // client.sendEventTable(eventName, opts);
+          client.sendEvent(COMPLETE.NOT, eventName, opts, ()=>{
+            table.refresh();
+          });
         };
       }
   };

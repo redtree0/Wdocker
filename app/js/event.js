@@ -46,7 +46,7 @@ function getServerIp() {
 				socket.handshake.secure = true;
 				// console.log("socket");
 				var token = socket.handshake.query.token;
-				console.log(token);
+				// console.log(token);
         if(!token){
           return ;
         }
@@ -80,25 +80,8 @@ function getServerIp() {
               service(server, host);
               task(server);
         });
-        // console.log("before");
-        // console.log(host);
-        // console.log("after");
+
         return ;
-
-        // var server = new Socket(socket);
-
-				// var host = token;
-				// container(server, host);
-				// network(server, host);
-				// image(server, host)
-        // volume(server, host);
-        // dockerfile(server);
-				// terminal(server);
-				// settings(server);
-				// swarm(server);
-				// node(server);
-				// service(server, host);
-				// task(server);
   }
 
   var container = function(server, host){
@@ -138,29 +121,31 @@ function getServerIp() {
 					});
 
 					server.listen("AttachContainer", function(data, fn){
-            console.log(data);
+
               var containerId = (data).toString().substring(0, 12);
-							function stdin(stream, container){
-									// server.listen("AttachStdin", stream);  //exec
+
+              function stdin(stream, container){
+
                   server.listen("AttachStdin", (data)=>{
-                    console.log(data);
+                    // console.log("listen");
+                    // console.log(data);
                     if(data === "exit"){
                       container.stop();
                     }else {
                       stream.write(data + "\n");
                     }
                   });
+
 							}
+
 
 							function stdout(stream){
 									// server.sendEvent("AttachStdout",  stream.pipe(stdout));
 									// stream.setEncoding('ascii');
 									stream.on('data', function(data){
                     var result = data.toString();
-
+                    // console.log(result);
                     server.sendEvent("AttachStdout", result);
-
-                    // console.log(result.substr(-2).trim() === "#");
 
 									});
 									stream.on('end', function(end) {
@@ -180,8 +165,6 @@ function getServerIp() {
 
 					});
 		});
-		// console.log("this");
-		// console.log(container.remoteDocker);
 
   };
   // });
@@ -505,10 +488,7 @@ var terminal = function (server) {
 }
 
 var settings = function(server){
-	// var selfP = new p();
-	// var settings = selfP.settings;
-	// console.log(Settings);
-	// var settings = new Settings();
+
 	var settings = p.settings;
 
 	server.listen('PING', function(data, fn) {
@@ -519,37 +499,13 @@ var settings = function(server){
 			settings.delete(data, fn);
 	});
 
-	// server.listen('IsConnected', function(data, fn) {
-	// 	settings.isConnected(data, fn);
-	// });
-	//
-	// server.listen('ConnectDocker', function(data, fn) {
-	// 	settings.connectDocker(data, fn);
-	// });
 
-	// server.listen('GetThisDocker', function(data, fn) {
-	// 	var docker = (p[data.docker].getDocker()).modem;
-	// 	var whoisDocker = null;
-	// 	if(docker.socketPath !== undefined){
-	// 				// console.log("default");
-	// 				whoisDocker = "default";
-	// 	}else if(docker.host !== undefined){
-	// 		// console.log("remote");
-	// 		whoisDocker = docker.host;
-	// 	}
-	// 	// console.log(docker.modem);
-	// 	// // console.log(p[data.docker].getDocker().socketPath);
-	// 	// // console.log(p[data.docker].getDocker().host);
-	// 	fn(whoisDocker);
-	// });
 
 	server.listen('authCheck', function(data, fn) {
 		settings.authCheck(data, fn);
 	});
 
-  // server.listen('setDefault', function(data, fn) {
-  //   settings.setDefault(data, fn);
-  // });
+
 }
 
 

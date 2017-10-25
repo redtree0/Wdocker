@@ -60,10 +60,8 @@ var serversocket = (function serversocket(socket) {
     console.log("do send %s", eventName);
   }
 
-  // this.errTransmit = function(eventName, data, callback) {
-  //   var socket =  this.socket;
-  //   socket.emit("errTransmit", data, callback);
-  // }
+
+
 
 }).call(serversocket.prototype);
 

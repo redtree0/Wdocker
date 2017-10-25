@@ -126,7 +126,7 @@ $(function(){
         }).html(msg) );
       }
       var taskUrl = "/myapp/task/data/" + hostId;
-      
+
       $.getJSON(taskUrl , (data)=>{
         // console.log(data);
         if(data.hasOwnProperty("json") && data.json.hasOwnProperty("message")){
@@ -138,15 +138,19 @@ $(function(){
           for(var i in data){
             var taskinfo =   data[i];
 
-            var nodeID =taskinfo.NodeID;
-
+            var networkinfo = "";
+            if(taskinfo.hasOwnProperty("NetworksAttachments")){
+              networkinfo =  " <br/> IP : " + taskinfo.NetworksAttachments["0"].Addresses["0"]
+              + "<br/> Network : " + taskinfo.NetworksAttachments["0"].Network.Spec.Name;
+            }
             var insert = "[Task]"
             + " <br/> Image : " + taskinfo.Spec.ContainerSpec.Image.split("@")["0"]
             + " <br/> Version : " + taskinfo.Version.Index
             + " <br/> Command : " + taskinfo.Spec.ContainerSpec.Command
             +  " <br/> State : " + taskinfo.Status.State
-            + " <br/> IP : " + taskinfo.NetworksAttachments["0"].Addresses["0"]
-            + "<br/> Network : " + taskinfo.NetworksAttachments["0"].Network.Spec.Name;
+            + networkinfo;
+            // console.log(insert);
+            // console.log(nodeID);
             var task = $("<div/>").attr({
               class : "alert alert-info",
             }).html(insert);

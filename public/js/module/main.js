@@ -47,14 +47,7 @@ var main = (function(){
     function getNewConnection(host){
       var hostid =  getHostId(host);
       // return ;
-      var socket = io({
-        query: {
-        //  token : host
-          token : hostid
-        },
-        secure : true
-      }); /// wss
-      return new Socket(socket, $('body'));
+      return new Socket(hostid, $('body'));
     }
 
     const LOCAL = getHostIP();
@@ -80,14 +73,6 @@ var main = (function(){
             var self = this;
             // console.log(self);
             settings = $all;
-
-            /// dropDown click 했는지 확인
-            // settings.clickDropdown = function ($dropdown, defaultVal) {
-            //       if( ($dropdown.text()).trim() === defaultVal ){
-            //         return false;
-            //       }
-            //       return true;
-            // };
 
             /// json에 값이 유효한 지 확인
             settings.checkValue = function (json) {
