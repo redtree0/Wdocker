@@ -10,12 +10,16 @@
           width : "30%",
           formatter : function (value , row, index){
 
-            var mine = value.map((value)=>{
-              return "<li><label>" +  "<input type='radio' name='optradio' value='"+ value + "'>  " + value + "</label></li>"
-            })
+            if(value !== null){
+              var mine = value.map((value)=>{
+                return "<li><label>" +  "<input type='radio' name='optradio' value='"+ value + "'>  " + value + "</label></li>"
+              })
 
-            var result = "<ul class='text-left mlist'>" + mine.join("") + "</ul>"
-            return result;
+              var result = "<ul class='text-left mlist'>" + mine.join("") + "</ul>"
+              return result;
+
+            }
+
           }
       }
       ,{

@@ -33,14 +33,21 @@ var table = (function Table($table, columns){
    *  @return {Function} callback - callback
    */
   this.initUrlTable = function (urljson, detailformat, callback) {
-
-    var init = this.opts;
+    var self = this;
+    var init = self.opts;
     init.url = urljson;
     if(typeof detailformat === "function" || detailformat === true) {
       init.detailView = true;
       init.detailFormatter = detailformat;
     }
-    (this.$table).bootstrapTable(init);  // 테이블 초기화
+    (self.$table).bootstrapTable(init);  // 테이블 초기화
+
+    $("button[name=refresh]").click((e)=>{
+      console.log(e);
+      self.refresh();
+      
+    });
+
     return callback;
   }
 

@@ -88,7 +88,7 @@ function getServerIp() {
 
 		var container = p.container;
 		container.getTaskDocker(host, (docker)=>{
-
+          // console.log(docker);
 					container.docker = docker;
 					server.listen('CreateContainer', function(data, fn){
 								container.create(data, fn);
@@ -122,7 +122,8 @@ function getServerIp() {
 
 					server.listen("AttachContainer", function(data, fn){
 
-              var containerId = (data).toString().substring(0, 12);
+              // var containerId = (data).toString().substring(0, 12);
+              console.log("attach");
 
               function stdin(stream, container){
 

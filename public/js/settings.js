@@ -46,6 +46,7 @@ $(function(){
       $all.init = function(){
 
               $.getJSON("/myapp/admin/data",(data)=>{
+                console.log(data);
                 if(data.auth){
                   if(data.auth.hasOwnProperty("username")){
                     $("#username").val(data.auth.username);

@@ -242,9 +242,6 @@ $(function(){
   function clickDefault(client, eventName, table){
     return function(){
       client.sendEventTable(eventName, table);
-      if($terminal !== null){
-        refresh();
-      }
     };
   }
   $all.event.create = {
@@ -303,7 +300,7 @@ $(function(){
      function terminal(containerId, client){
 
             $terminal =  $("#terminal").terminal((command, term) => {
-                 console.log("do comnad" + command);
+                //  console.log("do comnad" + command);
                  client.sendEvent(COMPLETE.NOT,'AttachStdin', command);
                 //  return ;
 
@@ -326,7 +323,7 @@ $(function(){
                          $terminal.error(String(data));
                        });
                        client.listen('AttachStdout', function(data) {
-                         console.log(String(data));
+                        //  console.log(String(data));
 
                          $terminal.echo(String(data));
                        });

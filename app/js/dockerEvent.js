@@ -199,7 +199,7 @@
                   self.ping(docker, (err, data)=>{
                       if(err === null){
                         self[type] = docker;
-                        console.log(docker);
+                        // console.log(docker);
                       }else {
                         self.remoteDocker = null;
                       }
@@ -435,42 +435,7 @@
      self.attach = function(data, stdin, stdout, stderr){
        var docker = self.docker;
        var container = docker.getContainer(data);
-      //  return stdin((data, fn)=>{
-      //    fn(true);
-      //   //  callback(true);
-      //   var cmd = data.split(" ");
-      //   // cmd.unshift("-c");
-      //   // cmd.unshift("bash");
-      //   console.log(cmd);
-      //    var options = {
-      //      Cmd: cmd,
-      //      AttachStdin: true,
-      //      AttachStdout: true,
-      //      AttachStderr: true,
-      //      DetachKeys: "ctrl-c",
-      //      Tty : true
-      //    };
-       //
-      //    container.exec(options, function(err, exec) {
-      //     //  console.log(exec);
-      //      if (err) return;
-      //     // console.log(exec);
-      //      exec.start({hijack: true, stdin: true, Tty : true, Detach : false},function(err, stream) {
-      //             //  console.log(err);
-      //             if(data === "exit"){
-      //               // console.log(data);
-      //               // stream.end();
-      //               container.stop();
-      //             }
-       //
-      //             stream.setEncoding('utf8');
-      //              stderr(stream);
-      //              stdout(stream);
-      //              // stdin(stream);
-      //              docker.modem.demuxStream(stream, process.stdout, process.stderr);
-      //      });
-       //
-      //    });
+      
       var options = {
            Cmd: ["/bin/bash"],
            AttachStdin: true,
@@ -655,8 +620,8 @@
     *  @return {Function} doTask
     */
     self.tag = function (data, callback) {
-      console.log(data);
-      console.log(data.orgImage);
+      // console.log(data);
+      // console.log(data.orgImage);
       var image = self.docker.getImage(data.orgImage);
       // data.name +":" + data.tag
       var opts = {
@@ -909,7 +874,7 @@
           swarmJoin.AdvertiseAddr = node.ip;
           swarmJoin.JoinToken = token;
           var docker = getSwarmDocker(self, hostconfig.host, hostconfig);
-          console.log(docker);
+          // console.log(docker);
           docker.swarmJoin(swarmJoin).then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));
           ;
         }
@@ -944,7 +909,7 @@
       */
       self.init = function (data, callback) {
         var hostconfig = data;
-        console.log(hostconfig);
+        // console.log(hostconfig);
 
         var docker = getSwarmDocker(self, data.host, hostconfig);
 

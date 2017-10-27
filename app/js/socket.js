@@ -26,7 +26,7 @@ var serversocket = (function serversocket(socket) {
   this.listen = function(eventName, callback) {
     var socket =  this.socket;
 
-    ///// socket.on (eventName, callback(data, fn))
+  
     //// eventName 소켓 이벤트 명
     //// callback 데이터 받을 시 실행할 콜백 함수
     //// data 받은 데이터

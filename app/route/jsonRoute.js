@@ -34,7 +34,8 @@
     }
 
     if( data === null ){
-          data = false;
+      // data = false;
+          data = [];
     }
     // console.log(data);
     return  res.json(data);
