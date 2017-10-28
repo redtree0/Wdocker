@@ -324,6 +324,14 @@ $(function(){
                        });
                        client.listen('AttachStdout', function(data) {
                         //  console.log(String(data));
+                        var enter = /\u0007/gi;
+                        var enter1 = /\r\n\u001b]0;/gi;
+
+                        var space = /\u001b\[0m/gi;
+                        var space1 =  /\u001b\[01;34m/gi;
+                        var blank = /\u001b]0;/gi;
+                        // \u001b\[01;34m
+                        var data = data.replace(enter, '\n').replace(enter1, '\n').replace(space, ' ').replace(space1, ' ').replace(blank, '');
 
                          $terminal.echo(String(data));
                        });
