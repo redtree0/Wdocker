@@ -527,8 +527,8 @@ var swarm = function(server){
 	});
 
 	server.listen("LeaveSwarm", function(data, fn){
-		var opts = {force : data};
-		swarm.leave(opts, fn);
+		// var opts = {force : data};
+		swarm.leave(data, fn);
 	});
 	//
 	// server.listen("JoinSwarm", function(data, fn){

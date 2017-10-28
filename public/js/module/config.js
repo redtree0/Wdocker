@@ -66,7 +66,14 @@ var config = (function(){
     var opts = container;
     opts.Image = filter.Image;
     opts.name = filter.name;
-    opts.Cmd = [ filter.Cmd];
+
+    // console.log(filter.Cmd);
+    if(filter.Cmd == null || filter.Cmd == ""){
+      delete opts.Cmd;
+    }else {
+      opts.Cmd = [ filter.Cmd];
+    }
+
     if(filter.hasOwnProperty("volume") && filter.hasOwnProperty("containerDest") ){
       opts.HostConfig.Mounts = [{
           "target" : filter.containerDest,
@@ -267,9 +274,16 @@ var config = (function(){
       var opts = service;
       opts.Name = filter.Name;
       opts.TaskTemplate.ContainerSpec.Image = filter.Image;
-      opts.TaskTemplate.ContainerSpec.Command = [filter.Command];
+      // opts.TaskTemplate.ContainerSpec.Command = [filter.Command];
       opts.Mode.Replicated.Replicas = filter.Replicas;
       opts.TaskTemplate.Networks = [ {"Target" : filter.Network }] ;
+
+      if(filter.Cmd == null || filter.Cmd == ""){
+        delete opts.TaskTemplate.ContainerSpec.Command;
+      }else {
+        opts.TaskTemplate.ContainerSpec.Command = [ filter.Command ];
+      }
+
 
       for ( var i in portlists) {
         console.log("portData");

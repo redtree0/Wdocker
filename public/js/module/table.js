@@ -43,9 +43,9 @@ var table = (function Table($table, columns){
     (self.$table).bootstrapTable(init);  // 테이블 초기화
 
     $("button[name=refresh]").click((e)=>{
-      console.log(e);
+      // console.log(e);
       self.refresh();
-      
+
     });
 
     return callback;

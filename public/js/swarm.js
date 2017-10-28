@@ -288,12 +288,38 @@ $(function  () {
         $button : $(".leave"),
         eventName : "LeaveSwarm",
         clickEvent : function(client, eventName, table){
-          return function(){
+
+
+          function getElementJson($lists){
+            var lists = [];
+            $lists.each(function(){
+                var ip = $(this).attr("ip");
+                var port = $(this).attr("port");
+
+                if(!$(this).hasClass("isNode")){
+                  lists.push({"ip" : ip , "port" : port});
+                }
+            });
+            // console.log(lists);
+            return lists[0];
+          }
+
+          return  function(){
             const FORCE = (!$("#force").prop("checked"));
-              client.sendEvent(COMPLETE.DO, eventName , FORCE, ()=>{
+            var opts = {
+              leader : getElementJson($("#leader li")),
+              force : FORCE
+            };
+            client.sendEvent(COMPLETE.DO, eventName , opts, ()=>{
                 refresh();
               });
-            }
+          };
+          // return function(){
+          //   const FORCE = (!$("#force").prop("checked"));
+          //     client.sendEvent(COMPLETE.DO, eventName , FORCE, ()=>{
+          //       refresh();
+          //     });
+          //   }
         }
     };
 

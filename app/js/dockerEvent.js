@@ -435,7 +435,7 @@
      self.attach = function(data, stdin, stdout, stderr){
        var docker = self.docker;
        var container = docker.getContainer(data);
-      
+
       var options = {
            Cmd: ["/bin/bash"],
            AttachStdin: true,
@@ -943,7 +943,14 @@
       *  @return {Object} promise
       */
       self.leave = function (data, callback){
-        return self.docker.swarmLeave({force : data}).then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));
+        var hostconfig = {
+          host : data.leader.ip,
+          port : data.leader.port
+        }
+        // console.log(data);
+        var docker = getSwarmDocker(self, data.leader.host, hostconfig);
+        // console.log(docker);
+        return docker.swarmLeave({force : data.force}).then(self.successCallback.bind(self, callback) , self.failureCallback.bind(self, callback));
       };
 
       /** @method  - getToken
